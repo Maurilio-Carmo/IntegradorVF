@@ -1,0 +1,41 @@
+/**
+ * tablet.css
+ * Estilos responsivos para tablet (769px - 1024px)
+ */
+
+@media (min-width: 769px) and (max-width: 1024px) {
+    /* Stats Grid - 2 colunas */
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    /* Import Grid - 2 colunas */
+    .import-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    /* Container */
+    .container {
+        max-width: 960px;
+    }
+    
+    /* Cards */
+    .card-body {
+        padding: var(--spacing-md);
+    }
+    
+    /* Typography */
+    h1 { font-size: var(--font-size-3xl); }
+    h2 { font-size: var(--font-size-2xl); }
+}
+
+/* Landscape tablets */
+@media (min-width: 769px) and (max-width: 1024px) and (orientation: landscape) {
+    .stats-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .import-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}

@@ -1,0 +1,407 @@
+<!-- Import Tabs Component -->
+<div class="card mt-4">
+    <div class="card-header">
+        <h2>📥 Importar Dados da API</h2>
+    </div>
+    <div class="card-body" style="padding: 0;">
+        <div class="import-tabs-container">
+            <!-- Abas -->
+            <div class="tabs-header">
+                <button class="tab-button active" data-tab="produto">
+                    <span class="tab-icon">🛒</span>
+                    PRODUTO
+                </button>
+                <button class="tab-button" data-tab="financeiro">
+                    <span class="tab-icon">💰</span>
+                    FINANCEIRO
+                </button>
+                <button class="tab-button" data-tab="frente-loja">
+                    <span class="tab-icon">🏪</span>
+                    FRENTE DE LOJA
+                </button>
+                <button class="tab-button" data-tab="estoque">
+                    <span class="tab-icon">📦</span>
+                    ESTOQUE
+                </button>
+                <button class="tab-button" data-tab="fiscal">
+                    <span class="tab-icon">⚖️</span>
+                    FISCAL
+                </button>
+                <button class="tab-button" data-tab="pessoa">
+                    <span class="tab-icon">👥</span>
+                    PESSOA
+                </button>
+            </div>
+
+            <!-- Conteúdo das Abas -->
+            <div class="tabs-content">
+                
+                <!-- Aba: PRODUTO -->
+                <div class="tab-panel active" data-panel="produto">
+                    <div class="tab-bulk-actions">
+                        <div class="tab-bulk-actions-info">
+                            <div class="tab-bulk-actions-title">🛒 Módulo Produto</div>
+                            <div class="tab-bulk-actions-description">Hierarquia mercadológica, produtos e marcas</div>
+                        </div>
+                        <button class="btn btn-success" id="btnImportarTudoProduto">
+                            🚀 Importar Tudo
+                        </button>
+                    </div>
+                    
+                    <div class="tab-items-grid">
+                        <div class="import-item">
+                            <div class="import-item-icon">📦</div>
+                            <div class="import-item-title">Seções</div>
+                            <div class="import-item-description">Todas as seções cadastradas</div>
+                            <button class="btn btn-primary btn-block" data-action="importar-secao">Importar</button>
+                            <div class="import-item-progress">
+                                <div class="import-item-progress-fill"></div>
+                            </div>
+                            <div class="import-item-status"></div>
+                        </div>
+
+                        <div class="import-item">
+                            <div class="import-item-icon">📦</div>
+                            <div class="import-item-title">Grupos</div>
+                            <div class="import-item-description">Todos os grupos cadastrados</div>
+                            <button class="btn btn-primary btn-block" data-action="importar-grupos">Importar</button>
+                            <div class="import-item-progress">
+                                <div class="import-item-progress-fill"></div>
+                            </div>
+                            <div class="import-item-status"></div>
+                        </div>
+
+                        <div class="import-item"></div>
+                            <div class="import-item-icon">📦</div>
+                            <div class="import-item-title">Subgrupos</div>
+                            <div class="import-item-description">Todos os subgrupos cadastrados</div>
+                            <button class="btn btn-primary btn-block" data-action="importar-subgrupos">Importar</button>
+                            <div class="import-item-progress">
+                                <div class="import-item-progress-fill"></div>
+                            </div>
+                            <div class="import-item-status"></div>
+                        </div>
+
+                        <div class="import-item">
+                            <div class="import-item-icon">🏷️</div>
+                            <div class="import-item-title">Marcas</div>
+                            <div class="import-item-description">Todas as marcas cadastradas</div>
+                            <button class="btn btn-primary btn-block" data-action="importar-marcas">Importar</button>
+                            <div class="import-item-progress">
+                                <div class="import-item-progress-fill"></div>
+                            </div>
+                            <div class="import-item-status"></div>
+                        </div>
+
+                        <div class="import-item">
+                            <div class="import-item-icon">🗃️</div>
+                            <div class="import-item-title">Famílias</div>
+                            <div class="import-item-description">Grupos de produtos relacionados</div>
+                            <button class="btn btn-primary btn-block" data-action="importar-familias">Importar</button>
+                            <div class="import-item-progress">
+                                <div class="import-item-progress-fill"></div>
+                            </div>
+                            <div class="import-item-status"></div>
+                        </div>
+
+                        <div class="import-item">
+                            <div class="import-item-icon">📦</div>
+                            <div class="import-item-title">Produtos</div>
+                            <div class="import-item-description">Todos os produtos do catálogo</div>
+                            <button class="btn btn-primary btn-block" data-action="importar-produtos">Importar</button>
+                            <div class="import-item-progress">
+                                <div class="import-item-progress-fill"></div>
+                            </div>
+                            <div class="import-item-status"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Aba: FINANCEIRO -->
+                <div class="tab-panel" data-panel="financeiro">
+                    <div class="tab-bulk-actions">
+                        <div class="tab-bulk-actions-info">
+                            <div class="tab-bulk-actions-title">💰 Módulo Financeiro</div>
+                            <div class="tab-bulk-actions-description">Categorias, contas, formas de pagamento</div>
+                        </div>
+                        <button class="btn btn-success" id="btnImportarTudoFinanceiro">
+                            🚀 Importar Tudo
+                        </button>
+                    </div>
+                    
+                    <div class="tab-items-grid">
+                        <div class="import-item">
+                            <div class="import-item-icon">📋</div>
+                            <div class="import-item-title">Categorias</div>
+                            <div class="import-item-description">Categorias financeiras</div>
+                            <button class="btn btn-primary btn-block" data-action="importar-categorias">Importar</button>
+                            <div class="import-item-progress">
+                                <div class="import-item-progress-fill"></div>
+                            </div>
+                            <div class="import-item-status"></div>
+                        </div>
+
+                        <div class="import-item">
+                            <div class="import-item-icon">👔</div>
+                            <div class="import-item-title">Agentes</div>
+                            <div class="import-item-description">Agentes financeiros</div>
+                            <button class="btn btn-primary btn-block" data-action="importar-agentes">Importar</button>
+                            <div class="import-item-progress">
+                                <div class="import-item-progress-fill"></div>
+                            </div>
+                            <div class="import-item-status"></div>
+                        </div>
+
+                        <div class="import-item">
+                            <div class="import-item-icon">🏦</div>
+                            <div class="import-item-title">Contas Correntes</div>
+                            <div class="import-item-description">Contas bancárias</div>
+                            <button class="btn btn-primary btn-block" data-action="importar-contas">Importar</button>
+                            <div class="import-item-progress">
+                                <div class="import-item-progress-fill"></div>
+                            </div>
+                            <div class="import-item-status"></div>
+                        </div>
+
+                        <div class="import-item">
+                            <div class="import-item-icon">💳</div>
+                            <div class="import-item-title">Formas de Pagamento</div>
+                            <div class="import-item-description">Métodos de pagamento</div>
+                            <button class="btn btn-primary btn-block" data-action="importar-formas-pagamento">Importar</button>
+                            <div class="import-item-progress">
+                                <div class="import-item-progress-fill"></div>
+                            </div>
+                            <div class="import-item-status"></div>
+                        </div>
+
+                        <div class="import-item">
+                            <div class="import-item-icon">🎯</div>
+                            <div class="import-item-title">Motivos de Desconto</div>
+                            <div class="import-item-description">Justificativas de desconto</div>
+                            <button class="btn btn-primary btn-block" data-action="importar-motivos-desconto">Importar</button>
+                            <div class="import-item-progress">
+                                <div class="import-item-progress-fill"></div>
+                            </div>
+                            <div class="import-item-status"></div>
+                        </div>
+
+                        <div class="import-item">
+                            <div class="import-item-icon">↩️</div>
+                            <div class="import-item-title">Motivos de Devolução</div>
+                            <div class="import-item-description">Razões de devolução</div>
+                            <button class="btn btn-primary btn-block" data-action="importar-motivos-devolucao">Importar</button>
+                            <div class="import-item-progress">
+                                <div class="import-item-progress-fill"></div>
+                            </div>
+                            <div class="import-item-status"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Aba: FRENTE DE LOJA -->
+                <div class="tab-panel" data-panel="frente-loja">
+                    <div class="tab-bulk-actions">
+                        <div class="tab-bulk-actions-info">
+                            <div class="tab-bulk-actions-title">🏪 Módulo Frente de Loja</div>
+                            <div class="tab-bulk-actions-description">Caixas e operações de PDV</div>
+                        </div>
+                        <button class="btn btn-success" id="btnImportarTudoFrenteLoja">
+                            🚀 Importar Tudo
+                        </button>
+                    </div>
+                    
+                    <div class="tab-items-grid">
+                        <div class="import-item">
+                            <div class="import-item-icon">🧺</div>
+                            <div class="import-item-title">Caixas</div>
+                            <div class="import-item-description">Caixas de atendimento</div>
+                            <button class="btn btn-primary btn-block" data-action="importar-caixas">Importar</button>
+                            <div class="import-item-progress">
+                                <div class="import-item-progress-fill"></div>
+                            </div>
+                            <div class="import-item-status"></div>
+                        </div>
+
+                        <div class="import-item">
+                            <div class="import-item-icon">💸</div>
+                            <div class="import-item-title">Pagamentos PDV</div>
+                            <div class="import-item-description">Formas de pagamento PDV</div>
+                            <button class="btn btn-primary btn-block" data-action="importar-pagamentos-pdv">Importar</button>
+                            <div class="import-item-progress">
+                                <div class="import-item-progress-fill"></div>
+                            </div>
+                            <div class="import-item-status"></div>
+                        </div>
+
+                        <div class="import-item">
+                            <div class="import-item-icon">💰</div>
+                            <div class="import-item-title">Recebimentos PDV</div>
+                            <div class="import-item-description">Formas de recebimento PDV</div>
+                            <button class="btn btn-primary btn-block" data-action="importar-recebimentos-pdv">Importar</button>
+                            <div class="import-item-progress">
+                                <div class="import-item-progress-fill"></div>
+                            </div>
+                            <div class="import-item-status"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Aba: ESTOQUE -->
+                <div class="tab-panel" data-panel="estoque">
+                    <div class="tab-bulk-actions">
+                        <div class="tab-bulk-actions-info">
+                            <div class="tab-bulk-actions-title">📦 Módulo Estoque</div>
+                            <div class="tab-bulk-actions-description">Locais e controles de estoque</div>
+                        </div>
+                        <button class="btn btn-success" id="btnImportarTudoEstoque">
+                            🚀 Importar Tudo
+                        </button>
+                    </div>
+                    
+                    <div class="tab-items-grid">
+                        <div class="import-item">
+                            <div class="import-item-icon">🏭</div>
+                            <div class="import-item-title">Local de Estoque</div>
+                            <div class="import-item-description">Locais de armazenamento</div>
+                            <button class="btn btn-primary btn-block" data-action="importar-locais-estoque">Importar</button>
+                            <div class="import-item-progress">
+                                <div class="import-item-progress-fill"></div>
+                            </div>
+                            <div class="import-item-status"></div>
+                        </div>
+
+                        <div class="import-item">
+                            <div class="import-item-icon">↕️</div>
+                            <div class="import-item-title">Tipos de Ajustes</div>
+                            <div class="import-item-description">Motivos de ajuste</div>
+                            <button class="btn btn-primary btn-block" data-action="importar-tipos-ajustes">Importar</button>
+                            <div class="import-item-progress">
+                                <div class="import-item-progress-fill"></div>
+                            </div>
+                            <div class="import-item-status"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Aba: FISCAL -->
+                <div class="tab-panel" data-panel="fiscal">
+                    <div class="tab-bulk-actions">
+                        <div class="tab-bulk-actions-info">
+                            <div class="tab-bulk-actions-title">⚖️ Módulo Fiscal</div>
+                            <div class="tab-bulk-actions-description">Configurações tributárias e fiscais</div>
+                        </div>
+                        <button class="btn btn-success" id="btnImportarTudoFiscal">
+                            🚀 Importar Tudo
+                        </button>
+                    </div>
+                    
+                    <div class="tab-items-grid">
+                        <div class="import-item">
+                            <div class="import-item-icon">🏛️</div>
+                            <div class="import-item-title">Regime Tributário</div>
+                            <div class="import-item-description">Regimes de tributação</div>
+                            <button class="btn btn-primary btn-block" data-action="importar-regime-tributario">Importar</button>
+                            <div class="import-item-progress">
+                                <div class="import-item-progress-fill"></div>
+                            </div>
+                            <div class="import-item-status"></div>
+                        </div>
+
+                        <div class="import-item">
+                            <div class="import-item-icon">📘</div>
+                            <div class="import-item-title">Situações Fiscais</div>
+                            <div class="import-item-description">CST e CSOSN</div>
+                            <button class="btn btn-primary btn-block" data-action="importar-situacoes-fiscais">Importar</button>
+                            <div class="import-item-progress">
+                                <div class="import-item-progress-fill"></div>
+                            </div>
+                            <div class="import-item-status"></div>
+                        </div>
+
+                        <div class="import-item">
+                            <div class="import-item-icon">📄</div>
+                            <div class="import-item-title">Tipos de Operações</div>
+                            <div class="import-item-description">CFOP e naturezas</div>
+                            <button class="btn btn-primary btn-block" data-action="importar-tipos-operacoes">Importar</button>
+                            <div class="import-item-progress">
+                                <div class="import-item-progress-fill"></div>
+                            </div>
+                            <div class="import-item-status"></div>
+                        </div>
+
+                        <div class="import-item">
+                            <div class="import-item-icon">💰</div>
+                            <div class="import-item-title">Impostos Federais</div>
+                            <div class="import-item-description">PIS, COFINS, IPI</div>
+                            <button class="btn btn-primary btn-block" data-action="importar-impostos-federais">Importar</button>
+                            <div class="import-item-progress">
+                                <div class="import-item-progress-fill"></div>
+                            </div>
+                            <div class="import-item-status"></div>
+                        </div>
+
+                        <div class="import-item">
+                            <div class="import-item-icon">🧮</div>
+                            <div class="import-item-title">Tabelas Tributárias</div>
+                            <div class="import-item-description">Entrada e Saída</div>
+                            <button class="btn btn-primary btn-block" data-action="importar-tabelas-tributarias">Importar</button>
+                            <div class="import-item-progress">
+                                <div class="import-item-progress-fill"></div>
+                            </div>
+                            <div class="import-item-status"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Aba: PESSOA -->
+                <div class="tab-panel" data-panel="pessoa">
+                    <div class="tab-bulk-actions">
+                        <div class="tab-bulk-actions-info">
+                            <div class="tab-bulk-actions-title">👥 Módulo Pessoa</div>
+                            <div class="tab-bulk-actions-description">Clientes, fornecedores e lojas</div>
+                        </div>
+                        <button class="btn btn-success" id="btnImportarTudoPessoa">
+                            🚀 Importar Tudo
+                        </button>
+                    </div>
+                    
+                    <div class="tab-items-grid">
+                        <div class="import-item">
+                            <div class="import-item-icon">🏬</div>
+                            <div class="import-item-title">Lojas</div>
+                            <div class="import-item-description">Filiais e estabelecimentos</div>
+                            <button class="btn btn-primary btn-block" data-action="importar-lojas">Importar</button>
+                            <div class="import-item-progress">
+                                <div class="import-item-progress-fill"></div>
+                            </div>
+                            <div class="import-item-status"></div>
+                        </div>
+
+                        <div class="import-item">
+                            <div class="import-item-icon">👥</div>
+                            <div class="import-item-title">Clientes</div>
+                            <div class="import-item-description">Base de clientes cadastrados</div>
+                            <button class="btn btn-primary btn-block" data-action="importar-clientes">Importar</button>
+                            <div class="import-item-progress">
+                                <div class="import-item-progress-fill"></div>
+                            </div>
+                            <div class="import-item-status"></div>
+                        </div>
+
+                        <div class="import-item">
+                            <div class="import-item-icon">🚚</div>
+                            <div class="import-item-title">Fornecedores</div>
+                            <div class="import-item-description">Lista de fornecedores</div>
+                            <button class="btn btn-primary btn-block" data-action="importar-fornecedores">Importar</button>
+                            <div class="import-item-progress">
+                                <div class="import-item-progress-fill"></div>
+                            </div>
+                            <div class="import-item-status"></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

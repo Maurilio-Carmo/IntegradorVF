@@ -1,0 +1,103 @@
+<!-- Import Component -->
+<div class="card mt-4">
+    <div class="card-header">
+        <h2>📥 Importar Dados da API</h2>
+    </div>
+    <div class="card-body">
+        <div class="import-grid">
+
+            <!-- Hierarquia Mercadológica -->
+            <div class="import-card">
+                <div class="import-icon">🌳</div>
+                <h3>Hierarquia</h3>
+                <p>Seções, Grupos e Subgrupos</p>
+                <button class="btn btn-primary btn-block" data-action="importar-hierarquia">
+                    Importar
+                </button>
+                <div class="progress-bar" style="display: none;">
+                    <div class="progress-fill"></div>
+                </div>
+                <div class="import-status"></div>
+            </div>
+
+            <!-- Marcas -->
+            <div class="import-card">
+                <div class="import-icon">🏷️</div>
+                <h3>Marcas</h3>
+                <p>Todas as marcas cadastradas</p>
+                <button class="btn btn-primary btn-block" data-action="importar-marcas">
+                    Importar
+                </button>
+                <div class="progress-bar" style="display: none;">
+                    <div class="progress-fill"></div>
+                </div>
+                <div class="import-status"></div>
+            </div>
+
+            <!-- Produtos -->
+            <div class="import-card">
+                <div class="import-icon">📦</div>
+                <h3>Produtos</h3>
+                <p>Todos os produtos do catálogo</p>
+                <button class="btn btn-primary btn-block" data-action="importar-produtos">
+                    Importar
+                </button>
+                <div class="progress-bar" style="display: none;">
+                    <div class="progress-fill"></div>
+                </div>
+                <div class="import-status"></div>
+            </div>
+
+            <!-- Clientes -->
+            <div class="import-card">
+                <div class="import-icon">👥</div>
+                <h3>Clientes</h3>
+                <p>Base de clientes cadastrados</p>
+                <button class="btn btn-primary btn-block" data-action="importar-clientes">
+                    Importar
+                </button>
+                <div class="progress-bar" style="display: none;">
+                    <div class="progress-fill"></div>
+                </div>
+                <div class="import-status"></div>
+            </div>
+
+            <!-- Fornecedores -->
+            <div class="import-card">
+                <div class="import-icon">🏢</div>
+                <h3>Fornecedores</h3>
+                <p>Lista de fornecedores</p>
+                <button class="btn btn-primary btn-block" data-action="importar-fornecedores">
+                    Importar
+                </button>
+                <div class="progress-bar" style="display: none;">
+                    <div class="progress-fill"></div>
+                </div>
+                <div class="import-status"></div>
+            </div>
+
+            <!-- Categorias -->
+            <div class="import-card">
+                <div class="import-icon">💰</div>
+                <h3>Categorias</h3>
+                <p>Categorias financeiras</p>
+                <button class="btn btn-primary btn-block" data-action="importar-categorias">
+                    Importar
+                </button>
+                <div class="progress-bar" style="display: none;">
+                    <div class="progress-fill"></div>
+                </div>
+                <div class="import-status"></div>
+            </div>
+
+        </div>
+
+        <!-- Importar Tudo -->
+        <div class="import-all-section">
+            <button class="btn btn-success btn-large" id="btnImportarTudo">
+                🚀 Importar Tudo
+            </button>
+            <p class="text-muted">Importa todos os dados em sequência</p>
+        </div>
+    </div>
+</div>

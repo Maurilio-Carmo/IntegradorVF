@@ -1,0 +1,147 @@
+/**
+ * animations.css
+ * Animações e transições
+ */
+
+/* Animações */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(-100%);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes spin {
+    from { 
+        transform: rotate(0deg); 
+    }
+    to { 
+        transform: rotate(360deg); 
+    }
+}
+
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes shake {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    25% {
+        transform: translateX(-10px);
+    }
+    75% {
+        transform: translateX(10px);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* Classes de animação */
+.fade-in {
+    animation: fadeIn var(--transition-base) var(--transition-timing);
+}
+
+.slide-in {
+    animation: slideIn var(--transition-base) var(--transition-timing);
+}
+
+.slide-in-right {
+    animation: slideInRight var(--transition-base) var(--transition-timing);
+}
+
+.slide-down {
+    animation: slideDown var(--transition-base) var(--transition-timing);
+}
+
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+.bounce {
+    animation: bounce 1s ease-in-out infinite;
+}
+
+.shake {
+    animation: shake 0.5s ease-in-out;
+}
+
+.pulse {
+    animation: pulse 2s ease-in-out infinite;
+}
+
+/* Transições */
+.transition {
+    transition: all var(--transition-base) var(--transition-timing);
+}
+
+.transition-fast {
+    transition: all var(--transition-fast) var(--transition-timing);
+}
+
+.transition-slow {
+    transition: all var(--transition-slow) var(--transition-timing);
+}
+
+/* Hover effects */
+.hover-lift {
+    transition: transform var(--transition-fast) var(--transition-timing);
+}
+
+.hover-lift:hover {
+    transform: translateY(-2px);
+}
+
+.hover-scale {
+    transition: transform var(--transition-fast) var(--transition-timing);
+}
+
+.hover-scale:hover {
+    transform: scale(1.05);
+}

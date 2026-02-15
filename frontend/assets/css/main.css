@@ -1,0 +1,40 @@
+/**
+ * main.css
+ * Arquivo principal que importa todos os módulos de CSS
+ */
+
+/* Base */
+@import 'base/variables.css';
+@import 'base/reset.css';
+@import 'base/typography.css';
+
+/* Layout */
+@import 'layout/container.css';
+@import 'layout/grid.css';
+
+/* Components */
+@import 'components/header.css';
+@import 'components/footer.css';
+@import 'components/card.css';
+@import 'components/button.css';
+@import 'components/form.css';
+@import 'components/stats.css';
+@import 'components/import-cards.css';
+@import 'components/log.css';
+@import 'components/modal.css';
+@import 'components/alert.css';
+@import 'components/progress.css';
+@import 'components/theme-switcher.css';
+@import 'components/tabs.css';
+
+/* Utils */
+@import 'utils/spacing.css';
+@import 'utils/text.css';
+@import 'utils/animations.css';
+
+/* Themes */
+@import 'themes/dark.css';
+
+/* Responsive */
+@import 'responsive/mobile.css';
+@import 'responsive/tablet.css';

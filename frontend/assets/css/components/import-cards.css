@@ -1,0 +1,85 @@
+/**
+ * import-cards.css
+ * Cards de importação
+ */
+
+.import-card {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-lg);
+    text-align: center;
+    transition: all var(--transition-base) var(--transition-timing);
+    display: flex;
+    flex-direction: column;
+}
+
+.import-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--primary-light);
+}
+
+.import-icon {
+    font-size: var(--font-size-4xl);
+    margin-bottom: var(--spacing-md);
+}
+
+.import-card h3 {
+    font-size: var(--font-size-lg);
+    margin-bottom: var(--spacing-sm);
+    color: var(--text-primary);
+}
+
+.import-card p {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-md);
+    flex: 1;
+}
+
+.import-card .btn {
+    margin-top: auto;
+}
+
+.import-status {
+    margin-top: var(--spacing-md);
+    padding: var(--spacing-sm);
+    border-radius: var(--border-radius);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+}
+
+.import-status:empty {
+    display: none;
+}
+
+.import-status.success {
+    background: var(--success-light);
+    color: var(--success-dark);
+}
+
+.import-status.error {
+    background: var(--danger-light);
+    color: var(--danger-dark);
+}
+
+.import-status.loading {
+    background: var(--info-light);
+    color: var(--info-dark);
+}
+
+/* Seção de importar tudo */
+.import-all-section {
+    margin-top: var(--spacing-2xl);
+    padding-top: var(--spacing-2xl);
+    border-top: 1px solid var(--border-color);
+    text-align: center;
+}
+
+.import-all-section p {
+    margin-top: var(--spacing-sm);
+    margin-bottom: 0;
+    font-size: var(--font-size-sm);
+    color: var(--text-tertiary);
+}

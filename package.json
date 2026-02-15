@@ -1,0 +1,27 @@
+{
+  "name": "integrador-varejo-facil",
+  "version": "1.0.0",
+  "description": "Sistema de integração com API Varejo Fácil",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "node backend/server.js",
+    "dev": "nodemon backend/server.js",
+    "frontend": "http-server frontend -p 8000 -c-1",
+    "init-db": "node backend/check-database.js",
+    "check-db": "node backend/check-database.js",
+    "reset-db": "rm -f backend/database/IntegradorVF.db && node backend/check-database.js"
+  },
+  "keywords": ["varejo", "integração", "api"],
+  "author": "Maurilio Carmo",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "better-sqlite3": "^9.2.2",
+    "node-firebird": "^1.1.8"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}

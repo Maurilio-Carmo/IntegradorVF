@@ -1,0 +1,137 @@
+/**
+ * mobile.css
+ * Estilos responsivos para mobile (< 768px)
+ */
+
+@media (max-width: 768px) {
+    /* Header */
+    .header-content {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .header-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .logo {
+        font-size: var(--font-size-xl);
+    }
+    
+    /* Stats Grid */
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    /* Import Grid */
+    .import-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    /* Form */
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .form-actions .btn {
+        width: 100%;
+    }
+    
+    /* Cards */
+    .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-sm);
+    }
+    
+    .card-header .btn {
+        width: 100%;
+    }
+    
+    /* Modal/Config */
+    .section-config {
+        padding: var(--spacing-sm);
+    }
+    
+    .section-config .card {
+        max-height: 95vh;
+    }
+    
+    /* Container */
+    .container {
+        padding: 0 var(--spacing-sm);
+    }
+    
+    /* Main */
+    .main {
+        padding: var(--spacing-md) 0;
+    }
+    
+    /* Stat Card */
+    .stat-card {
+        padding: var(--spacing-md);
+    }
+    
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        font-size: var(--font-size-2xl);
+    }
+    
+    .stat-value {
+        font-size: var(--font-size-xl);
+    }
+    
+    /* Import Card */
+    .import-card {
+        padding: var(--spacing-md);
+    }
+    
+    .import-icon {
+        font-size: var(--font-size-3xl);
+    }
+    
+    /* Log */
+    .log-container {
+        max-height: 300px;
+        font-size: var(--font-size-xs);
+    }
+    
+    /* Footer */
+    .footer {
+        padding: var(--spacing-md) 0;
+    }
+    
+    /* Buttons */
+    .btn-large {
+        padding: var(--spacing-sm) var(--spacing-lg);
+        font-size: var(--font-size-base);
+    }
+    
+    /* Typography */
+    h1 { font-size: var(--font-size-3xl); }
+    h2 { font-size: var(--font-size-2xl); }
+    h3 { font-size: var(--font-size-xl); }
+}
+
+/* Extra small devices (< 480px) */
+@media (max-width: 480px) {
+    .logo {
+        font-size: var(--font-size-lg);
+    }
+    
+    .stat-icon {
+        width: 40px;
+        height: 40px;
+        font-size: var(--font-size-xl);
+    }
+    
+    .stat-value {
+        font-size: var(--font-size-lg);
+    }
+    
+    .import-icon {
+        font-size: var(--font-size-2xl);
+    }
+}

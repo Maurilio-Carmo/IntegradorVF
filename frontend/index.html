@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Integrador Varejo Fácil</title>
+
+    <link rel="stylesheet" href="assets/css/main.css">
+
+</head>
+<body>
+    <!-- Container Principal -->
+    <div id="app">
+        <!-- Header Component -->
+        <div id="header-component"></div>
+
+        <!-- Main Content -->
+        <main class="main">
+            <div class="container">
+                
+                <!-- Config Component (Modal) -->
+                <div id="config-component"></div>
+
+                <!-- Dashboard Section -->
+                <section id="dashboard-section" class="section">
+                    <!-- Stats Component -->
+                    <div id="stats-component"></div>
+
+                    <!-- Import Tabs Component (NOVO) -->
+                    <div id="import-tabs-component"></div>
+
+                    <!-- Log Component -->
+                    <div id="log-component"></div>
+                </section>
+
+            </div>
+        </main>
+
+        <!-- Footer Component -->
+        <div id="footer-component"></div>
+    </div>
+
+    <!-- Core Scripts -->
+    <script src="src/core/component-loader.js"></script>
+    <script src="src/core/theme-manager.js"></script>
+    <script src="src/config.js"></script>
+    <script src="src/api.js"></script>
+    <script src="src/ui.js"></script>
+    <script src="src/tabs.js"></script>
+    <script src="src/importacao.js"></script>
+    <script src="src/app.js"></script>
+</body>
+</html>

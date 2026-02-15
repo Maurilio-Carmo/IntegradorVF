@@ -1,0 +1,42 @@
+/**
+ * alert.css
+ * Alertas e mensagens
+ */
+
+.alert {
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius);
+    margin-bottom: var(--spacing-md);
+    border: 1px solid transparent;
+    font-size: var(--font-size-sm);
+}
+
+.alert-success {
+    background: #d1fae5;
+    color: var(--success-dark);
+    border-color: var(--success-color);
+}
+
+.alert-error {
+    background: #fee2e2;
+    color: var(--danger-dark);
+    border-color: var(--danger-color);
+}
+
+.alert-warning {
+    background: #fef3c7;
+    color: var(--warning-dark);
+    border-color: var(--warning-color);
+}
+
+.alert-info {
+    background: #cffafe;
+    color: var(--info-dark);
+    border-color: var(--info-color);
+}
+
+.alert-primary {
+    background: #dbeafe;
+    color: var(--primary-dark);
+    border-color: var(--primary-color);
+}

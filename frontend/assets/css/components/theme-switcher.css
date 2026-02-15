@@ -1,0 +1,73 @@
+/**
+ * theme-switcher.css
+ * Botão de alternância de tema (claro/escuro)
+ */
+
+.theme-switcher {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-xs);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-lg);
+    cursor: pointer;
+    transition: all var(--transition-fast) var(--transition-timing);
+}
+
+.theme-switcher:hover {
+    border-color: var(--primary-color);
+    box-shadow: var(--shadow-sm);
+}
+
+.theme-option {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: all var(--transition-fast) var(--transition-timing);
+    font-size: var(--font-size-lg);
+}
+
+.theme-option:hover {
+    background: var(--hover-bg, var(--bg-tertiary));
+}
+
+.theme-option.active {
+    background: var(--primary-color);
+    color: var(--text-white);
+}
+
+/* Ícones */
+.theme-icon-light::before {
+    content: "☀️";
+}
+
+.theme-icon-dark::before {
+    content: "🌙";
+}
+
+/* Transição suave ao trocar tema */
+* {
+    transition: background-color var(--transition-base) var(--transition-timing),
+                color var(--transition-base) var(--transition-timing),
+                border-color var(--transition-base) var(--transition-timing);
+}
+
+/* Evitar transição em elementos que não precisam */
+button,
+input,
+select,
+textarea,
+.no-transition {
+    transition: none;
+}
+
+button,
+.btn {
+    transition: all var(--transition-fast) var(--transition-timing) !important;
+}
