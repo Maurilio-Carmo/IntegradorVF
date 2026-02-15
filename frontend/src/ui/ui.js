@@ -5,7 +5,7 @@
  * Gerencia elementos visuais e interações
  */
 
-import Config from "../services/config";
+import Config from "../services/config.js";
 
 const UI = {
     /**
@@ -229,14 +229,19 @@ const UI = {
     carregarConfigNoFormulario() {
         const config = Config.carregar();
         
+        // Se não houver configuração salva, usar valores padrão
+        if (!config) {
+            return;
+        }
+        
         const urlInput = document.getElementById('apiUrl');
         const keyInput = document.getElementById('apiKey');
         const lojaInput = document.getElementById('apiLoja');
         const saveInput = document.getElementById('salvarCredenciais');
         
-        if (urlInput) urlInput.value = config.apiUrl;
-        if (keyInput) keyInput.value = config.apiKey;
-        if (lojaInput) lojaInput.value = config.apiLoja;
+        if (urlInput && config.apiUrl) urlInput.value = config.apiUrl;
+        if (keyInput && config.apiKey) keyInput.value = config.apiKey;
+        if (lojaInput && config.apiLoja) lojaInput.value = config.apiLoja;
         if (saveInput) saveInput.checked = config.salvarCredenciais;
     },
 

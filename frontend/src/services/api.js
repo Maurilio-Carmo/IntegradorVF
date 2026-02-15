@@ -4,7 +4,7 @@
  * Módulo de comunicação com a API Varejo Fácil (via proxy)
  */
 
-import UI from "../ui/ui";
+import UI from "../ui/ui.js";
 
 const API = {
     // URL do nosso backend proxy
