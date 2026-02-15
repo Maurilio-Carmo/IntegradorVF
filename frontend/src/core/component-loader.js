@@ -1,3 +1,4 @@
+// frontend/src/core/component-loader.js
 /**
  * Component Loader
  * Sistema de carregamento dinâmico de componentes HTML
@@ -11,7 +12,7 @@ const ComponentLoader = {
         'header-component': 'components/header.html',
         'config-component': 'components/config.html',
         'stats-component': 'components/stats.html',
-        'import-tabs-component': 'components/import-tabs.html',  // Novo componente de tabs
+        'import-tabs-component': 'components/import-tabs.html',
         'log-component': 'components/log.html',
         'footer-component': 'components/footer.html'
     },
@@ -85,5 +86,5 @@ if (document.readyState === 'loading') {
     ComponentLoader.loadAll();
 }
 
-// Exportar para uso global
-window.ComponentLoader = ComponentLoader;
+// Export ES6
+export default ComponentLoader;

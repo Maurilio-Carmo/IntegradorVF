@@ -19,13 +19,12 @@
 @import 'components/button.css';
 @import 'components/form.css';
 @import 'components/stats.css';
-@import 'components/import-cards.css';
+@import 'components/tabs.css';
 @import 'components/log.css';
 @import 'components/modal.css';
 @import 'components/alert.css';
 @import 'components/progress.css';
 @import 'components/theme-switcher.css';
-@import 'components/tabs.css';
 
 /* Utils */
 @import 'utils/spacing.css';
