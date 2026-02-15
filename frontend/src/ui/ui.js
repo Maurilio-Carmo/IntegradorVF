@@ -1,9 +1,11 @@
-// frontend/src/ui.js
+// frontend/src/ui/ui.js
 
 /**
  * Módulo de Interface do Usuário
  * Gerencia elementos visuais e interações
  */
+
+import Config from "../services/config";
 
 const UI = {
     /**
@@ -264,3 +266,6 @@ const UI = {
         animar();
     }
 };
+
+// Exportar para uso global
+export default UI;

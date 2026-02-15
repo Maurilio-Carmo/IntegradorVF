@@ -1,9 +1,13 @@
-// frontend/src/tabs.js
+// frontend/src/ui/tabs.js
 
 /**
  * Gerenciador de Tabs
  * Controla navegação e estado das abas de importação
  */
+
+import UI from './ui.js';
+import Config from '../services/config.js';
+import Importacao from '../features/importacao.js';
 
 const TabsManager = {
     /**
@@ -185,3 +189,6 @@ const TabsManager = {
 document.addEventListener('componentsLoaded', () => {
     TabsManager.init();
 });
+
+// Exportar para uso global
+export default TabsManager;

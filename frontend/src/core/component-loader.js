@@ -86,5 +86,5 @@ if (document.readyState === 'loading') {
     ComponentLoader.loadAll();
 }
 
-// Export ES6
+// Exportar para uso global
 export default ComponentLoader;

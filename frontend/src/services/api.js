@@ -1,8 +1,10 @@
-// frontend/src/api.js - VERSÃO COM PROXY
+// frontend/src/services/api.js
 
 /**
  * Módulo de comunicação com a API Varejo Fácil (via proxy)
  */
+
+import UI from "../ui/ui";
 
 const API = {
     // URL do nosso backend proxy
@@ -189,3 +191,6 @@ const API = {
         return await this.fetchAll('financeiro/categorias', onProgress);
     }
 };
+
+// Exportar para uso global
+export default API;

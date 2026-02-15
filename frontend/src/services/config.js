@@ -1,78 +1,53 @@
-// frontend/src/config.js
+// frontend/src/services/config.js
 
 /**
  * Módulo de Configuração
  * Gerencia credenciais e configurações da API
  */
 
+
 const Config = {
-    // Chaves do localStorage
-    STORAGE_KEYS: {
-        API_URL: 'vf_api_url',
-        API_KEY: 'vf_api_key',
-        API_LOJA: 'vf_api_loja',
-        SAVE_CREDENTIALS: 'vf_save_credentials'
-    },
+    storageKey: 'varejoFacilConfig',
 
     /**
      * Salvar configurações no localStorage
+     * @param {Object} dados - { apiUrl, apiKey, apiLoja }
      */
-    salvar(apiUrl, apiKey, apiLoja, salvarCredenciais) {
-        if (salvarCredenciais) {
-            localStorage.setItem(this.STORAGE_KEYS.API_URL, apiUrl);
-            localStorage.setItem(this.STORAGE_KEYS.API_KEY, apiKey);
-            localStorage.setItem(this.STORAGE_KEYS.API_LOJA, apiLoja);
-            localStorage.setItem(this.STORAGE_KEYS.SAVE_CREDENTIALS, 'true');
-            console.log('✅ Credenciais salvas no localStorage');
-        } else {
-            this.limpar();
-        }
+    salvar(dados) {
+        localStorage.setItem(this.storageKey, JSON.stringify(dados));
+        console.log('✅ Configuração salva');
     },
 
     /**
      * Carregar configurações do localStorage
+     * @returns {Object|null} Dados salvos ou null
      */
     carregar() {
-        const salvarCredenciais = localStorage.getItem(this.STORAGE_KEYS.SAVE_CREDENTIALS) === 'true';
-        
-        if (salvarCredenciais) {
-            return {
-                apiUrl: localStorage.getItem(this.STORAGE_KEYS.API_URL) || '',
-                apiKey: localStorage.getItem(this.STORAGE_KEYS.API_KEY) || '',
-                apiLoja: localStorage.getItem(this.STORAGE_KEYS.API_LOJA) || '1',
-                salvarCredenciais: true
-            };
-        }
+        const dados = localStorage.getItem(this.storageKey);
+        return dados ? JSON.parse(dados) : null;
+    },
 
-        return {
-            apiUrl: '',
-            apiKey: '',
-            apiLoja: '1',
-            salvarCredenciais: false
-        };
+    /**
+     * Verificar se está configurado
+     * @returns {boolean}
+     */
+    estaConfigurado() {
+        const config = this.carregar();
+        return config && config.apiUrl && config.apiKey && config.apiLoja;
     },
 
     /**
      * Limpar configurações do localStorage
      */
     limpar() {
-        localStorage.removeItem(this.STORAGE_KEYS.API_URL);
-        localStorage.removeItem(this.STORAGE_KEYS.API_KEY);
-        localStorage.removeItem(this.STORAGE_KEYS.API_LOJA);
-        localStorage.removeItem(this.STORAGE_KEYS.SAVE_CREDENTIALS);
-        console.log('🗑️ Credenciais removidas do localStorage');
-    },
-
-    /**
-     * Verificar se está configurado
-     */
-    estaConfigurado() {
-        const config = this.carregar();
-        return !!(config.apiUrl && config.apiKey && config.apiLoja);
+        localStorage.removeItem(this.storageKey);
+        console.log('🗑️ Configuração limpa');
     },
 
     /**
      * Validar formato da URL
+     * @param {string} url
+     * @returns {boolean}
      */
     validarUrl(url) {
         try {
@@ -85,6 +60,8 @@ const Config = {
 
     /**
      * Validar formato da API Key
+     * @param {string} apiKey
+     * @returns {boolean}
      */
     validarApiKey(apiKey) {
         return apiKey && apiKey.length >= 10;
@@ -92,6 +69,8 @@ const Config = {
 
     /**
      * Validar código da loja
+     * @param {string} loja
+     * @returns {boolean}
      */
     validarLoja(loja) {
         const lojaNum = parseInt(loja);
@@ -100,6 +79,10 @@ const Config = {
 
     /**
      * Validar todas as configurações
+     * @param {string} apiUrl
+     * @param {string} apiKey
+     * @param {string} apiLoja
+     * @returns {Object} { valido: boolean, erros: string[] }
      */
     validar(apiUrl, apiKey, apiLoja) {
         const erros = [];
@@ -122,3 +105,6 @@ const Config = {
         };
     }
 };
+
+// Exportar para uso global
+export default Config;

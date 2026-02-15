@@ -1,9 +1,12 @@
-// frontend/src/importacao.js
+// frontend/src/features/importacao.js
 
 /**
  * Módulo de Importação
  * Gerencia o processo de importação de dados da API e gravação no banco
  */
+
+import API from '../services/api.js';
+import UI from '../ui/ui.js';
 
 const Importacao = {
     /**
@@ -334,3 +337,6 @@ const Importacao = {
         }
     }
 };
+
+// Exportar para uso global
+export default Importacao;

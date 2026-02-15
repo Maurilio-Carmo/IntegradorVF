@@ -179,4 +179,4 @@ if (document.readyState === 'loading') {
 }
 
 // Exportar para uso global
-window.ThemeManager = ThemeManager;
+export default ThemeManager;
