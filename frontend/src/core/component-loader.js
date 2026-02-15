@@ -1,4 +1,5 @@
 // frontend/src/core/component-loader.js
+
 /**
  * Component Loader
  * Sistema de carregamento dinâmico de componentes HTML
