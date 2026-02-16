@@ -6,6 +6,7 @@
  */
 
 import ThemeManager from './theme-manager.js';
+import ComponentLoader from './component-loader.js';
 import ConfigManager from '../config/config-manager.js';
 import EventHandlers from '../ui/event-handlers.js';
 import Importacao from '../features/import/index.js';
@@ -23,7 +24,6 @@ export const AppInitializer = {
      * Inicializar aplicação
      */
     async init() {
-        // Prevenir múltiplas inicializações
         if (this.isInitialized) {
             console.warn('⚠️ Aplicação já foi inicializada');
             return this.initPromise;
@@ -93,10 +93,24 @@ export const AppInitializer = {
             };
 
             if (check()) {
+                console.log('✅ Componentes já carregados');
                 resolve();
-            } else {
-                document.addEventListener('componentsLoaded', () => resolve(), { once: true });
+                return;
             }
+
+            console.log('⏳ Aguardando componentes...');
+
+            // Timeout de segurança (5 segundos)
+            const timeout = setTimeout(() => {
+                console.warn('⚠️ Timeout aguardando componentes. Continuando...');
+                resolve();
+            }, 5000);
+
+            document.addEventListener('componentsLoaded', () => {
+                console.log('✅ Evento componentsLoaded recebido');
+                clearTimeout(timeout);
+                resolve();
+            }, { once: true });
         });
     },
 
@@ -118,7 +132,6 @@ export const AppInitializer = {
             await ConfigManager.carregar();
         } catch (error) {
             console.error('⚠️ Erro ao carregar configuração:', error);
-            // Não bloquear inicialização por erro na config
         }
     },
 
@@ -175,7 +188,7 @@ export const AppInitializer = {
     },
 
     /**
-     * Reinicializar aplicação (forçar reload)
+     * Reinicializar aplicação
      */
     async reinit() {
         console.log('🔄 Reinicializando aplicação...');

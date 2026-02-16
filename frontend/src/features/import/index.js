@@ -162,7 +162,7 @@ class ImportManager {
     /**
      * Atualizar estatísticas do banco
      */
-    async atualizarEstatisticasDoBanco() {
+    async atualizarEstatisticas() {
         return await this.produto.updateStatistics();
     }
 
