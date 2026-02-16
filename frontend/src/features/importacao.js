@@ -51,211 +51,394 @@ const Importacao = {
     },
 
     /**
-     * Importar hierarquia mercadológica (Seções, Grupos, Subgrupos)
+     * Método genérico de importação
      */
-    async importarHierarquia(card) {
+    async importarEntidade(config) {
+        const { nome, endpoint, metodoAPI, card, estimativa = 500 } = config;
+        
         try {
-            UI.log('🌳 Iniciando importação de hierarquia...', 'info');
-            UI.atualizarStatusImportacao(card, 'loading', 'Buscando seções...');
+            UI.log(`📥 Iniciando importação de ${nome}...`, 'info');
+            UI.atualizarStatusImportacao(card, 'loading', `Buscando ${nome}...`);
 
-            // 1. Seções
-            const secoes = await API.buscarSecoes((total) => {
-                UI.log(`   📄 Seções: ${total} registros`, 'info');
+            const dados = await metodoAPI((total) => {
+                UI.log(`   📄 ${nome}: ${total} registros`, 'info');
+                const percentual = Math.min(Math.floor((total / estimativa) * 100), 99);
+                UI.atualizarStatusImportacao(card, 'progress', percentual);
             });
-            UI.log(`✅ ${secoes.length} seções buscadas da API`, 'success');
 
-            // Salvar seções no banco
-            UI.log('💾 Salvando seções no banco...', 'info');
-            await this.salvarNoBanco('secoes', secoes);
-            UI.log(`✅ ${secoes.length} seções salvas no banco`, 'success');
+            UI.log(`✅ ${dados.length} ${nome} buscados da API`, 'success');
 
-            // 2. Grupos
-            UI.atualizarStatusImportacao(card, 'loading', 'Buscando grupos...');
-            const grupos = await API.buscarGrupos((total) => {
-                UI.log(`   📄 Grupos: ${total} registros`, 'info');
-            });
-            UI.log(`✅ ${grupos.length} grupos buscados da API`, 'success');
+            // Salvar no banco
+            UI.log(`💾 Salvando ${nome} no banco...`, 'info');
+            await this.salvarNoBanco(endpoint, dados);
+            UI.log(`✅ ${dados.length} ${nome} salvos no banco`, 'success');
 
-            // Salvar grupos no banco
-            UI.log('💾 Salvando grupos no banco...', 'info');
-            await this.salvarNoBanco('grupos', grupos);
-            UI.log(`✅ ${grupos.length} grupos salvos no banco`, 'success');
-
-            // 3. Subgrupos
-            UI.atualizarStatusImportacao(card, 'loading', 'Buscando subgrupos...');
-            const subgrupos = await API.buscarSubgrupos((total) => {
-                UI.log(`   📄 Subgrupos: ${total} registros`, 'info');
-            });
-            UI.log(`✅ ${subgrupos.length} subgrupos buscados da API`, 'success');
-
-            // Salvar subgrupos no banco
-            UI.log('💾 Salvando subgrupos no banco...', 'info');
-            await this.salvarNoBanco('subgrupos', subgrupos);
-            UI.log(`✅ ${subgrupos.length} subgrupos salvos no banco`, 'success');
-
-            const total = secoes.length + grupos.length + subgrupos.length;
-            UI.atualizarStatusImportacao(card, 'success', `${total} registros`);
+            UI.atualizarStatusImportacao(card, 'success', `${dados.length} registros`);
             
             // Atualizar estatísticas do banco
             await this.atualizarEstatisticasDoBanco();
 
-            return { secoes, grupos, subgrupos };
+            return dados;
         } catch (error) {
-            UI.log(`❌ Erro ao importar hierarquia: ${error.message}`, 'error');
+            UI.log(`❌ Erro ao importar ${nome}: ${error.message}`, 'error');
             UI.atualizarStatusImportacao(card, 'error', error.message);
             throw error;
         }
     },
 
-    /**
-     * Importar marcas
-     */
+    // ========================================
+    // IMPORTAÇÕES ESPECÍFICAS - PRODUTOS
+    // ========================================
+
+    async importarSecoes(card) {
+        return await this.importarEntidade({
+            nome: 'seções',
+            endpoint: 'secoes',
+            metodoAPI: API.buscarSecoes.bind(API),
+            card,
+            estimativa: 100
+        });
+    },
+
+    async importarGrupos(card) {
+        return await this.importarEntidade({
+            nome: 'grupos',
+            endpoint: 'grupos',
+            metodoAPI: API.buscarGrupos.bind(API),
+            card,
+            estimativa: 500
+        });
+    },
+
+    async importarSubgrupos(card) {
+        return await this.importarEntidade({
+            nome: 'subgrupos',
+            endpoint: 'subgrupos',
+            metodoAPI: API.buscarSubgrupos.bind(API),
+            card,
+            estimativa: 1000
+        });
+    },
+
     async importarMarcas(card) {
-        try {
-            UI.log('🏷️  Iniciando importação de marcas...', 'info');
-            UI.atualizarStatusImportacao(card, 'loading');
-
-            const marcas = await API.buscarMarcas((total) => {
-                UI.log(`   📄 Marcas: ${total} registros`, 'info');
-                const percentual = Math.min(Math.floor((total / 500) * 100), 99);
-                UI.atualizarStatusImportacao(card, 'progress', percentual);
-            });
-
-            UI.log(`✅ ${marcas.length} marcas buscadas da API`, 'success');
-
-            // Salvar marcas no banco
-            UI.log('💾 Salvando marcas no banco...', 'info');
-            await this.salvarNoBanco('marcas', marcas);
-            UI.log(`✅ ${marcas.length} marcas salvas no banco`, 'success');
-
-            UI.atualizarStatusImportacao(card, 'success', `${marcas.length} registros`);
-            
-            // Atualizar estatísticas do banco
-            await this.atualizarEstatisticasDoBanco();
-
-            return marcas;
-        } catch (error) {
-            UI.log(`❌ Erro ao importar marcas: ${error.message}`, 'error');
-            UI.atualizarStatusImportacao(card, 'error', error.message);
-            throw error;
-        }
+        return await this.importarEntidade({
+            nome: 'marcas',
+            endpoint: 'marcas',
+            metodoAPI: API.buscarMarcas.bind(API),
+            card,
+            estimativa: 500
+        });
     },
 
-    /**
-     * Importar produtos
-     */
+    async importarFamilias(card) {
+        return await this.importarEntidade({
+            nome: 'famílias',
+            endpoint: 'familias',
+            metodoAPI: API.buscarFamilias.bind(API),
+            card,
+            estimativa: 200
+        });
+    },
+
     async importarProdutos(card) {
-        try {
-            UI.log('📦 Iniciando importação de produtos...', 'info');
-            UI.atualizarStatusImportacao(card, 'loading');
-
-            const produtos = await API.buscarProdutos((total) => {
-                UI.log(`   📄 Produtos: ${total} registros`, 'info');
-                const percentual = Math.min(Math.floor((total / 1000) * 100), 99);
-                UI.atualizarStatusImportacao(card, 'progress', percentual);
-            });
-
-            UI.log(`✅ ${produtos.length} produtos buscados da API`, 'success');
-
-            // TODO: Implementar salvamento de produtos (estrutura mais complexa)
-            UI.log(`⚠️  Salvamento de produtos será implementado em breve`, 'info');
-
-            UI.atualizarStatusImportacao(card, 'success', `${produtos.length} registros`);
-            UI.animarContador('statProdutos', produtos.length);
-
-            return produtos;
-        } catch (error) {
-            UI.log(`❌ Erro ao importar produtos: ${error.message}`, 'error');
-            UI.atualizarStatusImportacao(card, 'error', error.message);
-            throw error;
-        }
+        return await this.importarEntidade({
+            nome: 'produtos',
+            endpoint: 'produtos',
+            metodoAPI: API.buscarProdutos.bind(API),
+            card,
+            estimativa: 5000
+        });
     },
 
-    /**
-     * Importar clientes
-     */
+    // ========================================
+    // IMPORTAÇÕES ESPECÍFICAS - PESSOAS
+    // ========================================
+
     async importarClientes(card) {
-        try {
-            UI.log('👥 Iniciando importação de clientes...', 'info');
-            UI.atualizarStatusImportacao(card, 'loading');
-
-            const clientes = await API.buscarClientes((total) => {
-                UI.log(`   📄 Clientes: ${total} registros`, 'info');
-                const percentual = Math.min(Math.floor((total / 500) * 100), 99);
-                UI.atualizarStatusImportacao(card, 'progress', percentual);
-            });
-
-            UI.log(`✅ ${clientes.length} clientes buscados da API`, 'success');
-
-            // TODO: Implementar salvamento de clientes
-            UI.log(`⚠️  Salvamento de clientes será implementado em breve`, 'info');
-
-            UI.atualizarStatusImportacao(card, 'success', `${clientes.length} registros`);
-            UI.animarContador('statClientes', clientes.length);
-
-            return clientes;
-        } catch (error) {
-            UI.log(`❌ Erro ao importar clientes: ${error.message}`, 'error');
-            UI.atualizarStatusImportacao(card, 'error', error.message);
-            throw error;
-        }
+        return await this.importarEntidade({
+            nome: 'clientes',
+            endpoint: 'clientes',
+            metodoAPI: API.buscarClientes.bind(API),
+            card,
+            estimativa: 1000
+        });
     },
 
-    /**
-     * Importar fornecedores
-     */
     async importarFornecedores(card) {
+        return await this.importarEntidade({
+            nome: 'fornecedores',
+            endpoint: 'fornecedores',
+            metodoAPI: API.buscarFornecedores.bind(API),
+            card,
+            estimativa: 300
+        });
+    },
+
+    // ========================================
+    // IMPORTAÇÕES ESPECÍFICAS - OPERACIONAL
+    // ========================================
+
+    async importarLojas(card) {
+        return await this.importarEntidade({
+            nome: 'lojas',
+            endpoint: 'lojas',
+            metodoAPI: API.buscarLojas.bind(API),
+            card,
+            estimativa: 50
+        });
+    },
+
+    async importarCaixas(card) {
+        return await this.importarEntidade({
+            nome: 'caixas',
+            endpoint: 'caixas',
+            metodoAPI: API.buscarCaixas.bind(API),
+            card,
+            estimativa: 100
+        });
+    },
+
+    async importarLocalEstoque(card) {
+        return await this.importarEntidade({
+            nome: 'locais de estoque',
+            endpoint: 'local-estoque',
+            metodoAPI: API.buscarLocalEstoque.bind(API),
+            card,
+            estimativa: 50
+        });
+    },
+
+    // ========================================
+    // IMPORTAÇÕES ESPECÍFICAS - FINANCEIRO
+    // ========================================
+
+    async importarAgentes(card) {
+        return await this.importarEntidade({
+            nome: 'agentes',
+            endpoint: 'agentes',
+            metodoAPI: API.buscarAgentes.bind(API),
+            card,
+            estimativa: 100
+        });
+    },
+
+    async importarCategorias(card) {
+        return await this.importarEntidade({
+            nome: 'categorias',
+            endpoint: 'categorias',
+            metodoAPI: API.buscarCategorias.bind(API),
+            card,
+            estimativa: 200
+        });
+    },
+
+    async importarContasCorrentes(card) {
+        return await this.importarEntidade({
+            nome: 'contas correntes',
+            endpoint: 'contas-correntes',
+            metodoAPI: API.buscarContasCorrentes.bind(API),
+            card,
+            estimativa: 100
+        });
+    },
+
+    async importarEspeciesDocumento(card) {
+        return await this.importarEntidade({
+            nome: 'espécies de documento',
+            endpoint: 'especies-documento',
+            metodoAPI: API.buscarEspeciesDocumento.bind(API),
+            card,
+            estimativa: 50
+        });
+    },
+
+    async importarHistoricoPadrao(card) {
+        return await this.importarEntidade({
+            nome: 'histórico padrão',
+            endpoint: 'historico-padrao',
+            metodoAPI: API.buscarHistoricoPadrao.bind(API),
+            card,
+            estimativa: 100
+        });
+    },
+
+    // ========================================
+    // IMPORTAÇÕES ESPECÍFICAS - MOTIVOS
+    // ========================================
+
+    async importarMotivosCancelamento(card) {
+        return await this.importarEntidade({
+            nome: 'motivos de cancelamento',
+            endpoint: 'motivos-cancelamento',
+            metodoAPI: API.buscarMotivosCancelamento.bind(API),
+            card,
+            estimativa: 50
+        });
+    },
+
+    async importarMotivosDesconto(card) {
+        return await this.importarEntidade({
+            nome: 'motivos de desconto',
+            endpoint: 'motivos-desconto',
+            metodoAPI: API.buscarMotivosDesconto.bind(API),
+            card,
+            estimativa: 50
+        });
+    },
+
+    async importarMotivosDevolucao(card) {
+        return await this.importarEntidade({
+            nome: 'motivos de devolução',
+            endpoint: 'motivos-devolucao',
+            metodoAPI: API.buscarMotivosDevolucao.bind(API),
+            card,
+            estimativa: 50
+        });
+    },
+
+    // ========================================
+    // IMPORTAÇÕES ESPECÍFICAS - PDV
+    // ========================================
+
+    async importarPagamentosPDV(card) {
+        return await this.importarEntidade({
+            nome: 'pagamentos PDV',
+            endpoint: 'pagamentos-pdv',
+            metodoAPI: API.buscarPagamentosPDV.bind(API),
+            card,
+            estimativa: 50
+        });
+    },
+
+    async importarRecebimentosPDV(card) {
+        return await this.importarEntidade({
+            nome: 'recebimentos PDV',
+            endpoint: 'recebimentos-pdv',
+            metodoAPI: API.buscarRecebimentosPDV.bind(API),
+            card,
+            estimativa: 50
+        });
+    },
+
+    // ========================================
+    // IMPORTAÇÕES ESPECÍFICAS - FISCAL
+    // ========================================
+
+    async importarImpostosFederais(card) {
+        return await this.importarEntidade({
+            nome: 'impostos federais',
+            endpoint: 'impostos-federais',
+            metodoAPI: API.buscarImpostosFederais.bind(API),
+            card,
+            estimativa: 50
+        });
+    },
+
+    async importarRegimeTributario(card) {
+        return await this.importarEntidade({
+            nome: 'regime tributário',
+            endpoint: 'regime-tributario',
+            metodoAPI: API.buscarRegimeTributario.bind(API),
+            card,
+            estimativa: 50
+        });
+    },
+
+    async importarSituacoesFiscais(card) {
+        return await this.importarEntidade({
+            nome: 'situações fiscais',
+            endpoint: 'situacoes-fiscais',
+            metodoAPI: API.buscarSituacoesFiscais.bind(API),
+            card,
+            estimativa: 100
+        });
+    },
+
+    async importarTabelasTributariasEntrada(card) {
+        return await this.importarEntidade({
+            nome: 'tabelas tributárias de entrada',
+            endpoint: 'tabelas-tributarias-entrada',
+            metodoAPI: API.buscarTabelasTributariasEntrada.bind(API),
+            card,
+            estimativa: 100
+        });
+    },
+
+    async importarTabelasTributariasSaida(card) {
+        return await this.importarEntidade({
+            nome: 'tabelas tributárias de saída',
+            endpoint: 'tabelas-tributarias-saida',
+            metodoAPI: API.buscarTabelasTributariasSaida.bind(API),
+            card,
+            estimativa: 100
+        });
+    },
+
+    async importarTiposOperacoes(card) {
+        return await this.importarEntidade({
+            nome: 'tipos de operações',
+            endpoint: 'tipos-operacoes',
+            metodoAPI: API.buscarTiposOperacoes.bind(API),
+            card,
+            estimativa: 100
+        });
+    },
+
+    // ========================================
+    // IMPORTAÇÕES ESPECÍFICAS - ESTOQUE
+    // ========================================
+
+    async importarTiposAjustes(card) {
+        return await this.importarEntidade({
+            nome: 'tipos de ajustes',
+            endpoint: 'tipos-ajustes',
+            metodoAPI: API.buscarTiposAjustes.bind(API),
+            card,
+            estimativa: 50
+        });
+    },
+
+    // ========================================
+    // IMPORTAÇÕES AGRUPADAS
+    // ========================================
+
+    /**
+     * Importar hierarquia mercadológica completa
+     */
+    async importarHierarquiaCompleta(cardSecoes, cardGrupos, cardSubgrupos) {
         try {
-            UI.log('🏢 Iniciando importação de fornecedores...', 'info');
-            UI.atualizarStatusImportacao(card, 'loading');
-
-            const fornecedores = await API.buscarFornecedores((total) => {
-                UI.log(`   📄 Fornecedores: ${total} registros`, 'info');
-                const percentual = Math.min(Math.floor((total / 200) * 100), 99);
-                UI.atualizarStatusImportacao(card, 'progress', percentual);
-            });
-
-            UI.log(`✅ ${fornecedores.length} fornecedores buscados da API`, 'success');
-
-            // TODO: Implementar salvamento de fornecedores
-            UI.log(`⚠️  Salvamento de fornecedores será implementado em breve`, 'info');
-
-            UI.atualizarStatusImportacao(card, 'success', `${fornecedores.length} registros`);
-            UI.animarContador('statFornecedores', fornecedores.length);
-
-            return fornecedores;
+            UI.log('🌳 Iniciando importação de hierarquia completa...', 'info');
+            
+            await this.importarSecoes(cardSecoes);
+            await this.importarGrupos(cardGrupos);
+            await this.importarSubgrupos(cardSubgrupos);
+            
+            UI.log('✅ Hierarquia completa importada!', 'success');
         } catch (error) {
-            UI.log(`❌ Erro ao importar fornecedores: ${error.message}`, 'error');
-            UI.atualizarStatusImportacao(card, 'error', error.message);
+            UI.log(`❌ Erro na hierarquia: ${error.message}`, 'error');
             throw error;
         }
     },
 
     /**
-     * Importar categorias
+     * Importar cadastros de produtos
      */
-    async importarCategorias(card) {
+    async importarCadastrosProdutos() {
         try {
-            UI.log('💰 Iniciando importação de categorias...', 'info');
-            UI.atualizarStatusImportacao(card, 'loading');
-
-            const categorias = await API.buscarCategorias((total) => {
-                UI.log(`   📄 Categorias: ${total} registros`, 'info');
-                const percentual = Math.min(Math.floor((total / 100) * 100), 99);
-                UI.atualizarStatusImportacao(card, 'progress', percentual);
-            });
-
-            UI.log(`✅ ${categorias.length} categorias buscadas da API`, 'success');
-
-            // TODO: Implementar salvamento de categorias
-            UI.log(`⚠️  Salvamento de categorias será implementado em breve`, 'info');
-
-            UI.atualizarStatusImportacao(card, 'success', `${categorias.length} registros`);
-
-            return categorias;
+            UI.log('📦 Iniciando importação de cadastros de produtos...', 'info');
+            
+            const cards = document.querySelectorAll('.import-card');
+            
+            await this.importarSecoes(cards[0]);
+            await this.importarGrupos(cards[1]);
+            await this.importarSubgrupos(cards[2]);
+            await this.importarMarcas(cards[3]);
+            await this.importarFamilias(cards[4]);
+            await this.importarProdutos(cards[5]);
+            
+            UI.log('✅ Cadastros de produtos importados!', 'success');
         } catch (error) {
-            UI.log(`❌ Erro ao importar categorias: ${error.message}`, 'error');
-            UI.atualizarStatusImportacao(card, 'error', error.message);
+            UI.log(`❌ Erro nos cadastros: ${error.message}`, 'error');
             throw error;
         }
     },
@@ -268,12 +451,44 @@ const Importacao = {
             const stats = await this.buscarEstatisticas();
             if (stats) {
                 UI.log('📊 Atualizando estatísticas do banco...', 'info');
-                UI.animarContador('statSecoes', stats.secoes);
-                UI.animarContador('statGrupos', stats.grupos);
-                UI.animarContador('statMarcas', stats.marcas);
-                UI.animarContador('statProdutos', stats.produtos);
-                UI.animarContador('statClientes', stats.clientes);
-                UI.animarContador('statFornecedores', stats.fornecedores);
+                
+                // Atualizar cada contador se o elemento existir
+                const contadores = {
+                    'statSecoes': stats.secoes,
+                    'statGrupos': stats.grupos,
+                    'statSubgrupos': stats.subgrupos,
+                    'statMarcas': stats.marcas,
+                    'statFamilias': stats.familias,
+                    'statProdutos': stats.produtos,
+                    'statClientes': stats.clientes,
+                    'statFornecedores': stats.fornecedores,
+                    'statLojas': stats.lojas,
+                    'statCaixas': stats.caixas,
+                    'statLocalEstoque': stats.local_estoque,
+                    'statAgentes': stats.agentes,
+                    'statCategorias': stats.categorias,
+                    'statContasCorrentes': stats.contas_correntes,
+                    'statEspeciesDocumento': stats.especies_documento,
+                    'statHistoricoPadrao': stats.historico_padrao,
+                    'statMotivosCancelamento': stats.motivos_cancelamento,
+                    'statMotivosDesconto': stats.motivos_desconto,
+                    'statMotivosDevolucao': stats.motivos_devolucao,
+                    'statPagamentosPDV': stats.pagamentos_pdv,
+                    'statRecebimentosPDV': stats.recebimentos_pdv,
+                    'statImpostosFederais': stats.impostos_federais,
+                    'statRegimeTributario': stats.regime_tributario,
+                    'statSituacoesFiscais': stats.situacoes_fiscais,
+                    'statTabelasTributariasEntrada': stats.tabelas_tributarias_entrada,
+                    'statTabelasTributariasSaida': stats.tabelas_tributarias_saida,
+                    'statTiposOperacoes': stats.tipos_operacoes,
+                    'statTiposAjustes': stats.tipos_ajustes
+                };
+
+                for (const [id, valor] of Object.entries(contadores)) {
+                    if (document.getElementById(id)) {
+                        UI.animarContador(id, valor || 0);
+                    }
+                }
             }
         } catch (error) {
             console.error('Erro ao atualizar estatísticas:', error);
@@ -295,23 +510,46 @@ const Importacao = {
 
             const cards = document.querySelectorAll('.import-card');
             
-            // 1. Hierarquia (com gravação no banco)
-            await this.importarHierarquia(cards[0]);
-            
-            // 2. Marcas (com gravação no banco)
-            await this.importarMarcas(cards[1]);
-            
-            // 3. Produtos (apenas busca por enquanto)
-            await this.importarProdutos(cards[2]);
-            
-            // 4. Clientes (apenas busca por enquanto)
-            await this.importarClientes(cards[3]);
-            
-            // 5. Fornecedores (apenas busca por enquanto)
-            await this.importarFornecedores(cards[4]);
-            
-            // 6. Categorias (apenas busca por enquanto)
-            await this.importarCategorias(cards[5]);
+            // Executar importações em sequência
+            const importacoes = [
+                { metodo: 'importarSecoes', nome: 'Seções' },
+                { metodo: 'importarGrupos', nome: 'Grupos' },
+                { metodo: 'importarSubgrupos', nome: 'Subgrupos' },
+                { metodo: 'importarMarcas', nome: 'Marcas' },
+                { metodo: 'importarFamilias', nome: 'Famílias' },
+                { metodo: 'importarProdutos', nome: 'Produtos' },
+                { metodo: 'importarClientes', nome: 'Clientes' },
+                { metodo: 'importarFornecedores', nome: 'Fornecedores' },
+                { metodo: 'importarLojas', nome: 'Lojas' },
+                { metodo: 'importarCaixas', nome: 'Caixas' },
+                { metodo: 'importarLocalEstoque', nome: 'Local Estoque' },
+                { metodo: 'importarAgentes', nome: 'Agentes' },
+                { metodo: 'importarCategorias', nome: 'Categorias' },
+                { metodo: 'importarContasCorrentes', nome: 'Contas Correntes' },
+                { metodo: 'importarEspeciesDocumento', nome: 'Espécies Documento' },
+                { metodo: 'importarHistoricoPadrao', nome: 'Histórico Padrão' },
+                { metodo: 'importarMotivosCancelamento', nome: 'Motivos Cancelamento' },
+                { metodo: 'importarMotivosDesconto', nome: 'Motivos Desconto' },
+                { metodo: 'importarMotivosDevolucao', nome: 'Motivos Devolução' },
+                { metodo: 'importarPagamentosPDV', nome: 'Pagamentos PDV' },
+                { metodo: 'importarRecebimentosPDV', nome: 'Recebimentos PDV' },
+                { metodo: 'importarImpostosFederais', nome: 'Impostos Federais' },
+                { metodo: 'importarRegimeTributario', nome: 'Regime Tributário' },
+                { metodo: 'importarSituacoesFiscais', nome: 'Situações Fiscais' },
+                { metodo: 'importarTabelasTributariasEntrada', nome: 'Tabelas Trib. Entrada' },
+                { metodo: 'importarTabelasTributariasSaida', nome: 'Tabelas Trib. Saída' },
+                { metodo: 'importarTiposOperacoes', nome: 'Tipos Operações' },
+                { metodo: 'importarTiposAjustes', nome: 'Tipos Ajustes' }
+            ];
+
+            for (let i = 0; i < importacoes.length && i < cards.length; i++) {
+                const imp = importacoes[i];
+                try {
+                    await this[imp.metodo](cards[i]);
+                } catch (error) {
+                    UI.log(`⚠️  Erro em ${imp.nome}, continuando...`, 'warning');
+                }
+            }
 
             const tempoTotal = ((Date.now() - startTime) / 1000).toFixed(2);
             

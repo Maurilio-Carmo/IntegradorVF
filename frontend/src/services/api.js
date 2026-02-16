@@ -156,7 +156,7 @@ const API = {
     },
 
     // ========================================
-    // ENDPOINTS ESPECÍFICOS
+    // ENDPOINTS ESPECÍFICOS - PRODUTOS
     // ========================================
 
     async buscarSecoes(onProgress) {
@@ -175,9 +175,17 @@ const API = {
         return await this.fetchAll('produto/marcas', onProgress);
     },
 
+    async buscarFamilias(onProgress) {
+        return await this.fetchAll('produto/familias', onProgress);
+    },
+
     async buscarProdutos(onProgress) {
         return await this.fetchAll('produto/produtos', onProgress);
     },
+
+    // ========================================
+    // ENDPOINTS ESPECÍFICOS - PESSOAS
+    // ========================================
 
     async buscarClientes(onProgress) {
         return await this.fetchAll('pessoa/clientes', onProgress);
@@ -187,8 +195,147 @@ const API = {
         return await this.fetchAll('pessoa/fornecedores', onProgress);
     },
 
+    // ========================================
+    // ENDPOINTS ESPECÍFICOS - OPERACIONAL
+    // ========================================
+
+    async buscarLojas(onProgress) {
+        return await this.fetchAll('administracao/lojas', onProgress);
+    },
+
+    async buscarCaixas(onProgress) {
+        return await this.fetchAll('pdv/caixas', onProgress);
+    },
+
+    async buscarLocalEstoque(onProgress) {
+        return await this.fetchAll('estoque/locais-estoque', onProgress);
+    },
+
+    // ========================================
+    // ENDPOINTS ESPECÍFICOS - FINANCEIRO
+    // ========================================
+
+    async buscarAgentes(onProgress) {
+        return await this.fetchAll('financeiro/agentes-financeiros', onProgress);
+    },
+
     async buscarCategorias(onProgress) {
         return await this.fetchAll('financeiro/categorias', onProgress);
+    },
+
+    async buscarContasCorrentes(onProgress) {
+        return await this.fetchAll('financeiro/contas-correntes', onProgress);
+    },
+
+    async buscarEspeciesDocumento(onProgress) {
+        return await this.fetchAll('financeiro/especies-documento', onProgress);
+    },
+
+    async buscarHistoricoPadrao(onProgress) {
+        return await this.fetchAll('financeiro/historico-padrao', onProgress);
+    },
+
+    // ========================================
+    // ENDPOINTS ESPECÍFICOS - MOTIVOS
+    // ========================================
+
+    async buscarMotivosCancelamento(onProgress) {
+        return await this.fetchAll('pdv/motivos-cancelamento', onProgress);
+    },
+
+    async buscarMotivosDesconto(onProgress) {
+        return await this.fetchAll('pdv/motivos-desconto', onProgress);
+    },
+
+    async buscarMotivosDevolucao(onProgress) {
+        return await this.fetchAll('pdv/motivos-devolucao', onProgress);
+    },
+
+    // ========================================
+    // ENDPOINTS ESPECÍFICOS - PDV
+    // ========================================
+
+    async buscarPagamentosPDV(onProgress) {
+        return await this.fetchAll('pdv/formas-pagamento', onProgress);
+    },
+
+    async buscarRecebimentosPDV(onProgress) {
+        return await this.fetchAll('pdv/formas-recebimento', onProgress);
+    },
+
+    // ========================================
+    // ENDPOINTS ESPECÍFICOS - FISCAL
+    // ========================================
+
+    async buscarImpostosFederais(onProgress) {
+        return await this.fetchAll('fiscal/impostos-federais', onProgress);
+    },
+
+    async buscarRegimeTributario(onProgress) {
+        return await this.fetchAll('fiscal/regimes-tributarios', onProgress);
+    },
+
+    async buscarSituacoesFiscais(onProgress) {
+        return await this.fetchAll('fiscal/situacoes-fiscais', onProgress);
+    },
+
+    async buscarTabelasTributariasEntrada(onProgress) {
+        return await this.fetchAll('fiscal/tabelas-tributarias-entrada', onProgress);
+    },
+
+    async buscarTabelasTributariasSaida(onProgress) {
+        return await this.fetchAll('fiscal/tabelas-tributarias-saida', onProgress);
+    },
+
+    async buscarTiposOperacoes(onProgress) {
+        return await this.fetchAll('fiscal/tipos-operacoes', onProgress);
+    },
+
+    // ========================================
+    // ENDPOINTS ESPECÍFICOS - ESTOQUE
+    // ========================================
+
+    async buscarTiposAjustes(onProgress) {
+        return await this.fetchAll('estoque/tipos-ajustes', onProgress);
+    },
+
+    // ========================================
+    // MÉTODO GENÉRICO PARA IMPORTAR MÚLTIPLOS ENDPOINTS
+    // ========================================
+
+    /**
+     * Importar múltiplos endpoints de uma vez
+     * @param {Array} endpoints - Array de objetos com {nome, metodo, onProgress}
+     * @returns {Object} Resultados de todas as importações
+     */
+    async importarMultiplos(endpoints) {
+        const resultados = {};
+        
+        for (const endpoint of endpoints) {
+            try {
+                UI.log(`📥 Importando ${endpoint.nome}...`, 'info');
+                
+                const dados = await endpoint.metodo(endpoint.onProgress);
+                
+                resultados[endpoint.nome] = {
+                    sucesso: true,
+                    total: dados.length,
+                    dados: dados
+                };
+                
+                UI.log(`✅ ${endpoint.nome}: ${dados.length} registros`, 'success');
+                
+            } catch (error) {
+                resultados[endpoint.nome] = {
+                    sucesso: false,
+                    erro: error.message
+                };
+                
+                UI.log(`❌ Erro em ${endpoint.nome}: ${error.message}`, 'error');
+            }
+        }
+        
+        return resultados;
     }
 };
 
