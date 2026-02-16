@@ -18,7 +18,7 @@ export class TabNavigator {
     }
 
     setupTabButtons() {
-        const tabButtons = document.querySelectorAll('.tab-btn');
+        const tabButtons = document.querySelectorAll('.tab-button');
         const tabPanels = document.querySelectorAll('.tab-panel');
 
         tabButtons.forEach(button => {
