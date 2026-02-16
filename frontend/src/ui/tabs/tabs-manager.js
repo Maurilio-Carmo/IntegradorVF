@@ -258,7 +258,7 @@ export class ImportButtonManager {
 /**
  * Gerenciador Principal de Tabs
  */
-class TabsManager {
+export class TabsManager {
     constructor() {
         this.navigator = new TabNavigator();
         this.importManager = new ImportButtonManager();
@@ -275,6 +275,4 @@ class TabsManager {
 // Criar instância singleton
 const Tabs = new TabsManager();
 
-// Exportar
-export { TabsManager, TabNavigator, ImportButtonManager };
 export default Tabs;
