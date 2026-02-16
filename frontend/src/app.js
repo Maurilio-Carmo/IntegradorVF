@@ -1,134 +1,175 @@
 // frontend/src/app.js
+
 /**
  * Aplicação Principal
- * Entry point único - importa e inicializa todos os módulos
+ * Ponto de entrada da aplicação
  */
 
-// Importar módulos core
 import ComponentLoader from './core/component-loader.js';
 import ThemeManager from './core/theme-manager.js';
-
-// Importar módulos services
 import Config from './services/config.js';
-import API from './services/api.js';
-
-// Importar módulos UI
-import UI from './ui/ui.js';
-import TabsManager from './ui/tabs.js';
-
-// Importar módulos features
 import Importacao from './features/importacao.js';
+import API from './services/api.js';
+import UI from './ui/ui.js';
+import Tabs from './ui/tabs.js';
 
 /**
- * Aguardar componentes serem carregados
+ * Inicializar aplicação
  */
-document.addEventListener('componentsLoaded', () => {
-    console.log('🚀 Aplicação iniciada');
+async function init() {
+    console.log('🚀 Iniciando aplicação...');
 
-    // Carregar configurações salvas
-    inicializar();
-    
+    // Aguardar carregamento dos componentes
+    await waitForComponents();
+
+    // Inicializar tema
+    ThemeManager.init();
+    ThemeManager.addToHeader();
+
+    // Carregar configuração salva
+    await carregarConfiguracao();
+
     // Configurar event listeners
     setupEventListeners();
-});
+
+    // Inicializar sistema de tabs
+    Tabs.init();
+
+    // Atualizar estatísticas do banco
+    await Importacao.atualizarEstatisticasDoBanco();
+
+    console.log('✅ Aplicação inicializada!');
+    UI.log('🎯 Sistema pronto para uso!', 'success');
+}
 
 /**
- * Carregar configurações e testar conexão
+ * Aguardar carregamento dos componentes
  */
-function inicializar() {
-    UI.carregarConfigNoFormulario();
+function waitForComponents() {
+    return new Promise((resolve) => {
+        if (document.querySelector('#header-component')?.children.length > 0) {
+            resolve();
+        } else {
+            document.addEventListener('componentsLoaded', resolve, { once: true });
+        }
+    });
+}
 
-    // Verificar se está configurado
-    if (Config.estaConfigurado()) {
-        const config = Config.carregar();
-        API.configurar(config.apiUrl, config.apiKey, config.apiLoja);
+/**
+ * Carregar configuração salva
+ */
+async function carregarConfiguracao() {
+    const config = Config.carregar();
+    
+    if (config) {
+        console.log('⚙️ Configuração encontrada');
+        API.configurar(config.apiUrl, config.apiKey, config.loja);
         
-        console.log('✅ Configuração carregada:', {
-            apiUrl: config.apiUrl,
-            apiKey: config.apiKey ? '***' : 'não definido',
-            apiLoja: config.apiLoja
-        });
-        
-        // Testar conexão automaticamente
-        testarConexao();
+        // Preencher formulário
+        const form = document.getElementById('formConfig');
+        if (form) {
+            form.querySelector('#apiUrl').value = config.apiUrl;
+            form.querySelector('#apiKey').value = config.apiKey;
+            form.querySelector('#apiLoja').value = config.loja;
+        }
+
+        UI.log('✅ Configuração carregada', 'success');
     } else {
-        console.log('⚠️ Aplicação não configurada');
-        // Mostrar tela de configuração
-        UI.mostrarConfig();
+        console.log('⚠️ Nenhuma configuração encontrada');
+        UI.log('⚠️ Configure a API para começar', 'warning');
     }
+}
+
+/**
+ * Salvar configuração
+ */
+async function salvarConfiguracao() {
+    const form = document.getElementById('formConfig');
+    
+    const apiUrl = form.querySelector('#apiUrl').value.trim();
+    const apiKey = form.querySelector('#apiKey').value.trim();
+    const loja = parseInt(form.querySelector('#apiLoja').value);
+
+    if (!apiUrl || !apiKey || !loja) {
+        UI.mostrarAlerta('Preencha todos os campos', 'error');
+        return;
+    }
+
+    // Validar configuração
+    const validacao = Config.validar(apiUrl, apiKey, loja);
+    if (!validacao.valido) {
+        UI.mostrarAlerta(validacao.erros.join('\n'), 'error');
+        return;
+    }
+
+    // Salvar configuração
+    Config.salvar({ apiUrl, apiKey, loja });
+    API.configurar(apiUrl, apiKey, loja);
+
+    UI.log('💾 Configuração salva com sucesso', 'success');
+    UI.mostrarAlerta('Configuração salva com sucesso!', 'success');
+
+    // Fechar modal
+    UI.fecharConfig();
 }
 
 /**
  * Testar conexão com a API
  */
 async function testarConexao() {
+    const form = document.getElementById('formConfig');
+    
+    const apiUrl = form.querySelector('#apiUrl').value.trim();
+    const apiKey = form.querySelector('#apiKey').value.trim();
+    const loja = parseInt(form.querySelector('#apiLoja').value);
+
+    if (!apiUrl || !apiKey || !loja) {
+        UI.mostrarAlerta('Preencha todos os campos antes de testar', 'error');
+        return;
+    }
+
+    // Configurar temporariamente
+    API.configurar(apiUrl, apiKey, loja);
+
+    const btnTestar = document.getElementById('btnTestarConexao');
+    btnTestar.disabled = true;
+    btnTestar.textContent = '🔄 Testando...';
+
     try {
-        console.log('🔍 Iniciando teste de conexão...');
-        
-        // Verificar se API está configurada
-        if (!API.apiUrl || !API.apiKey) {
-            UI.mostrarAlerta('Configure a API antes de testar a conexão', 'error');
-            return;
-        }
-        
         const resultado = await API.testarConexao();
         
         if (resultado.success) {
-            UI.atualizarStatusConexao(true);
-            UI.esconderConfig();
+            UI.mostrarAlerta('✅ Conexão estabelecida com sucesso!', 'success');
         } else {
-            UI.atualizarStatusConexao(false);
-            UI.mostrarAlerta(`Erro na conexão: ${resultado.error}`, 'error');
+            UI.mostrarAlerta('❌ Falha na conexão: ' + resultado.error, 'error');
         }
-    } catch (error) {
-        console.error('❌ Erro ao testar conexão:', error);
-        UI.atualizarStatusConexao(false);
-        UI.mostrarAlerta(`Erro ao testar conexão: ${error.message}`, 'error');
+    } finally {
+        btnTestar.disabled = false;
+        btnTestar.textContent = '🔍 Testar Conexão';
     }
 }
 
 /**
- * Salvar configuração da API
+ * Toggle de senha
  */
-async function salvarConfiguracao() {
-    // ✅ CORRIGIDO: IDs corretos dos inputs
-    const apiUrl = document.getElementById('apiUrl').value.trim();
-    const apiKey = document.getElementById('apiKey').value.trim();
-    const apiLoja = document.getElementById('apiLoja').value.trim();
-
-    console.log('💾 Salvando configuração:', { apiUrl, apiKey: '***', apiLoja });
-
-    // Validar campos
-    if (!apiUrl || !apiKey || !apiLoja) {
-        UI.mostrarAlerta('Preencha todos os campos', 'error');
-        return;
+function toggleSenha() {
+    const input = document.getElementById('apiKey');
+    const icon = document.querySelector('#btnTogglePassword span');
+    
+    if (input.type === 'password') {
+        input.type = 'text';
+        if (icon) icon.textContent = '🙈';
+    } else {
+        input.type = 'password';
+        if (icon) icon.textContent = '👁️';
     }
-
-    // Validar formato da URL
-    try {
-        new URL(apiUrl);
-    } catch {
-        UI.mostrarAlerta('URL inválida', 'error');
-        return;
-    }
-
-    // Salvar configuração
-    Config.salvar({ apiUrl, apiKey, apiLoja });
-    API.configurar(apiUrl, apiKey, apiLoja);
-
-    UI.mostrarAlerta('✅ Configuração salva!', 'success');
-    UI.log('⚙️ Configuração atualizada', 'info');
-
-    // Testar conexão automaticamente
-    await testarConexao();
 }
 
 /**
- * Configurar todos os event listeners da aplicação
+ * Configurar event listeners globais
  */
 function setupEventListeners() {
-
-    // Abrir modal de configuração
+    // Botão de configuração
     const btnConfig = document.getElementById('btnConfig');
     if (btnConfig) {
         btnConfig.addEventListener('click', () => {
@@ -136,36 +177,29 @@ function setupEventListeners() {
         });
     }
 
-    // Fechar modal de configuração
+    // Fechar modal de configuração (X)
+    const btnFecharConfig = document.getElementById('btnFecharConfig');
+    if (btnFecharConfig) {
+        btnFecharConfig.addEventListener('click', () => {
+            UI.fecharConfig();
+        });
+    }
+
+    // Fechar modal de configuração (Botão Fechar)
     const btnCloseConfig = document.getElementById('btnCloseConfig');
     if (btnCloseConfig) {
         btnCloseConfig.addEventListener('click', () => {
-            if (Config.estaConfigurado()) {
-                UI.esconderConfig();
-            } else {
-                UI.mostrarAlerta('Configure a API antes de continuar', 'error');
-            }
+            UI.fecharConfig();
         });
     }
 
     // Toggle de senha
     const btnTogglePassword = document.getElementById('btnTogglePassword');
     if (btnTogglePassword) {
-        btnTogglePassword.addEventListener('click', () => {
-            const input = document.getElementById('apiKey');
-            const icon = btnTogglePassword.querySelector('span');
-            
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.textContent = '🙈';
-            } else {
-                input.type = 'password';
-                icon.textContent = '👁️';
-            }
-        });
+        btnTogglePassword.addEventListener('click', toggleSenha);
     }
 
-    // Salvar configurações
+    // Salvar configuração
     const formConfig = document.getElementById('formConfig');
     if (formConfig) {
         formConfig.addEventListener('submit', async (e) => {
@@ -190,82 +224,39 @@ function setupEventListeners() {
         });
     }
 
-    // Configurar botões de importação
-    configurarBotoesImportacao();
+    // Fechar modal ao clicar fora
+    const modalConfig = document.getElementById('modalConfig');
+    if (modalConfig) {
+        modalConfig.addEventListener('click', (e) => {
+            if (e.target === modalConfig) {
+                UI.fecharConfig();
+            }
+        });
+    }
+
+    // ESC para fechar modal
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            const modal = document.getElementById('modalConfig');
+            if (modal && modal.classList.contains('active')) {
+                UI.fecharConfig();
+            }
+        }
+    });
+
+    // Listener para mudança de tema
+    document.addEventListener('themeChanged', (e) => {
+        console.log(`🎨 Tema alterado para: ${e.detail.theme}`);
+        UI.log(`🎨 Tema alterado para: ${e.detail.theme}`, 'info');
+    });
 }
 
-/**
- * Configurar event listeners dos botões de importação
- */
-function configurarBotoesImportacao() {
-    // Hierarquia
-    const btnHierarquia = document.querySelector('[data-action="importar-hierarquia"]');
-    if (btnHierarquia) {
-        btnHierarquia.addEventListener('click', async () => {
-            const card = btnHierarquia.closest('.import-item');
-            await Importacao.importarHierarquia(card);
-        });
-    }
-
-    // Marcas
-    const btnMarcas = document.querySelector('[data-action="importar-marcas"]');
-    if (btnMarcas) {
-        btnMarcas.addEventListener('click', async () => {
-            const card = btnMarcas.closest('.import-item');
-            await Importacao.importarMarcas(card);
-        });
-    }
-
-    // Produtos
-    const btnProdutos = document.querySelector('[data-action="importar-produtos"]');
-    if (btnProdutos) {
-        btnProdutos.addEventListener('click', async () => {
-            const card = btnProdutos.closest('.import-item');
-            await Importacao.importarProdutos(card);
-        });
-    }
-
-    // Clientes
-    const btnClientes = document.querySelector('[data-action="importar-clientes"]');
-    if (btnClientes) {
-        btnClientes.addEventListener('click', async () => {
-            const card = btnClientes.closest('.import-item');
-            await Importacao.importarClientes(card);
-        });
-    }
-
-    // Fornecedores
-    const btnFornecedores = document.querySelector('[data-action="importar-fornecedores"]');
-    if (btnFornecedores) {
-        btnFornecedores.addEventListener('click', async () => {
-            const card = btnFornecedores.closest('.import-item');
-            await Importacao.importarFornecedores(card);
-        });
-    }
-
-    // Categorias
-    const btnCategorias = document.querySelector('[data-action="importar-categorias"]');
-    if (btnCategorias) {
-        btnCategorias.addEventListener('click', async () => {
-            const card = btnCategorias.closest('.import-item');
-            await Importacao.importarCategorias(card);
-        });
-    }
+// Inicializar quando o DOM estiver pronto
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+} else {
+    init();
 }
 
-// ========================================
-// EXPORTS (para uso no console)
-// ========================================
-
-// Exportar para window para debug no console
-window.App = {
-    Config,
-    API,
-    UI,
-    TabsManager,
-    Importacao,
-    ComponentLoader,
-    ThemeManager
-};
-
-console.log('✅ Aplicação carregada. Use window.App para acessar os módulos no console.');
+// Exportar funções úteis
+export { init, salvarConfiguracao, testarConexao, toggleSenha };

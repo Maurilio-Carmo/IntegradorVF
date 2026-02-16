@@ -1,194 +1,351 @@
 // frontend/src/ui/tabs.js
 
 /**
- * Gerenciador de Tabs
- * Controla navegação e estado das abas de importação
+ * Módulo de Gerenciamento de Tabs
+ * Controla navegação entre abas e importações
  */
 
-import UI from './ui.js';
 import Config from '../services/config.js';
 import Importacao from '../features/importacao.js';
+import UI from './ui.js';
 
-const TabsManager = {
+const Tabs = {
     /**
-     * Inicializar tabs
+     * Inicializar sistema de tabs
      */
     init() {
-        // Event listeners para os botões de aba
-        document.querySelectorAll('.tab-button').forEach(button => {
-            button.addEventListener('click', (e) => {
-                const tabName = e.currentTarget.dataset.tab;
-                this.switchTab(tabName);
+        console.log('🔧 Inicializando sistema de tabs...');
+        this.setupTabNavigation();
+        this.setupImportButtons();
+        this.setupBulkImportButtons();
+        console.log('✅ Sistema de tabs inicializado');
+    },
+
+    /**
+     * Configurar navegação entre tabs
+     */
+    setupTabNavigation() {
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        const tabPanels = document.querySelectorAll('.tab-panel');
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const targetTab = button.dataset.tab;
+
+                // Atualizar botões ativos
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+
+                // Atualizar painéis ativos
+                tabPanels.forEach(panel => panel.classList.remove('active'));
+                const targetPanel = document.querySelector(`[data-panel="${targetTab}"]`);
+                if (targetPanel) {
+                    targetPanel.classList.add('active');
+                }
             });
         });
-
-        // Event listeners para botões "Importar Tudo" de cada módulo
-        this.setupBulkImportButtons();
-
-        console.log('✅ Tabs inicializadas');
     },
 
     /**
-     * Trocar de aba
+     * Configurar botões individuais de importação
      */
-    switchTab(tabName) {
-        // Desativar todas as abas
-        document.querySelectorAll('.tab-button').forEach(btn => {
-            btn.classList.remove('active');
-        });
-
-        document.querySelectorAll('.tab-panel').forEach(panel => {
-            panel.classList.remove('active');
-        });
-
-        // Ativar aba selecionada
-        const button = document.querySelector(`.tab-button[data-tab="${tabName}"]`);
-        const panel = document.querySelector(`.tab-panel[data-panel="${tabName}"]`);
-
-        if (button && panel) {
-            button.classList.add('active');
-            panel.classList.add('active');
-        }
-    },
-
-    /**
-     * Configurar botões de importação em massa por módulo
-     */
-    setupBulkImportButtons() {
-        const bulkButtons = {
-            'btnImportarTudoProduto': ['importar-hierarquia', 'importar-marcas', 'importar-produtos', 'importar-familias'],
-            'btnImportarTudoFinanceiro': ['importar-categorias', 'importar-agentes', 'importar-contas', 'importar-formas-pagamento'],
-            'btnImportarTudoFrenteLoja': ['importar-caixas', 'importar-pagamentos-pdv', 'importar-recebimentos-pdv'],
-            'btnImportarTudoEstoque': ['importar-locais-estoque', 'importar-tipos-ajustes'],
-            'btnImportarTudoFiscal': ['importar-regime-tributario', 'importar-situacoes-fiscais', 'importar-tipos-operacoes'],
-            'btnImportarTudoPessoa': ['importar-lojas', 'importar-clientes', 'importar-fornecedores']
+    setupImportButtons() {
+        const buttonActions = {
+            // PRODUTOS
+            'importar-secao': 'importarSecoes',
+            'importar-grupos': 'importarGrupos',
+            'importar-subgrupos': 'importarSubgrupos',
+            'importar-marcas': 'importarMarcas',
+            'importar-familias': 'importarFamilias',
+            'importar-produtos': 'importarProdutos',
+            
+            // PESSOA
+            'importar-lojas': 'importarLojas',
+            'importar-clientes': 'importarClientes',
+            'importar-fornecedores': 'importarFornecedores',
+            
+            // FINANCEIRO
+            'importar-categorias': 'importarCategorias',
+            'importar-agentes': 'importarAgentes',
+            'importar-contas-correntes': 'importarContasCorrentes',
+            'importar-especies-documento': 'importarEspeciesDocumento',
+            'importar-historico-padrao': 'importarHistoricoPadrao',
+            
+            // FRENTE DE LOJA
+            'importar-caixas': 'importarCaixas',
+            'importar-motivos-cancelamento': 'importarMotivosCancelamento',
+            'importar-motivos-desconto': 'importarMotivosDesconto',
+            'importar-motivos-devolucao': 'importarMotivosDevolucao',
+            'importar-formas-pagamento': 'importarPagamentosPDV',
+            'importar-formas-recebimento': 'importarRecebimentosPDV',
+            
+            // ESTOQUE
+            'importar-locais-estoque': 'importarLocalEstoque',
+            'importar-tipos-ajustes': 'importarTiposAjustes',
+            
+            // FISCAL
+            'importar-impostos-federais': 'importarImpostosFederais',
+            'importar-regime-tributario': 'importarRegimeTributario',
+            'importar-situacoes-fiscais': 'importarSituacoesFiscais',
+            'importar-tabelas-entrada': 'importarTabelasTributariasEntrada',
+            'importar-tabelas-saida': 'importarTabelasTributariasSaida',
+            'importar-tipos-operacoes': 'importarTiposOperacoes'
         };
 
-        Object.entries(bulkButtons).forEach(([buttonId, actions]) => {
-            const button = document.getElementById(buttonId);
+        Object.entries(buttonActions).forEach(([action, method]) => {
+            const button = document.querySelector(`[data-action="${action}"]`);
             if (button) {
                 button.addEventListener('click', async () => {
-                    const confirmar = confirm(
-                        `Deseja importar todos os itens deste módulo?\n\n` +
-                        `Isso importará ${actions.length} tipos de dados.`
-                    );
-
-                    if (!confirmar) return;
-
-                    // Desabilitar botão durante importação
-                    button.disabled = true;
-                    const originalText = button.textContent;
-                    button.textContent = '⏳ Importando...';
-
-                    try {
-                        for (const action of actions) {
-                            const item = document.querySelector(`[data-action="${action}"]`).closest('.import-item');
-                            await this.triggerImport(action, item);
-                        }
-
-                        UI.mostrarAlerta('✅ Módulo importado com sucesso!', 'success');
-                    } catch (error) {
-                        UI.mostrarAlerta(`❌ Erro na importação: ${error.message}`, 'error');
-                    } finally {
-                        button.disabled = false;
-                        button.textContent = originalText;
-                    }
+                    await this.handleImportClick(method, button);
                 });
             }
         });
     },
 
     /**
-     * Disparar importação de um item
+     * Configurar botões de importação em massa (Importar Tudo)
      */
-    async triggerImport(action, item) {
+    setupBulkImportButtons() {
+        const bulkActions = {
+            'btnImportarTudoProduto': [
+                'importarSecoes',
+                'importarGrupos',
+                'importarSubgrupos',
+                'importarMarcas',
+                'importarFamilias',
+                'importarProdutos'
+            ],
+            'btnImportarTudoPessoa': [
+                'importarLojas',
+                'importarClientes',
+                'importarFornecedores'
+            ],
+            'btnImportarTudoFinanceiro': [
+                'importarCategorias',
+                'importarAgentes',
+                'importarContasCorrentes',
+                'importarEspeciesDocumento',
+                'importarHistoricoPadrao'
+            ],
+            'btnImportarTudoFrenteLoja': [
+                'importarCaixas',
+                'importarMotivosCancelamento',
+                'importarMotivosDesconto',
+                'importarMotivosDevolucao',
+                'importarPagamentosPDV',
+                'importarRecebimentosPDV'
+            ],
+            'btnImportarTudoEstoque': [
+                'importarLocalEstoque',
+                'importarTiposAjustes'
+            ],
+            'btnImportarTudoFiscal': [
+                'importarImpostosFederais',
+                'importarRegimeTributario',
+                'importarSituacoesFiscais',
+                'importarTabelasTributariasEntrada',
+                'importarTabelasTributariasSaida',
+                'importarTiposOperacoes'
+            ]
+        };
+
+        Object.entries(bulkActions).forEach(([buttonId, methods]) => {
+            const button = document.getElementById(buttonId);
+            if (button) {
+                button.addEventListener('click', async () => {
+                    await this.handleBulkImport(button, methods);
+                });
+            }
+        });
+    },
+
+    /**
+     * Manipular clique em botão de importação individual
+     */
+    async handleImportClick(method, button) {
         // Verificar se está configurado
         if (!Config.estaConfigurado()) {
-            UI.mostrarAlerta('Configure a API antes de importar', 'error');
+            UI.mostrarAlerta('⚙️ Configure a API antes de importar', 'warning');
             UI.mostrarConfig();
-            throw new Error('API não configurada');
+            return;
         }
 
+        // Encontrar o card/item pai
+        const item = button.closest('.import-item');
+        if (!item) {
+            UI.mostrarAlerta('❌ Erro: elemento de importação não encontrado', 'error');
+            return;
+        }
+
+        // Desabilitar botão durante importação
+        button.disabled = true;
+        const originalText = button.textContent;
+        button.textContent = '⏳ Importando...';
+
         try {
-            switch (action) {
-                case 'importar-hierarquia':
-                    await Importacao.importarHierarquia(item);
-                    break;
-                case 'importar-marcas':
-                    await Importacao.importarMarcas(item);
-                    break;
-                case 'importar-produtos':
-                    await Importacao.importarProdutos(item);
-                    break;
-                case 'importar-clientes':
-                    await Importacao.importarClientes(item);
-                    break;
-                case 'importar-fornecedores':
-                    await Importacao.importarFornecedores(item);
-                    break;
-                case 'importar-categorias':
-                    await Importacao.importarCategorias(item);
-                    break;
-                // Adicionar mais casos conforme implementado
-                default:
-                    UI.log(`⚠️  Importação de "${action}" ainda não implementada`, 'info');
-                    this.updateItemStatus(item, 'loading', 'Em desenvolvimento');
+            // Executar método de importação
+            if (typeof Importacao[method] === 'function') {
+                await Importacao[method](item);
+            } else {
+                throw new Error(`Método ${method} não encontrado`);
             }
         } catch (error) {
-            console.error(`Erro ao importar ${action}:`, error);
-            throw error;
+            UI.mostrarAlerta(`❌ Erro: ${error.message}`, 'error');
+        } finally {
+            // Restaurar botão
+            button.disabled = false;
+            button.textContent = originalText;
         }
     },
 
     /**
-     * Atualizar status visual do item
+     * Manipular importação em massa
+     */
+    async handleBulkImport(button, methods) {
+        // Verificar se está configurado
+        if (!Config.estaConfigurado()) {
+            UI.mostrarAlerta('⚙️ Configure a API antes de importar', 'warning');
+            UI.mostrarConfig();
+            return;
+        }
+
+        // Confirmar ação
+        const confirmar = confirm(
+            `🚀 Importar todos os itens deste módulo?\n\n` +
+            `Isso importará ${methods.length} tipos de dados.\n\n` +
+            `Deseja continuar?`
+        );
+
+        if (!confirmar) return;
+
+        // Desabilitar botão durante importação
+        button.disabled = true;
+        const originalText = button.textContent;
+        let successCount = 0;
+        let errorCount = 0;
+
+        try {
+            UI.log('═══════════════════════════════════════', 'info');
+            UI.log(`🚀 IMPORTAÇÃO EM MASSA INICIADA`, 'info');
+            UI.log(`📋 ${methods.length} itens para importar`, 'info');
+            UI.log('═══════════════════════════════════════', 'info');
+
+            for (let i = 0; i < methods.length; i++) {
+                const method = methods[i];
+                button.textContent = `⏳ ${i + 1}/${methods.length}...`;
+
+                // Encontrar o botão correspondente para pegar o item
+                const actionName = this.methodToAction(method);
+                const itemButton = document.querySelector(`[data-action="${actionName}"]`);
+                const item = itemButton?.closest('.import-item');
+
+                if (item && typeof Importacao[method] === 'function') {
+                    try {
+                        await Importacao[method](item);
+                        successCount++;
+                    } catch (error) {
+                        errorCount++;
+                        UI.log(`⚠️ Erro em ${method}: ${error.message}`, 'warning');
+                    }
+                } else {
+                    errorCount++;
+                    UI.log(`⚠️ Método ou item não encontrado: ${method}`, 'warning');
+                }
+            }
+
+            UI.log('═══════════════════════════════════════', 'success');
+            UI.log(`✅ Importação em massa finalizada!`, 'success');
+            UI.log(`📊 Sucessos: ${successCount} | Erros: ${errorCount}`, 'info');
+            UI.log('═══════════════════════════════════════', 'success');
+
+            if (errorCount === 0) {
+                UI.mostrarAlerta(`✅ Módulo importado com sucesso!`, 'success');
+            } else {
+                UI.mostrarAlerta(
+                    `⚠️ Importação concluída com ${errorCount} erro(s).\n` +
+                    `${successCount} item(ns) importado(s) com sucesso.`,
+                    'warning'
+                );
+            }
+        } catch (error) {
+            UI.mostrarAlerta(`❌ Erro na importação: ${error.message}`, 'error');
+        } finally {
+            button.disabled = false;
+            button.textContent = originalText;
+        }
+    },
+
+    /**
+     * Converter nome do método para nome da ação (data-action)
+     */
+    methodToAction(method) {
+        const mapping = {
+            'importarSecoes': 'importar-secao',
+            'importarGrupos': 'importar-grupos',
+            'importarSubgrupos': 'importar-subgrupos',
+            'importarMarcas': 'importar-marcas',
+            'importarFamilias': 'importar-familias',
+            'importarProdutos': 'importar-produtos',
+            'importarLojas': 'importar-lojas',
+            'importarClientes': 'importar-clientes',
+            'importarFornecedores': 'importar-fornecedores',
+            'importarCategorias': 'importar-categorias',
+            'importarAgentes': 'importar-agentes',
+            'importarContasCorrentes': 'importar-contas-correntes',
+            'importarEspeciesDocumento': 'importar-especies-documento',
+            'importarHistoricoPadrao': 'importar-historico-padrao',
+            'importarCaixas': 'importar-caixas',
+            'importarMotivosCancelamento': 'importar-motivos-cancelamento',
+            'importarMotivosDesconto': 'importar-motivos-desconto',
+            'importarMotivosDevolucao': 'importar-motivos-devolucao',
+            'importarPagamentosPDV': 'importar-formas-pagamento',
+            'importarRecebimentosPDV': 'importar-formas-recebimento',
+            'importarLocalEstoque': 'importar-locais-estoque',
+            'importarTiposAjustes': 'importar-tipos-ajustes',
+            'importarImpostosFederais': 'importar-impostos-federais',
+            'importarRegimeTributario': 'importar-regime-tributario',
+            'importarSituacoesFiscais': 'importar-situacoes-fiscais',
+            'importarTabelasTributariasEntrada': 'importar-tabelas-entrada',
+            'importarTabelasTributariasSaida': 'importar-tabelas-saida',
+            'importarTiposOperacoes': 'importar-tipos-operacoes'
+        };
+
+        return mapping[method] || method;
+    },
+
+    /**
+     * Atualizar status de um item de importação
      */
     updateItemStatus(item, status, message = '') {
-        const statusDiv = item.querySelector('.import-item-status');
-        const progressBar = item.querySelector('.import-item-progress');
-        const progressFill = item.querySelector('.import-item-progress-fill');
-        const button = item.querySelector('.btn');
+        if (!item) return;
 
-        switch (status) {
-            case 'loading':
-                button.disabled = true;
-                button.textContent = '⏳ Processando...';
-                progressBar.classList.add('active');
-                statusDiv.className = 'import-item-status loading';
-                statusDiv.textContent = message;
-                break;
+        const statusEl = item.querySelector('.import-item-status');
+        const progressBar = item.querySelector('.import-item-progress-fill');
 
-            case 'progress':
-                progressFill.style.width = `${message}%`;
-                break;
+        if (statusEl) {
+            statusEl.textContent = message;
+            statusEl.className = 'import-item-status';
+            
+            if (status === 'success') {
+                statusEl.classList.add('success');
+            } else if (status === 'error') {
+                statusEl.classList.add('error');
+            } else if (status === 'loading') {
+                statusEl.classList.add('loading');
+            }
+        }
 
-            case 'success':
-                button.disabled = false;
-                button.textContent = 'Importar';
-                progressBar.classList.remove('active');
-                statusDiv.className = 'import-item-status success';
-                statusDiv.textContent = `✅ ${message}`;
-                setTimeout(() => {
-                    statusDiv.textContent = '';
-                    statusDiv.className = 'import-item-status';
-                }, 5000);
-                break;
-
-            case 'error':
-                button.disabled = false;
-                button.textContent = 'Importar';
-                progressBar.classList.remove('active');
-                statusDiv.className = 'import-item-status error';
-                statusDiv.textContent = `❌ ${message}`;
-                break;
+        if (progressBar) {
+            if (status === 'success') {
+                progressBar.style.width = '100%';
+            } else if (status === 'loading') {
+                progressBar.style.width = '50%';
+            } else if (status === 'error') {
+                progressBar.style.width = '0%';
+            }
         }
     }
 };
 
-// Inicializar quando componentes carregarem
-document.addEventListener('componentsLoaded', () => {
-    TabsManager.init();
-});
-
 // Exportar para uso global
-export default TabsManager;
+export default Tabs;
