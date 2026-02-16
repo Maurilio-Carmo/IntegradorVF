@@ -1,16 +1,16 @@
 /**
  * header.css
- * Estilos do header
+ * Estilos do header e navegação
  */
 
 .header {
     background: var(--bg-primary);
     border-bottom: 1px solid var(--border-color);
-    padding: var(--spacing-md) 0;
-    box-shadow: var(--shadow-sm);
+    padding: var(--spacing-lg) 0;
     position: sticky;
     top: 0;
-    z-index: var(--z-sticky);
+    z-index: var(--z-sticky, 100);
+    box-shadow: var(--shadow-sm);
 }
 
 .header-content {
@@ -23,7 +23,7 @@
 .logo {
     font-size: var(--font-size-2xl);
     font-weight: var(--font-weight-bold);
-    color: var(--primary-color);
+    color: var(--text-primary);
     margin: 0;
 }
 
@@ -33,37 +33,84 @@
     gap: var(--spacing-md);
 }
 
+/* Status Indicator */
 .status-indicator {
     display: flex;
     align-items: center;
     gap: var(--spacing-sm);
     padding: var(--spacing-sm) var(--spacing-md);
-    background: var(--bg-secondary);
     border-radius: var(--border-radius);
-    font-size: var(--font-size-sm);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    transition: all var(--transition-base);
 }
 
 .status-dot {
-    width: 8px;
-    height: 8px;
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
-    background: var(--danger-color);
-    animation: pulse 2s infinite;
+    background: var(--secondary-color);
+    transition: all var(--transition-base);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.status-text {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--text-secondary);
+    transition: color var(--transition-base);
+}
+
+/* Estado conectado */
+.status-indicator.connected {
+    background: rgba(16, 185, 129, 0.1);
+    border-color: var(--success-color);
 }
 
 .status-indicator.connected .status-dot {
     background: var(--success-color);
+    box-shadow: 0 0 8px var(--success-color);
+    animation: none;
+}
+
+.status-indicator.connected .status-text {
+    color: var(--success-dark);
+}
+
+/* Estado de erro */
+.status-indicator.error {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: var(--danger-color);
 }
 
 .status-indicator.error .status-dot {
     background: var(--danger-color);
+    animation: none;
 }
 
-.status-text {
-    font-weight: var(--font-weight-medium);
+.status-indicator.error .status-text {
+    color: var(--danger-dark);
 }
 
-@keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
+/* Estado carregando */
+.status-indicator.loading .status-dot {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
 }
