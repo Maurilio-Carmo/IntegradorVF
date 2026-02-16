@@ -5,13 +5,12 @@
  * Gerencia credenciais e configurações da API
  */
 
-
 const Config = {
     storageKey: 'varejoFacilConfig',
 
     /**
      * Salvar configurações no localStorage
-     * @param {Object} dados - { apiUrl, apiKey, apiLoja }
+     * @param {Object} dados - { apiUrl, apiKey, loja }
      */
     salvar(dados) {
         localStorage.setItem(this.storageKey, JSON.stringify(dados));
@@ -33,7 +32,18 @@ const Config = {
      */
     estaConfigurado() {
         const config = this.carregar();
-        return config && config.apiUrl && config.apiKey && config.apiLoja;
+        // IMPORTANTE: Usar 'loja' pois é assim que salvamos no localStorage
+        const configurado = config && config.apiUrl && config.apiKey && config.loja;
+        
+        console.log('🔍 Verificando configuração:', {
+            existe: !!config,
+            temUrl: !!config?.apiUrl,
+            temKey: !!config?.apiKey,
+            temLoja: !!config?.loja,
+            resultado: configurado
+        });
+        
+        return configurado;
     },
 
     /**
@@ -81,10 +91,10 @@ const Config = {
      * Validar todas as configurações
      * @param {string} apiUrl
      * @param {string} apiKey
-     * @param {string} apiLoja
+     * @param {string} loja
      * @returns {Object} { valido: boolean, erros: string[] }
      */
-    validar(apiUrl, apiKey, apiLoja) {
+    validar(apiUrl, apiKey, loja) {
         const erros = [];
 
         if (!this.validarUrl(apiUrl)) {
@@ -95,7 +105,7 @@ const Config = {
             erros.push('API Key inválida (mínimo 10 caracteres)');
         }
 
-        if (!this.validarLoja(apiLoja)) {
+        if (!this.validarLoja(loja)) {
             erros.push('Código da loja inválido');
         }
 
