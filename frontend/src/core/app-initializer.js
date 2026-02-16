@@ -8,8 +8,8 @@
 import ThemeManager from './theme-manager.js';
 import ConfigManager from '../config/config-manager.js';
 import EventHandlers from '../ui/event-handlers.js';
-import Importacao from '../features/importacao.js';
-import Tabs from '../ui/tabs.js';
+import Importacao from '../features/import/index.js';
+import Tabs from '../ui/tabs/tabs-manager.js';
 import UI from '../ui/ui.js';
 
 export const AppInitializer = {
@@ -147,7 +147,7 @@ export const AppInitializer = {
      */
     async initStatistics() {
         try {
-            await Importacao.atualizarEstatisticasDoBanco();
+            await Importacao.atualizarEstatisticas();
         } catch (error) {
             console.error('⚠️ Erro ao carregar estatísticas:', error);
             UI.log('⚠️ Não foi possível carregar estatísticas do banco', 'warning');

@@ -6,7 +6,7 @@
  */
 
 import Config from '../services/config.js';
-import API from '../services/api.js';
+import API from '../services/api/index.js';
 import UI from '../ui/ui.js';
 
 export const ConfigManager = {
