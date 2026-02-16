@@ -17,11 +17,18 @@ const UI = {
     },
 
     /**
-     * Esconder seção de configuração
+     * Fechar seção de configuração
      */
-    esconderConfig() {
+    fecharConfig() {
         document.getElementById('sectionConfig').style.display = 'none';
         document.getElementById('dashboard-section').style.display = 'block';
+    },
+
+    /**
+     * Esconder seção de configuração (alias)
+     */
+    esconderConfig() {
+        this.fecharConfig();
     },
 
     /**
@@ -181,9 +188,6 @@ const UI = {
                         'import-item-status success' : 'import-status success';
                     statusDiv.style.display = 'block';
                     statusDiv.textContent = `✅ ${mensagem}`;
-                    setTimeout(() => {
-                        statusDiv.style.display = 'none';
-                    }, 3000);
                 }
                 break;
 
@@ -241,7 +245,7 @@ const UI = {
         
         if (urlInput && config.apiUrl) urlInput.value = config.apiUrl;
         if (keyInput && config.apiKey) keyInput.value = config.apiKey;
-        if (lojaInput && config.apiLoja) lojaInput.value = config.apiLoja;
+        if (lojaInput && config.loja) lojaInput.value = config.loja;
         if (saveInput) saveInput.checked = config.salvarCredenciais;
     },
 

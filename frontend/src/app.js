@@ -24,7 +24,6 @@ async function init() {
 
     // Inicializar tema
     ThemeManager.init();
-    ThemeManager.addToHeader();
 
     // Carregar configuração salva
     await carregarConfiguracao();
@@ -145,7 +144,7 @@ async function testarConexao() {
         }
     } finally {
         btnTestar.disabled = false;
-        btnTestar.textContent = '🔍 Testar Conexão';
+        btnTestar.textContent = '🔗 Testar Conexão';
     }
 }
 
@@ -225,10 +224,10 @@ function setupEventListeners() {
     }
 
     // Fechar modal ao clicar fora
-    const modalConfig = document.getElementById('modalConfig');
-    if (modalConfig) {
-        modalConfig.addEventListener('click', (e) => {
-            if (e.target === modalConfig) {
+    const sectionConfig = document.getElementById('sectionConfig');
+    if (sectionConfig) {
+        sectionConfig.addEventListener('click', (e) => {
+            if (e.target === sectionConfig) {
                 UI.fecharConfig();
             }
         });
@@ -237,8 +236,8 @@ function setupEventListeners() {
     // ESC para fechar modal
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
-            const modal = document.getElementById('modalConfig');
-            if (modal && modal.classList.contains('active')) {
+            const section = document.getElementById('sectionConfig');
+            if (section && section.style.display === 'block') {
                 UI.fecharConfig();
             }
         }

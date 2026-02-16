@@ -1,73 +1,99 @@
 /**
  * theme-switcher.css
- * Botão de alternância de tema (claro/escuro)
+ * Seletor de tema claro/escuro
  */
 
 .theme-switcher {
-    position: relative;
-    display: inline-flex;
+    display: flex;
     align-items: center;
-    gap: var(--spacing-xs);
-    padding: var(--spacing-xs);
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius-lg);
+    gap: var(--spacing-sm);
+}
+
+.theme-toggle {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+}
+
+.theme-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.theme-slider {
+    position: absolute;
     cursor: pointer;
-    transition: all var(--transition-fast) var(--transition-timing);
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    transition: all var(--transition-base);
+    border-radius: 24px;
 }
 
-.theme-switcher:hover {
-    border-color: var(--primary-color);
-    box-shadow: var(--shadow-sm);
-}
-
-.theme-option {
+.theme-slider:before {
+    position: absolute;
+    content: "☀️";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 2px;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
-    border-radius: var(--border-radius);
-    cursor: pointer;
-    transition: all var(--transition-fast) var(--transition-timing);
-    font-size: var(--font-size-lg);
+    font-size: 12px;
+    transition: transform var(--transition-base);
 }
 
-.theme-option:hover {
-    background: var(--hover-bg, var(--bg-tertiary));
+input:checked + .theme-slider {
+    background-color: var(--primary-color);
 }
 
-.theme-option.active {
-    background: var(--primary-color);
-    color: var(--text-white);
-}
-
-/* Ícones */
-.theme-icon-light::before {
-    content: "☀️";
-}
-
-.theme-icon-dark::before {
+input:checked + .theme-slider:before {
     content: "🌙";
+    transform: translateX(26px);
+}
+
+.theme-slider:hover {
+    background-color: var(--bg-secondary);
+}
+
+input:checked + .theme-slider:hover {
+    background-color: var(--primary-dark);
+}
+
+/* Label do tema */
+.theme-label {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    user-select: none;
+}
+
+/* Animação de troca de tema */
+[data-theme="dark"] .theme-toggle .theme-slider:before {
+    content: "🌙";
+}
+
+[data-theme="light"] .theme-toggle .theme-slider:before {
+    content: "☀️";
 }
 
 /* Transição suave ao trocar tema */
 * {
-    transition: background-color var(--transition-base) var(--transition-timing),
-                color var(--transition-base) var(--transition-timing),
-                border-color var(--transition-base) var(--transition-timing);
+    transition-property: background-color, border-color, color, fill, stroke;
+    transition-duration: var(--transition-base);
+    transition-timing-function: var(--transition-timing);
 }
 
-/* Evitar transição em elementos que não precisam */
-button,
-input,
-select,
-textarea,
-.no-transition {
-    transition: none;
-}
-
-button,
-.btn {
-    transition: all var(--transition-fast) var(--transition-timing) !important;
+/* Exceções (não animar certos elementos) */
+.no-theme-transition,
+.theme-toggle *,
+.log-container *,
+.progress-bar,
+.animate-* {
+    transition-property: none;
 }

@@ -45,7 +45,7 @@ app.all('/api/vf/*', async (req, res) => {
 
         console.log(`🔄 Proxy request: ${req.method} ${fullUrl}`);
 
-        // Fazer requisição para API externa
+        // Fazer requisição para API externa - CÓDIGO CORRIGIDO
         const response = await fetch(fullUrl, {
             method: req.method,
             headers: {
@@ -123,8 +123,8 @@ app.get('*', (req, res) => {
 
 // Iniciar servidor
 app.listen(PORT, () => {
-    console.log(`🚀 Servidor rodando em http://localhost:3000`);
+    console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);
     console.log(`📁 Pasta frontend: ${frontendPath}`);
     console.log(`✅ CORS habilitado`);
-    console.log(`🔗 Health check: http://localhost:3000/health`);
+    console.log(`🔗 Health check: http://localhost:${PORT}/health`);
 });
