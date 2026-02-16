@@ -43,9 +43,16 @@ function inicializar() {
         const config = Config.carregar();
         API.configurar(config.apiUrl, config.apiKey, config.apiLoja);
         
+        console.log('✅ Configuração carregada:', {
+            apiUrl: config.apiUrl,
+            apiKey: config.apiKey ? '***' : 'não definido',
+            apiLoja: config.apiLoja
+        });
+        
         // Testar conexão automaticamente
         testarConexao();
     } else {
+        console.log('⚠️ Aplicação não configurada');
         // Mostrar tela de configuração
         UI.mostrarConfig();
     }
@@ -56,6 +63,14 @@ function inicializar() {
  */
 async function testarConexao() {
     try {
+        console.log('🔍 Iniciando teste de conexão...');
+        
+        // Verificar se API está configurada
+        if (!API.apiUrl || !API.apiKey) {
+            UI.mostrarAlerta('Configure a API antes de testar a conexão', 'error');
+            return;
+        }
+        
         const resultado = await API.testarConexao();
         
         if (resultado.success) {
@@ -66,9 +81,46 @@ async function testarConexao() {
             UI.mostrarAlerta(`Erro na conexão: ${resultado.error}`, 'error');
         }
     } catch (error) {
+        console.error('❌ Erro ao testar conexão:', error);
         UI.atualizarStatusConexao(false);
         UI.mostrarAlerta(`Erro ao testar conexão: ${error.message}`, 'error');
     }
+}
+
+/**
+ * Salvar configuração da API
+ */
+async function salvarConfiguracao() {
+    // ✅ CORRIGIDO: IDs corretos dos inputs
+    const apiUrl = document.getElementById('apiUrl').value.trim();
+    const apiKey = document.getElementById('apiKey').value.trim();
+    const apiLoja = document.getElementById('apiLoja').value.trim();
+
+    console.log('💾 Salvando configuração:', { apiUrl, apiKey: '***', apiLoja });
+
+    // Validar campos
+    if (!apiUrl || !apiKey || !apiLoja) {
+        UI.mostrarAlerta('Preencha todos os campos', 'error');
+        return;
+    }
+
+    // Validar formato da URL
+    try {
+        new URL(apiUrl);
+    } catch {
+        UI.mostrarAlerta('URL inválida', 'error');
+        return;
+    }
+
+    // Salvar configuração
+    Config.salvar({ apiUrl, apiKey, apiLoja });
+    API.configurar(apiUrl, apiKey, apiLoja);
+
+    UI.mostrarAlerta('✅ Configuração salva!', 'success');
+    UI.log('⚙️ Configuração atualizada', 'info');
+
+    // Testar conexão automaticamente
+    await testarConexao();
 }
 
 /**
@@ -100,7 +152,7 @@ function setupEventListeners() {
     const btnTogglePassword = document.getElementById('btnTogglePassword');
     if (btnTogglePassword) {
         btnTogglePassword.addEventListener('click', () => {
-            const input = document.getElementById('inputApiKey');
+            const input = document.getElementById('apiKey');
             const icon = btnTogglePassword.querySelector('span');
             
             if (input.type === 'password') {
@@ -137,39 +189,68 @@ function setupEventListeners() {
             UI.limparLog();
         });
     }
+
+    // Configurar botões de importação
+    configurarBotoesImportacao();
 }
 
 /**
- * Salvar configuração da API
+ * Configurar event listeners dos botões de importação
  */
-async function salvarConfiguracao() {
-    const apiUrl = document.getElementById('inputApiUrl').value.trim();
-    const apiKey = document.getElementById('inputApiKey').value.trim();
-    const apiLoja = document.getElementById('inputApiLoja').value.trim();
-
-    // Validar campos
-    if (!apiUrl || !apiKey || !apiLoja) {
-        UI.mostrarAlerta('Preencha todos os campos', 'error');
-        return;
+function configurarBotoesImportacao() {
+    // Hierarquia
+    const btnHierarquia = document.querySelector('[data-action="importar-hierarquia"]');
+    if (btnHierarquia) {
+        btnHierarquia.addEventListener('click', async () => {
+            const card = btnHierarquia.closest('.import-item');
+            await Importacao.importarHierarquia(card);
+        });
     }
 
-    // Validar formato da URL
-    try {
-        new URL(apiUrl);
-    } catch {
-        UI.mostrarAlerta('URL inválida', 'error');
-        return;
+    // Marcas
+    const btnMarcas = document.querySelector('[data-action="importar-marcas"]');
+    if (btnMarcas) {
+        btnMarcas.addEventListener('click', async () => {
+            const card = btnMarcas.closest('.import-item');
+            await Importacao.importarMarcas(card);
+        });
     }
 
-    // Salvar configuração
-    Config.salvar({ apiUrl, apiKey, apiLoja });
-    API.configurar(apiUrl, apiKey, apiLoja);
+    // Produtos
+    const btnProdutos = document.querySelector('[data-action="importar-produtos"]');
+    if (btnProdutos) {
+        btnProdutos.addEventListener('click', async () => {
+            const card = btnProdutos.closest('.import-item');
+            await Importacao.importarProdutos(card);
+        });
+    }
 
-    UI.mostrarAlerta('✅ Configuração salva!', 'success');
-    UI.log('⚙️ Configuração atualizada', 'info');
+    // Clientes
+    const btnClientes = document.querySelector('[data-action="importar-clientes"]');
+    if (btnClientes) {
+        btnClientes.addEventListener('click', async () => {
+            const card = btnClientes.closest('.import-item');
+            await Importacao.importarClientes(card);
+        });
+    }
 
-    // Testar conexão automaticamente
-    await testarConexao();
+    // Fornecedores
+    const btnFornecedores = document.querySelector('[data-action="importar-fornecedores"]');
+    if (btnFornecedores) {
+        btnFornecedores.addEventListener('click', async () => {
+            const card = btnFornecedores.closest('.import-item');
+            await Importacao.importarFornecedores(card);
+        });
+    }
+
+    // Categorias
+    const btnCategorias = document.querySelector('[data-action="importar-categorias"]');
+    if (btnCategorias) {
+        btnCategorias.addEventListener('click', async () => {
+            const card = btnCategorias.closest('.import-item');
+            await Importacao.importarCategorias(card);
+        });
+    }
 }
 
 // ========================================
