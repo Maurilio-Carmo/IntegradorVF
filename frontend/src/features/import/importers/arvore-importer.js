@@ -1,13 +1,13 @@
-// frontend/src/features/import/arvore-mercadologica-importer.js
+// frontend/src/features/import/importers/arvore-importer.js
 
 /**
  * Importador de Árvore Mercadológica Completa
  * Importa Seções, Grupos e Subgrupos em sequência
  */
 
-import { ImportBase } from './import-base.js';
-import API from '../../services/api/index.js';
-import UI from '../../ui/ui.js';
+import { ImportBase } from '../import-base.js';
+import API from '../../../services/api/index.js';
+import UI from '../../../ui/ui.js';
 
 export class ArvoreMercadologicaImporter extends ImportBase {
     
@@ -16,11 +16,7 @@ export class ArvoreMercadologicaImporter extends ImportBase {
      */
     async importarArvoreMercadologica(uiElement) {
         try {
-            UI.log('═══════════════════════════════════════', 'info');
-            UI.log('🌳 IMPORTAÇÃO DA ÁRVORE MERCADOLÓGICA', 'info');
-            UI.log('═══════════════════════════════════════', 'info');
             UI.log('📋 Sequência: Seções → Grupos → Subgrupos', 'info');
-            UI.log('═══════════════════════════════════════', 'info');
 
             // Atualizar UI inicial
             UI.status.updateImport(uiElement, 'loading', 'Iniciando...');
@@ -29,9 +25,7 @@ export class ArvoreMercadologicaImporter extends ImportBase {
             let totalGruposImportados = 0;
             let totalSubgruposImportados = 0;
 
-            // ============================================
             // ETAPA 1: IMPORTAR SEÇÕES
-            // ============================================
             UI.log('\n📁 ETAPA 1/3: Importando Seções...', 'info');
             UI.status.updateImport(uiElement, 'loading', '1/3 - Seções...');
 
@@ -55,9 +49,7 @@ export class ArvoreMercadologicaImporter extends ImportBase {
                 throw new Error(`Falha na importação de seções: ${error.message}`);
             }
 
-            // ============================================
             // ETAPA 2: IMPORTAR GRUPOS (HIERÁRQUICO)
-            // ============================================
             UI.log('\n📂 ETAPA 2/3: Importando Grupos (hierárquico)...', 'info');
             UI.status.updateImport(uiElement, 'loading', '2/3 - Grupos...');
 
@@ -81,9 +73,7 @@ export class ArvoreMercadologicaImporter extends ImportBase {
                 throw new Error(`Falha na importação de grupos: ${error.message}`);
             }
 
-            // ============================================
             // ETAPA 3: IMPORTAR SUBGRUPOS (HIERÁRQUICO)
-            // ============================================
             UI.log('\n📑 ETAPA 3/3: Importando Subgrupos (hierárquico)...', 'info');
             UI.status.updateImport(uiElement, 'loading', '3/3 - Subgrupos...');
 
@@ -107,20 +97,12 @@ export class ArvoreMercadologicaImporter extends ImportBase {
                 throw new Error(`Falha na importação de subgrupos: ${error.message}`);
             }
 
-            // ============================================
             // FINALIZAÇÃO
-            // ============================================
             const totalGeral = totalSecoesImportadas + totalGruposImportados + totalSubgruposImportados;
-
-            UI.log('═══════════════════════════════════════', 'success');
-            UI.log('✅ ÁRVORE MERCADOLÓGICA IMPORTADA!', 'success');
-            UI.log('═══════════════════════════════════════', 'success');
-            UI.log(`📊 Resumo:`, 'info');
             UI.log(`   📁 Seções: ${totalSecoesImportadas}`, 'info');
             UI.log(`   📂 Grupos: ${totalGruposImportados}`, 'info');
             UI.log(`   📑 Subgrupos: ${totalSubgruposImportados}`, 'info');
             UI.log(`   🎯 Total: ${totalGeral} registros`, 'info');
-            UI.log('═══════════════════════════════════════', 'success');
 
             // Atualizar UI final
             UI.status.updateImport(uiElement, 'success', `${totalGeral} registros`);

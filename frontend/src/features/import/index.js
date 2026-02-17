@@ -11,7 +11,7 @@ import { FinanceiroImporter } from './importers.js';
 import { PDVImporter } from './importers.js';
 import { FiscalImporter } from './importers.js';
 import { EstoqueImporter } from './importers.js';
-import { ArvoreMercadologicaImporter } from './arvore-mercadologica-importer.js';
+import { ArvoreMercadologicaImporter } from './importers/arvore-importer.js';
 import DatabaseClient from '../../services/database/db-client.js';
 import UI from '../../ui/ui.js';
 
