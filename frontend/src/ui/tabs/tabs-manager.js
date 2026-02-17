@@ -57,9 +57,7 @@ export class ImportButtonManager {
     buildActionMap() {
         return {
             // PRODUTOS
-            'importar-secao': 'importarSecoes',
-            'importar-grupos': 'importarGrupos',
-            'importar-subgrupos': 'importarSubgrupos',
+            'importar-arvore-mercadologica': 'importarArvoreMercadologica',
             'importar-marcas': 'importarMarcas',
             'importar-familias': 'importarFamilias',
             'importar-produtos': 'importarProdutos',
@@ -75,26 +73,27 @@ export class ImportButtonManager {
             'importar-contas-correntes': 'importarContasCorrentes',
             'importar-especies-documento': 'importarEspeciesDocumento',
             'importar-historico-padrao': 'importarHistoricoPadrao',
+            'importar-formas-pagamento': 'importarFormasPagamento',
             
-            // PDV
+            // PDV / FRENTE DE LOJA
             'importar-caixas': 'importarCaixas',
             'importar-motivos-cancelamento': 'importarMotivosCancelamento',
             'importar-motivos-desconto': 'importarMotivosDesconto',
             'importar-motivos-devolucao': 'importarMotivosDevolucao',
-            'importar-formas-pagamento': 'importarPagamentosPDV',
-            'importar-formas-recebimento': 'importarRecebimentosPDV',
-            
-            // ESTOQUE
-            'importar-locais-estoque': 'importarLocalEstoque',
-            'importar-tipos-ajustes': 'importarTiposAjustes',
+            'importar-pagamentos-pdv': 'importarPagamentosPDV',
+            'importar-recebimentos-pdv': 'importarRecebimentosPDV',
             
             // FISCAL
             'importar-impostos-federais': 'importarImpostosFederais',
             'importar-regime-tributario': 'importarRegimeTributario',
             'importar-situacoes-fiscais': 'importarSituacoesFiscais',
-            'importar-tabelas-entrada': 'importarTabelasTributariasEntrada',
-            'importar-tabelas-saida': 'importarTabelasTributariasSaida',
-            'importar-tipos-operacoes': 'importarTiposOperacoes'
+            'importar-tabelas-tributarias-entrada': 'importarTabelasTributariasEntrada',
+            'importar-tabelas-tributarias-saida': 'importarTabelasTributariasSaida',
+            'importar-tipos-operacoes': 'importarTiposOperacoes',
+            
+            // ESTOQUE
+            'importar-local-estoque': 'importarLocalEstoque',
+            'importar-tipos-ajustes': 'importarTiposAjustes'
         };
     }
 

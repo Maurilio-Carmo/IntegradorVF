@@ -1,203 +1,257 @@
 // frontend/src/features/import/index.js
 
 /**
- * Módulo de Importação Principal (Modularizado)
- * Agrega todos os importadores e mantém compatibilidade com código legado
+ * Módulo de Importação Principal
+ * Agrupa todos os importadores e expõe métodos públicos
  */
 
-import {
-    ProdutoImporter,
-    PessoaImporter,
-    FinanceiroImporter,
-    PDVImporter,
-    FiscalImporter,
-    EstoqueImporter
-} from './importers.js';
-import { ImportBase } from './import-base.js';
+import { ProdutoImporter } from './importers.js';
+import { PessoaImporter } from './importers.js';
+import { FinanceiroImporter } from './importers.js';
+import { PDVImporter } from './importers.js';
+import { FiscalImporter } from './importers.js';
+import { EstoqueImporter } from './importers.js';
+import { ArvoreMercadologicaImporter } from './arvore-mercadologica-importer.js';
 import DatabaseClient from '../../services/database/db-client.js';
+import UI from '../../ui/ui.js';
+
+// Instanciar importadores
+const produtoImporter = new ProdutoImporter();
+const pessoaImporter = new PessoaImporter();
+const financeiroImporter = new FinanceiroImporter();
+const pdvImporter = new PDVImporter();
+const fiscalImporter = new FiscalImporter();
+const estoqueImporter = new EstoqueImporter();
+const arvoreMercadologicaImporter = new ArvoreMercadologicaImporter();
+const db = new DatabaseClient();
 
 /**
- * Gerenciador de Importações
+ * API Pública de Importação
+ * Cada método corresponde a uma ação do usuário
  */
-class ImportManager {
-    constructor() {
-        // Criar instâncias dos importadores
-        this.produto = new ProdutoImporter();
-        this.pessoa = new PessoaImporter();
-        this.financeiro = new FinanceiroImporter();
-        this.pdv = new PDVImporter();
-        this.fiscal = new FiscalImporter();
-        this.estoque = new EstoqueImporter();
-        
-        // Cliente de banco
-        this.db = new DatabaseClient();
-    }
-
+const Importacao = {
     // ========================================
-    // MÉTODOS LEGADOS (compatibilidade)
+    // ESTATÍSTICAS (NOVO - NECESSÁRIO)
     // ========================================
-
-    // Produtos
-    async importarSecoes(card) {
-        return await this.produto.importarSecoes(card);
-    }
-
-    async importarGrupos(card) {
-        return await this.produto.importarGrupos(card);
-    }
-
-    async importarSubgrupos(card) {
-        return await this.produto.importarSubgrupos(card);
-    }
-
-    async importarMarcas(card) {
-        return await this.produto.importarMarcas(card);
-    }
-
-    async importarFamilias(card) {
-        return await this.produto.importarFamilias(card);
-    }
-
-    async importarProdutos(card) {
-        return await this.produto.importarProdutos(card);
-    }
-
-    // Pessoas
-    async importarClientes(card) {
-        return await this.pessoa.importarClientes(card);
-    }
-
-    async importarFornecedores(card) {
-        return await this.pessoa.importarFornecedores(card);
-    }
-
-    async importarLojas(card) {
-        return await this.pessoa.importarLojas(card);
-    }
-
-    // Financeiro
-    async importarCategorias(card) {
-        return await this.financeiro.importarCategorias(card);
-    }
-
-    async importarAgentes(card) {
-        return await this.financeiro.importarAgentes(card);
-    }
-
-    async importarContasCorrentes(card) {
-        return await this.financeiro.importarContasCorrentes(card);
-    }
-
-    async importarEspeciesDocumento(card) {
-        return await this.financeiro.importarEspeciesDocumento(card);
-    }
-
-    async importarHistoricoPadrao(card) {
-        return await this.financeiro.importarHistoricoPadrao(card);
-    }
-
-    // PDV
-    async importarCaixas(card) {
-        return await this.pdv.importarCaixas(card);
-    }
-
-    async importarMotivosCancelamento(card) {
-        return await this.pdv.importarMotivosCancelamento(card);
-    }
-
-    async importarMotivosDesconto(card) {
-        return await this.pdv.importarMotivosDesconto(card);
-    }
-
-    async importarMotivosDevolucao(card) {
-        return await this.pdv.importarMotivosDevolucao(card);
-    }
-
-    async importarPagamentosPDV(card) {
-        return await this.pdv.importarPagamentosPDV(card);
-    }
-
-    async importarRecebimentosPDV(card) {
-        return await this.pdv.importarRecebimentosPDV(card);
-    }
-
-    // Fiscal
-    async importarImpostosFederais(card) {
-        return await this.fiscal.importarImpostosFederais(card);
-    }
-
-    async importarRegimeTributario(card) {
-        return await this.fiscal.importarRegimeTributario(card);
-    }
-
-    async importarSituacoesFiscais(card) {
-        return await this.fiscal.importarSituacoesFiscais(card);
-    }
-
-    async importarTabelasTributariasEntrada(card) {
-        return await this.fiscal.importarTabelasTributariasEntrada(card);
-    }
-
-    async importarTabelasTributariasSaida(card) {
-        return await this.fiscal.importarTabelasTributariasSaida(card);
-    }
-
-    async importarTiposOperacoes(card) {
-        return await this.fiscal.importarTiposOperacoes(card);
-    }
-
-    // Estoque
-    async importarLocalEstoque(card) {
-        return await this.estoque.importarLocalEstoque(card);
-    }
-
-    async importarTiposAjustes(card) {
-        return await this.estoque.importarTiposAjustes(card);
-    }
-
-    // ========================================
-    // MÉTODOS UTILITÁRIOS
-    // ========================================
-
+    
     /**
      * Atualizar estatísticas do banco
      */
     async atualizarEstatisticas() {
-        return await this.produto.updateStatistics();
-    }
+        try {
+            console.log('📊 Carregando estatísticas do banco...');
+            const stats = await db.getStatistics();
+            
+            if (stats) {
+                UI.statistics.update(stats);
+                console.log('✅ Estatísticas atualizadas:', stats);
+            } else {
+                console.warn('⚠️ Nenhuma estatística retornada');
+            }
+            
+            return stats;
+        } catch (error) {
+            console.error('❌ Erro ao atualizar estatísticas:', error);
+            throw error;
+        }
+    },
 
+    // ========================================
+    // ÁRVORE MERCADOLÓGICA
+    // ========================================
+    
     /**
-     * Buscar estatísticas
+     * Importar Árvore Mercadológica Completa
+     * Importa Seções + Grupos + Subgrupos em sequência
      */
-    async buscarEstatisticas() {
-        return await this.db.getStatistics();
+    async importarArvoreMercadologica(uiElement) {
+        const result = await arvoreMercadologicaImporter.importarArvoreMercadologica(uiElement);
+        
+        // Atualizar estatísticas após importação
+        await this.atualizarEstatisticas();
+        
+        return result;
+    },
+
+    // ========================================
+    // PRODUTOS
+    // ========================================
+    
+    async importarMarcas(uiElement) {
+        const result = await produtoImporter.importarMarcas(uiElement);
+        await this.atualizarEstatisticas();
+        return result;
+    },
+
+    async importarFamilias(uiElement) {
+        const result = await produtoImporter.importarFamilias(uiElement);
+        await this.atualizarEstatisticas();
+        return result;
+    },
+
+    async importarProdutos(uiElement) {
+        const result = await produtoImporter.importarProdutos(uiElement);
+        await this.atualizarEstatisticas();
+        return result;
+    },
+
+    // ========================================
+    // PESSOAS
+    // ========================================
+    
+    async importarClientes(uiElement) {
+        const result = await pessoaImporter.importarClientes(uiElement);
+        await this.atualizarEstatisticas();
+        return result;
+    },
+
+    async importarFornecedores(uiElement) {
+        const result = await pessoaImporter.importarFornecedores(uiElement);
+        await this.atualizarEstatisticas();
+        return result;
+    },
+
+    async importarLojas(uiElement) {
+        const result = await pessoaImporter.importarLojas(uiElement);
+        await this.atualizarEstatisticas();
+        return result;
+    },
+
+    // ========================================
+    // FINANCEIRO
+    // ========================================
+    
+    async importarCategorias(uiElement) {
+        const result = await financeiroImporter.importarCategorias(uiElement);
+        await this.atualizarEstatisticas();
+        return result;
+    },
+
+    async importarAgentes(uiElement) {
+        const result = await financeiroImporter.importarAgentes(uiElement);
+        await this.atualizarEstatisticas();
+        return result;
+    },
+
+    async importarContasCorrentes(uiElement) {
+        const result = await financeiroImporter.importarContasCorrentes(uiElement);
+        await this.atualizarEstatisticas();
+        return result;
+    },
+
+    async importarEspeciesDocumento(uiElement) {
+        const result = await financeiroImporter.importarEspeciesDocumento(uiElement);
+        await this.atualizarEstatisticas();
+        return result;
+    },
+
+    async importarHistoricoPadrao(uiElement) {
+        const result = await financeiroImporter.importarHistoricoPadrao(uiElement);
+        await this.atualizarEstatisticas();
+        return result;
+    },
+
+    async importarFormasPagamento(uiElement) {
+        const result = await financeiroImporter.importarFormasPagamento(uiElement);
+        await this.atualizarEstatisticas();
+        return result;
+    },
+
+    // ========================================
+    // PDV / FRENTE DE LOJA
+    // ========================================
+    
+    async importarCaixas(uiElement) {
+        const result = await pdvImporter.importarCaixas(uiElement);
+        await this.atualizarEstatisticas();
+        return result;
+    },
+
+    async importarMotivosCancelamento(uiElement) {
+        const result = await pdvImporter.importarMotivosCancelamento(uiElement);
+        await this.atualizarEstatisticas();
+        return result;
+    },
+
+    async importarMotivosDesconto(uiElement) {
+        const result = await pdvImporter.importarMotivosDesconto(uiElement);
+        await this.atualizarEstatisticas();
+        return result;
+    },
+
+    async importarMotivosDevolucao(uiElement) {
+        const result = await pdvImporter.importarMotivosDevolucao(uiElement);
+        await this.atualizarEstatisticas();
+        return result;
+    },
+
+    async importarPagamentosPDV(uiElement) {
+        const result = await pdvImporter.importarPagamentosPDV(uiElement);
+        await this.atualizarEstatisticas();
+        return result;
+    },
+
+    async importarRecebimentosPDV(uiElement) {
+        const result = await pdvImporter.importarRecebimentosPDV(uiElement);
+        await this.atualizarEstatisticas();
+        return result;
+    },
+
+    // ========================================
+    // FISCAL
+    // ========================================
+    
+    async importarImpostosFederais(uiElement) {
+        const result = await fiscalImporter.importarImpostosFederais(uiElement);
+        await this.atualizarEstatisticas();
+        return result;
+    },
+
+    async importarRegimeTributario(uiElement) {
+        const result = await fiscalImporter.importarRegimeTributario(uiElement);
+        await this.atualizarEstatisticas();
+        return result;
+    },
+
+    async importarSituacoesFiscais(uiElement) {
+        const result = await fiscalImporter.importarSituacoesFiscais(uiElement);
+        await this.atualizarEstatisticas();
+        return result;
+    },
+
+    async importarTabelasTributariasEntrada(uiElement) {
+        const result = await fiscalImporter.importarTabelasTributariasEntrada(uiElement);
+        await this.atualizarEstatisticas();
+        return result;
+    },
+
+    async importarTabelasTributariasSaida(uiElement) {
+        const result = await fiscalImporter.importarTabelasTributariasSaida(uiElement);
+        await this.atualizarEstatisticas();
+        return result;
+    },
+
+    async importarTiposOperacoes(uiElement) {
+        const result = await fiscalImporter.importarTiposOperacoes(uiElement);
+        await this.atualizarEstatisticas();
+        return result;
+    },
+
+    // ========================================
+    // ESTOQUE
+    // ========================================
+    
+    async importarLocalEstoque(uiElement) {
+        const result = await estoqueImporter.importarLocalEstoque(uiElement);
+        await this.atualizarEstatisticas();
+        return result;
+    },
+
+    async importarTiposAjustes(uiElement) {
+        const result = await estoqueImporter.importarTiposAjustes(uiElement);
+        await this.atualizarEstatisticas();
+        return result;
     }
+};
 
-    /**
-     * Salvar no banco (método legado)
-     */
-    async salvarNoBanco(endpoint, dados) {
-        return await this.db.save(endpoint, dados);
-    }
-
-    /**
-     * Importar entidade (método legado genérico)
-     */
-    async importarEntidade(config) {
-        const base = new ImportBase();
-        return await base.execute({
-            name: config.nome,
-            endpoint: config.endpoint,
-            apiMethod: config.metodoAPI,
-            uiElement: config.card,
-            estimate: config.estimativa
-        });
-    }
-}
-
-// Criar instância singleton
-const Importacao = new ImportManager();
-
-// Exportar instância e classes
-export { ImportManager, Importacao };
 export default Importacao;

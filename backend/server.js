@@ -53,7 +53,9 @@ app.all('/api/vf/*', async (req, res) => {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
             },
-            body: req.method !== 'GET' && req.method !== 'HEAD' ? JSON.stringify(req.body) : undefined
+            body: req.method !== 'GET' && req.method !== 'HEAD' 
+            ? JSON.stringify(req.body) 
+            : undefined
         });
 
         // Log do status da resposta
