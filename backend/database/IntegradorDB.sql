@@ -15,11 +15,8 @@ PRAGMA foreign_keys = ON;
 -- S = Success/Sucesso  (✅)
 -- =====================================================
 
--- =====================================================
--- 1. ESTRUTURA MERCADOLÓGICA (Hierarquia)
--- =====================================================
+-- SEÇÕES
 
--- Tabela: Seções
 DROP TABLE IF EXISTS secoes;
 CREATE TABLE secoes (
     secao_id INTEGER PRIMARY KEY,
@@ -30,9 +27,8 @@ CREATE TABLE secoes (
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_secoes ON secoes(secao_id);
+-- GRUPOS
 
--- Tabela: Grupos
 DROP TABLE IF EXISTS grupos;
 CREATE TABLE grupos (
     grupo_id INTEGER PRIMARY KEY,
@@ -42,12 +38,14 @@ CREATE TABLE grupos (
     status TEXT CHECK (status IN ('C','U','D')) DEFAULT 'U',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    
     FOREIGN KEY (secao_id) REFERENCES secoes(secao_id) ON UPDATE CASCADE ON DELETE RESTRICT
 );
 
-CREATE INDEX idx_grupos ON grupos(secao_id, grupo_id);
+CREATE INDEX idx_grupos_grupo ON grupos(secao_id, grupo_id);
 
--- Tabela: Subgrupos
+-- SUBGRUPOS
+
 DROP TABLE IF EXISTS subgrupos;
 CREATE TABLE subgrupos (
     subgrupo_id INTEGER PRIMARY KEY,
@@ -58,13 +56,15 @@ CREATE TABLE subgrupos (
     status TEXT CHECK (status IN ('C','U','D')) DEFAULT 'U',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    
     FOREIGN KEY (secao_id) REFERENCES secoes(secao_id) ON UPDATE CASCADE ON DELETE RESTRICT,
     FOREIGN KEY (grupo_id) REFERENCES grupos(grupo_id) ON UPDATE CASCADE ON DELETE RESTRICT
 );
 
-CREATE INDEX idx_subgrupos ON subgrupos(secao_id, grupo_id, subgrupo_id);
+CREATE INDEX idx_subgrupos_subgrupo ON subgrupos(secao_id, grupo_id, subgrupo_id);
 
--- Tabela: Marcas
+-- MARCAS
+
 DROP TABLE IF EXISTS marcas;
 CREATE TABLE marcas (
     marca_id INTEGER PRIMARY KEY,
@@ -75,9 +75,8 @@ CREATE TABLE marcas (
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_marcas ON marcas(marca_id);
+-- FAMILIAS
 
--- Tabela: Famílias
 DROP TABLE IF EXISTS familias;
 CREATE TABLE familias (
     familia_id INTEGER PRIMARY KEY,
@@ -88,463 +87,606 @@ CREATE TABLE familias (
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_familias ON familias(familia_id);
-
--- =====================================================
--- 2. PRODUTOS
--- =====================================================
+-- PRODUTOS
 
 DROP TABLE IF EXISTS produtos;
 CREATE TABLE produtos (
-    produto_id_old TEXT,
-    descricao_old TEXT,
-    descricao_reduzida_old TEXT,
-    secao_id_old TEXT,
-    grupo_id_old TEXT,
-    subgrupo_id_old TEXT,
-    familia_id_old TEXT,
-    marca_id_old TEXT,
-    status TEXT CHECK(status IN ('C', 'U', 'D')) DEFAULT 'U',
-    produto_id_new INTEGER PRIMARY KEY,
-    descricao_new TEXT,
-    descricao_reduzida_new TEXT,
-    secao_id_new INTEGER,
-    grupo_id_new INTEGER,
-    subgrupo_id_new INTEGER,
-    familia_id_new INTEGER,
-    marca_id_new INTEGER,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (secao_id_new) REFERENCES secoes(secao_id_new) ON DELETE SET NULL,
-    FOREIGN KEY (grupo_id_new) REFERENCES grupos(grupo_id_new) ON DELETE SET NULL,
-    FOREIGN KEY (subgrupo_id_new) REFERENCES subgrupos(subgrupo_id_new) ON DELETE SET NULL,
-    FOREIGN KEY (familia_id_new) REFERENCES familias(familia_id_new) ON DELETE SET NULL,
-    FOREIGN KEY (marca_id_new) REFERENCES marcas(marca_id_new) ON DELETE SET NULL
+	produto_id INTEGER PRIMARY KEY, 
+	descricao TEXT, 
+	descricao_reduzida TEXT, 
+	codigo_interno TEXT, 
+	secao_id INTEGER, 
+	grupo_id INTEGER, 
+	subgrupo_id INTEGER, 
+	familia_id INTEGER, 
+	marca_id INTEGER, 
+	estoque_minimo REAL, 
+	estoque_maximo REAL, 
+	composicao TEXT CHECK(composicao IN ('NORMAL','COMPOSTO','KIT','RENDIMENTO')),
+	peso_variavel TEXT CHECK(peso_variavel IN ('SIM','PESO','NAO','UNITARIO','PENDENTE')),
+	unidade_compra TEXT, 
+	itens_embalagem INTEGER, 
+	unidade_venda TEXT, 
+	itens_embalagem_venda INTEGER, 
+	unidade_transf TEXT, 
+	itens_embalagem_transf INTEGER, 
+	peso_bruto REAL DEFAULT 0, 
+	peso_liquido REAL DEFAULT 0, 
+	fator_rendimento_unidade REAL DEFAULT 0,
+	fator_rendimento_custo REAL DEFAULT 0,
+	tabela_a TEXT CHECK(tabela_a IN ('NACIONAL','IMPORTACAO_DIRETA','ADQUIRIDO_DO_MERCADO_INTERNO','MERCADORIA_CONTENDO_IMPORTACAO_SUPERIOR_40','CUJO_PRODUCAO_TENHA_SIDO_FEITO','MERCADORIA_COM_CONTEUDO_DE_IMPORTACAO_EM_CONFORMIDADE','IMPORTACAO_DIRETA_SEM_SIMILAR_NACIONAL','ADQUIRIDO_DO_MERCADO_INTERNO_SEM_SIMILAR_NACIONAL','MERCADORIA_COM_CONTEUDO_DE_IMPORTACAO_SUPERIOR_A_70')),
+	genero_id TEXT,
+	ncm TEXT,
+	cest TEXT,
+	situacao_fiscal_id INTEGER,
+	situacao_fiscal_saida_id INTEGER,
+	regime_estadual_id INTEGER,
+	impostos_federais_ids TEXT,
+	natureza_imposto_id INTEGER,
+	permite_desconto INTEGER DEFAULT 0,
+	desconto_maximo REAL DEFAULT 0,
+	controla_estoque INTEGER DEFAULT 0,
+	envia_balanca INTEGER DEFAULT 0,
+	descricao_variavel INTEGER DEFAULT 0,
+	preco_variavel INTEGER DEFAULT 0,
+	ativo_ecommerce INTEGER DEFAULT 0,
+	controla_validade INTEGER DEFAULT 0,
+	validade_dias INTEGER DEFAULT 0,
+	finalidade TEXT CHECK(finalidade IN ('COMERCIALIZACAO','CONSUMO','IMOBILIZADO','INDUSTRIALIZADO','MATERIA_PRIMA','OUTROS')),
+	producao TEXT CHECK(producao IN ('PROPRIO','TERCEIROS')),
+	unidade_referencia TEXT,
+	medida_referencial REAL DEFAULT 0,
+	indice_at TEXT CHECK(indice_at IN ('ARREDONDA','TRUNCA')),
+    fora_de_linha INTEGER DEFAULT 0,
+	data_saida DATETIME,
+	data_inclusao DATETIME,
+	data_alteracao DATETIME,
+	status TEXT CHECK(status IN ('C','U','D','E')) DEFAULT 'U',
+	created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+	updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (secao_id) REFERENCES secoes(secao_id) ON DELETE SET NULL,
+    FOREIGN KEY (grupo_id) REFERENCES grupos(grupo_id) ON DELETE SET NULL,
+    FOREIGN KEY (subgrupo_id) REFERENCES subgrupos(subgrupo_id) ON DELETE SET NULL,
+    FOREIGN KEY (familia_id) REFERENCES familias(familia_id) ON DELETE SET NULL,
+    FOREIGN KEY (marca_id) REFERENCES marcas(marca_id) ON DELETE SET NULL
 );
 
-CREATE INDEX idx_produtos_old ON produtos(produto_id_old);
-CREATE INDEX idx_produtos_secao_old ON produtos(secao_id_old);
-CREATE INDEX idx_produtos_grupo_old ON produtos(grupo_id_old);
-CREATE INDEX idx_produtos_subgrupo_old ON produtos(subgrupo_id_old);
-CREATE INDEX idx_produtos_familia_old ON produtos(familia_id_old);
-CREATE INDEX idx_produtos_marca_old ON produtos(marca_id_old);
-CREATE INDEX idx_produtos_secao_new ON produtos(secao_id_new);
-CREATE INDEX idx_produtos_grupo_new ON produtos(grupo_id_new);
-CREATE INDEX idx_produtos_subgrupo_new ON produtos(subgrupo_id_new);
-CREATE INDEX idx_produtos_familia_new ON produtos(familia_id_new);
-CREATE INDEX idx_produtos_marca_new ON produtos(marca_id_new);
-CREATE INDEX idx_produtos_status ON produtos(status);
+CREATE INDEX idx_produtos_secao ON produtos(secao_id);
+CREATE INDEX idx_produtos_grupo ON produtos(grupo_id);
+CREATE INDEX idx_produtos_subgrupo ON produtos(subgrupo_id);
+CREATE INDEX idx_produtos_familia ON produtos(familia_id);
+CREATE INDEX idx_produtos_marca ON produtos(marca_id);
 
--- =====================================================
--- 3. ENTIDADES COMERCIAIS
--- =====================================================
+-- LOJAS
 
--- Tabela: Clientes
-DROP TABLE IF EXISTS clientes;
-CREATE TABLE clientes (
-    cliente_id_old TEXT,
-    nome_old TEXT,
-    cpf_cnpj_old TEXT,
-    status TEXT CHECK(status IN ('C', 'U', 'D')) DEFAULT 'U',
-    cliente_id_new INTEGER PRIMARY KEY,
-    nome_new TEXT,
-    cpf_cnpj_new TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE INDEX idx_clientes_old ON clientes(cliente_id_old);
-CREATE INDEX idx_clientes_cpf_cnpj_old ON clientes(cpf_cnpj_old);
-CREATE INDEX idx_clientes_status ON clientes(status);
-
--- Tabela: Fornecedores
-DROP TABLE IF EXISTS fornecedores;
-CREATE TABLE fornecedores (
-    fornecedor_id_old TEXT,
-    nome_old TEXT,
-    cpf_cnpj_old TEXT,
-    status TEXT CHECK(status IN ('C', 'U', 'D')) DEFAULT 'U',
-    fornecedor_id_new INTEGER PRIMARY KEY,
-    nome_new TEXT,
-    cpf_cnpj_new TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE INDEX idx_fornecedores_old ON fornecedores(fornecedor_id_old);
-CREATE INDEX idx_fornecedores_cpf_cnpj_old ON fornecedores(cpf_cnpj_old);
-CREATE INDEX idx_fornecedores_status ON fornecedores(status);
-
--- =====================================================
--- 4. ESTRUTURA OPERACIONAL
--- =====================================================
-
--- Tabela: Lojas
 DROP TABLE IF EXISTS lojas;
 CREATE TABLE lojas (
-    loja_id_old TEXT,
-    nome_old TEXT,
-    cnpj_old TEXT,
-    status TEXT CHECK(status IN ('C', 'U', 'D')) DEFAULT 'U',
-    loja_id_new INTEGER PRIMARY KEY,
-    nome_new TEXT,
-    cnpj_new TEXT,
+	loja_id INTEGER PRIMARY KEY,
+	nome TEXT,
+	fantasia TEXT,
+	perfil_fiscal TEXT,
+	atividade_economica TEXT,
+	ramo_atuacao_id TEXT,
+	agente_validacao TEXT,
+	crt TEXT,
+	matriz INTEGER DEFAULT 0,
+	sigla TEXT,
+	mail TEXT,
+	telefone TEXT,
+	cep TEXT,
+	uf TEXT,
+	cidade TEXT,
+	logradouro TEXT,
+	numero INTEGER,
+	bairro TEXT,
+	tipo TEXT,
+	tipo_contribuinte TEXT,
+	ativo INTEGER DEFAULT 1,
+	ecommerce INTEGER DEFAULT 0,
+	locais_da_loja_ids TEXT,
+	status TEXT CHECK(status IN ('C','U','D','E')) DEFAULT 'U',
+	created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+	updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- CLIENTES
+
+DROP TABLE IF EXISTS clientes;
+CREATE TABLE clientes (
+    cliente_id INTEGER PRIMARY KEY,
+    tipo_de_pessoa TEXT CHECK(tipo_de_pessoa IN ('FISICA','JURIDICA','ESTRANGEIRO')),
+    documento TEXT,
+    nome TEXT,
+    fantasia TEXT,
+    holding_id TEXT,
+    tipo_contribuinte TEXT CHECK(tipo_contribuinte IN ('CONTRIBUINTE','NAO_CONTRIBUINTE','ISENTO')),
+    inscricao_estadual TEXT,
+    telefone1 TEXT,
+    telefone2 TEXT,
+    email TEXT,
+    data_nascimento DATETIME,
+    estado_civil TEXT CHECK(estado_civil IN ('SOLTEIRO','CASADO','DIVORCIADO','VIUVO','OUTROS')),
+    sexo TEXT CHECK(sexo IN ('MASCULINO','FEMININO')),
+    orgao_publico INTEGER DEFAULT 0,
+    retem_iss INTEGER DEFAULT 0,
+    observacao TEXT,
+    tipo_de_preco INTEGER,
+    data_de_bloqueio DATETIME,
+    tipo_de_bloqueio TEXT,
+    desconto TEXT,
+    tabela_prazo TEXT CHECK(tabela_prazo IN ('','DF','PRZ','DFM','DFD','DFS','DFQ')),
+    prazo INTEGER,
+    corte INTEGER,
+    vendedor_id INTEGER,
+    cep TEXT,
+    logradouro TEXT,
+    numero INTEGER,
+    complemento TEXT,
+    referencia TEXT,
+    bairro TEXT,
+    municipio TEXT,
+    ibge TEXT,
+    uf TEXT,
+    pais TEXT,
+    status TEXT CHECK(status IN ('C','U','D','E')) DEFAULT 'U',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (loja_id) REFERENCES lojas(loja_id) ON DELETE SET NULL
+);
+
+-- FORNECEDORES
+
+DROP TABLE IF EXISTS fornecedores;
+CREATE TABLE fornecedores (
+    fornecedor_id INTEGER PRIMARY KEY,
+    tipo_de_pessoa TEXT CHECK(tipo_de_pessoa IN ('FISICA','JURIDICA','ESTRANGEIRO')),
+    documento TEXT,
+    nome TEXT,
+    fantasia TEXT,
+    holding_id TEXT,
+    tipo_contribuinte TEXT CHECK(tipo_contribuinte IN ('CONTRIBUINTE','NAO_CONTRIBUINTE','ISENTO')),
+    inscricao_estadual TEXT,
+    telefone1 TEXT,
+    telefone2 TEXT,
+    email TEXT,
+    tipo_de_fornecedor TEXT CHECK(tipo_de_fornecedor IN ('INDUSTRIA','DISTRIBUIDORA','VAREJO','SIMPLES_NACIONAL','OUTROS')),
+    servico INTEGER DEFAULT 0,
+    transportadora INTEGER DEFAULT 0,
+    produtor_rural INTEGER DEFAULT 0,
+    inscricao_municipal TEXT,
+    tabela_prazo TEXT CHECK(tabela_prazo IN ('','DF','PRZ','DFM','DFD','DFS','DFQ')),
+    prazo INTEGER,
+    prazo_de_entrega INTEGER,
+    tipo_de_frete TEXT CHECK(tipo_de_frete IN ('','SEM_FRETE','EMITENTE','DESTINATARIO','TERCEIRO','EMITENTE_PROPRIO','DESTINATARIO_PROPRIO')),
+    desativa_atendimento_pedido INTEGER DEFAULT 0,
+    tipo_pedido_compra TEXT CHECK(tipo_pedido_compra IN ('NAO_GERENCIADO','GERENCIADO_MAESTRO')),
+    regime_estadual_tributario_id TEXT,
+    destaca_substituicao TEXT CHECK(destaca_substituicao IN ('DESPESAS_ACESSORIAS','CAMPO_PROPRIO','DADOS_COMPLEMENTARES')),
+    considera_desoneração INTEGER DEFAULT 0,
+    cep TEXT,
+    logradouro TEXT,
+    numero INTEGER,
+    complemento TEXT,
+    bairro TEXT,
+    municipio TEXT,
+    ibge TEXT,
+    uf TEXT,
+    pais TEXT,
+    criado_em DATETIME,
+    atualizado_em DATETIME,
+    status TEXT CHECK(status IN ('C','U','D','E')) DEFAULT 'U',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_lojas_old ON lojas(loja_id_old);
-CREATE INDEX idx_lojas_cnpj_old ON lojas(cnpj_old);
-CREATE INDEX idx_lojas_status ON lojas(status);
+-- CAIXAS
 
--- Tabela: Caixas
 DROP TABLE IF EXISTS caixas;
 CREATE TABLE caixas (
-    caixa_id_old TEXT,
-    descricao_old TEXT,
-    loja_id_old TEXT,
-    status TEXT CHECK(status IN ('C', 'U', 'D')) DEFAULT 'U',
-    caixa_id_new INTEGER PRIMARY KEY,
-    descricao_new TEXT,
-    loja_id_new INTEGER,
+    loja_id INTEGER,
+    caixa_id INTEGER PRIMARY KEY,
+    numero INTEGER,
+    serie_do_equipamento TEXT,
+    versao TEXT,
+    data_ultima_venda TEXT,
+    hora TEXT,
+    visivel_monitoramento INTEGER DEFAULT 1,
+    tipo_frente_loja TEXT CHECK(tipo_frente_loja IN ('SYSPDV','EASY_ASSIST')),
+    status TEXT CHECK(status IN ('C','U','D','E')) DEFAULT 'U',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (loja_id_new) REFERENCES lojas(loja_id_new) ON DELETE SET NULL
+    
+    FOREIGN KEY (loja_id) REFERENCES lojas(loja_id) ON DELETE SET NULL
 );
 
-CREATE INDEX idx_caixas_old ON caixas(caixa_id_old);
-CREATE INDEX idx_caixas_loja_old ON caixas(loja_id_old);
-CREATE INDEX idx_caixas_loja_new ON caixas(loja_id_new);
-CREATE INDEX idx_caixas_status ON caixas(status);
+-- LOCAL DE ESTOQUE
 
--- Tabela: Local de Estoque
 DROP TABLE IF EXISTS local_estoque;
 CREATE TABLE local_estoque (
-    local_id_old TEXT,
-    descricao_old TEXT,
-    loja_id_old TEXT,
-    status TEXT CHECK(status IN ('C', 'U', 'D')) DEFAULT 'U',
-    local_id_new INTEGER PRIMARY KEY,
-    descricao_new TEXT,
-    loja_id_new INTEGER,
+    local_id INTEGER PRIMARY KEY,
+    descricao TEXT,
+    tipo_de_estoque TEXT CHECK(tipo_de_estoque IN ('PROPRIO','TERCEIROS')),
+    bloqueio INTEGER DEFAULT 0,
+    avaria INTEGER DEFAULT 0,
+    status TEXT CHECK(status IN ('C','U','D','E')) DEFAULT 'U',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (loja_id_new) REFERENCES lojas(loja_id_new) ON DELETE SET NULL
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_local_estoque_old ON local_estoque(local_id_old);
-CREATE INDEX idx_local_estoque_loja_old ON local_estoque(loja_id_old);
-CREATE INDEX idx_local_estoque_loja_new ON local_estoque(loja_id_new);
-CREATE INDEX idx_local_estoque_status ON local_estoque(status);
+-- AGENTES
 
--- =====================================================
--- 5. ENTIDADES FINANCEIRAS
--- =====================================================
-
--- Tabela: Agentes (Bancos)
 DROP TABLE IF EXISTS agentes;
 CREATE TABLE agentes (
-    agente_id_old TEXT,
-    nome_old TEXT,
-    fantasia_old TEXT,
-    codigo_banco_old TEXT,
-    tipo_pessoa_old TEXT,
-    documento_old TEXT,
-    status TEXT CHECK(status IN ('C', 'U', 'D')) DEFAULT 'U',
-    agente_id_new INTEGER PRIMARY KEY,
-    nome_new TEXT,
-    fantasia_new TEXT,
-    codigo_banco_new TEXT,
-    tipo_pessoa_new TEXT,
-    documento_new TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+	 agente_id INTEGER PRIMARY KEY,
+	 nome TEXT,
+	 fantasia TEXT,
+	 codigo_do_banco TEXT,
+	 tipo TEXT CHECK(tipo IN ('FISICA','JURIDICA')),
+	 documento TEXT,
+	 tipo_contribuinte TEXT CHECK(tipo_contribuinte IN ('CONTRIBUINTE','NAO_CONTRIBUINTE','ISENTO')),
+	 inscricao_estadual TEXT,
+	 telefone1 TEXT,
+	 holding_id TEXT,
+	 cep TEXT,
+	 logradouro TEXT,
+	 numero TEXT,
+	 bairro TEXT,
+	 municipio TEXT,
+	 ibge TEXT,
+	 uf TEXT,
+	 pais TEXT,
+	 tipo_de_endereco TEXT,
+	 status TEXT CHECK(status IN ('C','U','D','E')) DEFAULT 'U',
+	 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+	 updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_agentes_old ON agentes(agente_id_old);
-CREATE INDEX idx_agentes_codigo_banco_old ON agentes(codigo_banco_old);
-CREATE INDEX idx_agentes_status ON agentes(status);
+-- CATEGORIAS
 
--- Tabela: Categorias
 DROP TABLE IF EXISTS categorias;
 CREATE TABLE categorias (
-    categoria_id_old TEXT,
-    descricao_old TEXT,
-    categoria_pai_old TEXT,
-    classificacao_old TEXT,
-    tipo_old TEXT,
-    status TEXT CHECK(status IN ('C', 'U', 'D')) DEFAULT 'U',
-    categoria_id_new INTEGER PRIMARY KEY,
-    descricao_new TEXT,
-    categoria_pai_new INTEGER,
-    classificacao_new TEXT,
-    tipo_new TEXT,
+    categoria_id INTEGER PRIMARY KEY,
+    descricao TEXT,
+    categoria_pai_id INTEGER,
+    codigo_contabil TEXT,
+    inativa INTEGER DEFAULT 0,
+    posicao TEXT,
+    classificacao TEXT CHECK(classificacao IN ('RECEITA','DESPESA')),
+    tipo TEXT CHECK(tipo IN ('SINTETICA','ANALITICA')),
+    status TEXT CHECK(status IN ('C','U','D','E')) DEFAULT 'U',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (categoria_pai_new) REFERENCES categorias(categoria_id_new) ON DELETE SET NULL
+    
+    FOREIGN KEY (categoria_pai_id) REFERENCES categorias(categoria_id) ON DELETE SET NULL
 );
 
-CREATE INDEX idx_categorias_old ON categorias(categoria_id_old);
-CREATE INDEX idx_categorias_pai_old ON categorias(categoria_pai_old);
-CREATE INDEX idx_categorias_pai_new ON categorias(categoria_pai_new);
-CREATE INDEX idx_categorias_status ON categorias(status);
+-- CONTAS CORRENTES
 
--- Tabela: Contas Correntes
 DROP TABLE IF EXISTS contas_correntes;
 CREATE TABLE contas_correntes (
-    conta_id_old TEXT,
-    descricao_old TEXT,
-    tipo_old TEXT,
-    loja_id_old TEXT,
-    agente_id_old TEXT,
-    status TEXT CHECK(status IN ('C', 'U', 'D')) DEFAULT 'U',
-    conta_id_new INTEGER PRIMARY KEY,
-    descricao_new TEXT,
-    tipo_new TEXT,
-    loja_id_new INTEGER,
-    agente_id_new INTEGER,
+    conta_id INTEGER PRIMARY KEY,
+    descricao TEXT,
+    tipo TEXT CHECK(tipo IN ('CAIXA','BANCARIA')),
+    ativa INTEGER DEFAULT 1,
+    compoe_fluxo_de_caixa INTEGER DEFAULT 0,
+    lancamento_consolidado INTEGER DEFAULT 0,
+    loja_id INTEGER,
+    nome_loja TEXT,
+    agente_financeiro_id INTEGER,
+    nome_banco TEXT,
+    codigo_banco TEXT,
+    agencia TEXT,
+    conta TEXT,
+    local_de_pagamento TEXT,
+    identificacao_ofx TEXT CHECK(identificacao_ofx IN ('AGENCIA_NUMERO','NUMERO')),
+    status TEXT CHECK(status IN ('C','U','D','E')) DEFAULT 'U',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (loja_id_new) REFERENCES lojas(loja_id_new) ON DELETE SET NULL,
-    FOREIGN KEY (agente_id_new) REFERENCES agentes(agente_id_new) ON DELETE SET NULL
+    
+    FOREIGN KEY (loja_id) REFERENCES lojas(loja_id) ON DELETE SET NULL,
+    FOREIGN KEY (agente_financeiro_id) REFERENCES agentes(agente_id) ON DELETE SET NULL
 );
 
-CREATE INDEX idx_contas_correntes_old ON contas_correntes(conta_id_old);
-CREATE INDEX idx_contas_correntes_loja_old ON contas_correntes(loja_id_old);
-CREATE INDEX idx_contas_correntes_agente_old ON contas_correntes(agente_id_old);
-CREATE INDEX idx_contas_correntes_loja_new ON contas_correntes(loja_id_new);
-CREATE INDEX idx_contas_correntes_agente_new ON contas_correntes(agente_id_new);
-CREATE INDEX idx_contas_correntes_status ON contas_correntes(status);
+-- ESPÉCIES DE DOCUMENTO
 
--- Tabela: Espécies de Documento
-DROP TABLE IF EXISTS especies_documento;
-CREATE TABLE especies_documento (
-    especie_id_old TEXT,
-    descricao_old TEXT,
-    sigla_old TEXT,
-    genero_old TEXT,
-    modalidade_old TEXT,
-    status TEXT CHECK(status IN ('C', 'U', 'D')) DEFAULT 'U',
-    especie_id_new INTEGER PRIMARY KEY,
-    descricao_new TEXT,
-    sigla_new TEXT,
-    genero_new TEXT,
-    modalidade_new TEXT,
+DROP TABLE IF EXISTS especies_documentos;
+CREATE TABLE especies_documentos (
+    especie_id INTEGER PRIMARY KEY,
+    descricao TEXT,
+    sigla TEXT,
+    genero TEXT CHECK(genero IN ('PAGAR','RECEBER')),
+    especie_nfe TEXT CHECK(especie_nfe IN ('DINHEIRO','CHEQUE','CARTAO_CREDITO','CARTAO_DEBITO','CARTAO_EM_LOJA','VALE_ALIMENTACAO','VALE_REFEICAO','VALE_PRESENTE','VALE_COMBUSTIVEL','DUPLICATA_MERCANTIL','BOLETO_BANCARIO','DEPOSITO_BANCARIO','PAGAMENTO_INSTANTANEO_PIX_DINAMICO','TRANSFERENCIA_BANCARIA','CASHBACK','PAGAMENTO_INSTANTANEO_PIX_ESTATICO','CREDITO_LOJA','PAGAMENTO_ELETRONICO_NAO_INFORMADO','SEM_PAGAMENTO','OUTROS')),
+    modalidade TEXT CHECK(modalidade IN ('SIMPLES','COMPOSTO')),
+    dias_para_juros INTEGER,
+    tipo_valor_mora_diaria TEXT CHECK(tipo_valor_mora_diaria IN ('VALOR','PERCENTUAL')),
+    mora_diaria_por_atraso REAL,
+    dias_para_multa INTEGER,
+    tipo_valor_multa TEXT CHECK(tipo_valor_multa IN ('VALOR','PERCENTUAL')),
+    valor_multa_por_atraso REAL,
+    emite_documento_vinculado INTEGER DEFAULT 0,
+    quantidade_vias INTEGER,
+    quantidade_autenticacoes INTEGER,
+    especie_pdv TEXT CHECK(especie_pdv IN ('DINHEIRO','CHEQUE','CARTAO_CREDITO','CARTAO_DEBITO','VALE_ALIMENTACAO','VALE_REFEICAO','VALE_PRESENTE','VALE_COMBUSTIVEL','CREDIARIO','CONVENIO','FATURA','CARTAO_INTERNO','VALE_COMPRA','OUTROS','OUTRAS_MOEDAS','BOLETO_BANCARIO','DEPOSITO_BANCARIO','PAGAMENTO_INSTANTANEO_PIX_DINAMICO','RESGATE_FIDELIDADE','CREDITO_ANTECIPADO','TRANSF_BANCARIA_CARTEIRA_DIGIT','PAGAMENTO_INSTANTANEO_PIX_ESTATICO','CREDITO_LOJA','PAGAMENTO_ELETRONICO_NAO_INFORMADO')),
+    controla_limite_credito INTEGER DEFAULT 0,
+    tipo TEXT CHECK(tipo IN ('AVULSO','CONVENIO')),
+    status TEXT CHECK(status IN ('C','U','D','E')) DEFAULT 'U',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_especies_documento_old ON especies_documento(especie_id_old);
-CREATE INDEX idx_especies_documento_status ON especies_documento(status);
+-- HISTÓRICO PADRÃO
 
--- Tabela: Histórico Padrão
 DROP TABLE IF EXISTS historico_padrao;
 CREATE TABLE historico_padrao (
-    historico_id_old TEXT,
-    descricao_old TEXT,
-    status TEXT CHECK(status IN ('C', 'U', 'D')) DEFAULT 'U',
-    historico_id_new INTEGER PRIMARY KEY,
-    descricao_new TEXT,
+    historico_id INTEGER PRIMARY KEY,
+    descricao TEXT,
+    tipo TEXT CHECK(tipo IN ('CREDITO','DEBITO')),
+    status TEXT CHECK(status IN ('C','U','D','E')) DEFAULT 'U',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_historico_padrao_old ON historico_padrao(historico_id_old);
-CREATE INDEX idx_historico_padrao_status ON historico_padrao(status);
+-- MOTIVOS DE CANCELAMENTO
 
--- =====================================================
--- 6. MOTIVOS E FORMAS DE PAGAMENTO
--- =====================================================
-
--- Tabela: Motivos de Cancelamento
 DROP TABLE IF EXISTS motivos_cancelamento;
 CREATE TABLE motivos_cancelamento (
-    motivo_id_old TEXT,
-    descricao_old TEXT,
-    status TEXT CHECK(status IN ('C', 'U', 'D')) DEFAULT 'U',
-    motivo_id_new INTEGER PRIMARY KEY,
-    descricao_new TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+	 motivo_id INTEGER PRIMARY KEY,
+	 descricao TEXT,
+	 tipo_aplicacao TEXT CHECK(tipo_aplicacao IN ('ITEM','CUPOM','AMBOS')),
+	 solicita_justificativa INTEGER DEFAULT 0,
+	 status TEXT CHECK(status IN ('C','U','D','E')) DEFAULT 'U',
+	 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+	 updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_motivos_cancelamento_old ON motivos_cancelamento(motivo_id_old);
-CREATE INDEX idx_motivos_cancelamento_status ON motivos_cancelamento(status);
+-- MOTIVOS DE DESCONTO
 
--- Tabela: Motivos de Desconto
 DROP TABLE IF EXISTS motivos_desconto;
 CREATE TABLE motivos_desconto (
-    motivo_id_old TEXT,
-    descricao_old TEXT,
-    percentual_old REAL,
-    status TEXT CHECK(status IN ('C', 'U', 'D')) DEFAULT 'U',
-    motivo_id_new INTEGER PRIMARY KEY,
-    descricao_new TEXT,
-    percentual_new REAL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+	 motivo_id INTEGER PRIMARY KEY,
+	 descricao TEXT,
+	 tipo_aplicacao_desconto TEXT CHECK(tipo_aplicacao_desconto IN ('ITEM','SUB_TOTAL','AMBOS')),
+	 tipo_calculo_aplicacao_desconto TEXT CHECK(tipo_calculo_aplicacao_desconto IN ('PERCENTUAL','VALOR','PERCENTUAL_E_VALOR')),
+	 solicita_justificativa INTEGER DEFAULT 0,
+	 desconto_fidelidade INTEGER DEFAULT 0,
+	 status TEXT CHECK(status IN ('C','U','D','E')) DEFAULT 'U',
+	 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+	 updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_motivos_desconto_old ON motivos_desconto(motivo_id_old);
-CREATE INDEX idx_motivos_desconto_status ON motivos_desconto(status);
+-- MOTIVOS DE DEVOLUÇÃO
 
--- Tabela: Motivos de Devolução
 DROP TABLE IF EXISTS motivos_devolucao;
 CREATE TABLE motivos_devolucao (
-    motivo_id_old TEXT,
-    descricao_old TEXT,
-    status TEXT CHECK(status IN ('C', 'U', 'D')) DEFAULT 'U',
-    motivo_id_new INTEGER PRIMARY KEY,
-    descricao_new TEXT,
+    motivo_id INTEGER PRIMARY KEY,
+    descricao TEXT,
+    status TEXT CHECK(status IN ('C','U','D','E')) DEFAULT 'U',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_motivos_devolucao_old ON motivos_devolucao(motivo_id_old);
-CREATE INDEX idx_motivos_devolucao_status ON motivos_devolucao(status);
+-- PAGAMENTOS PDV
 
--- Tabela: Pagamentos PDV
 DROP TABLE IF EXISTS pagamentos_pdv;
 CREATE TABLE pagamentos_pdv (
-    pagamento_id_old TEXT,
-    descricao_old TEXT,
-    status TEXT CHECK(status IN ('C', 'U', 'D')) DEFAULT 'U',
-    pagamento_id_new INTEGER PRIMARY KEY,
-    descricao_new TEXT,
+    pagamento_id INTEGER PRIMARY KEY,
+    descricao TEXT,
+    categoria_id INTEGER,
+    loja_id INTEGER,
+    valor_maximo REAL,
+    status TEXT CHECK(status IN ('C','U','D','E')) DEFAULT 'U',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (loja_id) REFERENCES lojas(loja_id) ON DELETE SET NULL,
+    FOREIGN KEY (categoria_id) REFERENCES categorias(categoria_id) ON DELETE SET NULL
 );
 
-CREATE INDEX idx_pagamentos_pdv_old ON pagamentos_pdv(pagamento_id_old);
-CREATE INDEX idx_pagamentos_pdv_status ON pagamentos_pdv(status);
+-- RECEBIMENTOS PDV
 
--- Tabela: Recebimentos PDV
 DROP TABLE IF EXISTS recebimentos_pdv;
 CREATE TABLE recebimentos_pdv (
-    recebimento_id_old TEXT,
-    descricao_old TEXT,
-    status TEXT CHECK(status IN ('C', 'U', 'D')) DEFAULT 'U',
-    recebimento_id_new INTEGER PRIMARY KEY,
-    descricao_new TEXT,
+    recebimento_id INTEGER PRIMARY KEY,
+    id_externo TEXT,
+    descricao TEXT,
+    categoria_id INTEGER,
+    loja_id INTEGER,
+    tipo_recebimento TEXT CHECK(tipo_recebimento IN ('PROPRIO','TERCEIRO','TAXA')),
+    qtd_autenticacoes INTEGER DEFAULT 0,
+    imprime_doc INTEGER DEFAULT 0,
+    qtd_impressoes INTEGER DEFAULT 0,
+    valor_recebimento REAL DEFAULT 0,
+    status TEXT CHECK(status IN ('C','U','D','E')) DEFAULT 'U',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (loja_id) REFERENCES lojas(loja_id) ON DELETE SET NULL,
+    FOREIGN KEY (categoria_id) REFERENCES categorias(categoria_id) ON DELETE SET NULL
 );
 
-CREATE INDEX idx_recebimentos_pdv_old ON recebimentos_pdv(recebimento_id_old);
-CREATE INDEX idx_recebimentos_pdv_status ON recebimentos_pdv(status);
+-- IMPOSTOS FEDERAIS
 
--- =====================================================
--- 7. FISCAL E TRIBUTÁRIO
--- =====================================================
-
--- Tabela: Impostos Federais
 DROP TABLE IF EXISTS impostos_federais;
 CREATE TABLE impostos_federais (
-    imposto_id_old TEXT,
-    descricao_old TEXT,
-    status TEXT CHECK(status IN ('C', 'U', 'D')) DEFAULT 'U',
-    imposto_id_new INTEGER PRIMARY KEY,
-    descricao_new TEXT,
+    imposto_id INTEGER PRIMARY KEY,
+    descricao TEXT,
+    tipo_imposto TEXT CHECK(tipo_imposto IN ('PIS','COFINS','IRPJ','CSLL','OUTROS')),
+    cst_entrada_real TEXT,
+    cst_saida_real TEXT,
+    aliquota_entrada_real REAL DEFAULT 0,
+    aliquota_saida_real REAL DEFAULT 0,
+    cst_entrada_presumido TEXT,
+    cst_saida_presumido TEXT,
+    aliquota_entrada_presumido REAL DEFAULT 0,
+    aliquota_saida_presumido REAL DEFAULT 0,
+    cst_entrada_simples TEXT,
+    cst_saida_simples TEXT,
+    status TEXT CHECK(status IN ('C','U','D','E')) DEFAULT 'U',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_impostos_federais_old ON impostos_federais(imposto_id_old);
-CREATE INDEX idx_impostos_federais_status ON impostos_federais(status);
+-- REGIME TRIBUTÁRIO
 
--- Tabela: Regime Tributário
 DROP TABLE IF EXISTS regime_tributario;
 CREATE TABLE regime_tributario (
-    regime_id_old TEXT,
-    descricao_old TEXT,
-    status TEXT CHECK(status IN ('C', 'U', 'D')) DEFAULT 'U',
-    regime_id_new INTEGER PRIMARY KEY,
-    descricao_new TEXT,
+    regime_id INTEGER PRIMARY KEY,
+    descricao TEXT,
+    classificacao TEXT CHECK(classificacao IN ('N','E','A','S')),
+    loja INTEGER DEFAULT 0,
+    fornecedor INTEGER DEFAULT 0,
+    status TEXT CHECK(status IN ('C','U','D','E')) DEFAULT 'U',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_regime_tributario_old ON regime_tributario(regime_id_old);
-CREATE INDEX idx_regime_tributario_status ON regime_tributario(status);
+-- SITUAÇÕES FISCAIS
 
--- Tabela: Situações Fiscais
 DROP TABLE IF EXISTS situacoes_fiscais;
 CREATE TABLE situacoes_fiscais (
-    situacao_id_old TEXT,
-    descricao_old TEXT,
-    status TEXT CHECK(status IN ('C', 'U', 'D')) DEFAULT 'U',
-    situacao_id_new INTEGER PRIMARY KEY,
-    descricao_new TEXT,
+    situacao_id INTEGER PRIMARY KEY,
+    descricao TEXT,
+    descricao_completa TEXT,
+    substituto INTEGER DEFAULT 0,
+    status TEXT CHECK(status IN ('C','U','D','E')) DEFAULT 'U',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_situacoes_fiscais_old ON situacoes_fiscais(situacao_id_old);
-CREATE INDEX idx_situacoes_fiscais_status ON situacoes_fiscais(status);
+-- TABELAS TRIBUTÁRIAS ENTRADA
 
--- Tabela: Tabelas Tributárias Entrada
 DROP TABLE IF EXISTS tabelas_tributarias_entrada;
 CREATE TABLE tabelas_tributarias_entrada (
-    tabela_id_old TEXT,
-    descricao_old TEXT,
-    status TEXT CHECK(status IN ('C', 'U', 'D')) DEFAULT 'U',
-    tabela_id_new INTEGER PRIMARY KEY,
-    descricao_new TEXT,
+    tabela_id INTEGER,
+    regime_estadual_id INTEGER,
+    situacao_fiscal_id INTEGER,
+    figura_fiscal_id TEXT,
+    uf_origem TEXT,
+    classificacao_pessoa TEXT CHECK(classificacao_pessoa IN ('ENTRADA_DE_INDUSTRIA','ENTRADA_DE_DISTRIBUIDOR','ENTRADA_DE_MICROEMPRESA','ENTRADA_DE_VAREJO','ENTRADA_DE_TRANSFERENCIA')),
+    uf_destino TEXT,
+    tributado_nf REAL DEFAULT 0,
+    isento_nf REAL DEFAULT 0,
+    outros_nf REAL DEFAULT 0,
+    aliquota REAL DEFAULT 0,
+    agregado REAL DEFAULT 0,
+    tributado_icms REAL DEFAULT 0,
+    carga_liquida REAL DEFAULT 0,
+    aliquota_interna REAL DEFAULT 0,
+    fecop REAL DEFAULT 0,
+    fecop_st REAL DEFAULT 0,
+    soma_ipi_bc INTEGER DEFAULT 0,
+    soma_ipi_bs INTEGER DEFAULT 0,
+    st_destacado INTEGER DEFAULT 0,
+    cst_id TEXT,
+    csosn TEXT,
+    tributacao TEXT,
+    cfop_id TEXT,
+    icms_desonerado INTEGER DEFAULT 0,
+    icms_origem TEXT,
+    icms_efetivo INTEGER DEFAULT 0,
+    reducao_origem REAL DEFAULT 0,
+    status TEXT CHECK(status IN ('C','U','D','E')) DEFAULT 'U',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    
+    PRIMARY KEY (tabela_id, classificacao_pessoa, uf_destino),
+    FOREIGN KEY (regime_estadual_id) REFERENCES regime_tributario(regime_id) ON DELETE SET NULL,
+    FOREIGN KEY (situacao_fiscal_id) REFERENCES situacoes_fiscais(situacao_id) ON DELETE SET NULL
 );
 
-CREATE INDEX idx_tabelas_tributarias_entrada_old ON tabelas_tributarias_entrada(tabela_id_old);
-CREATE INDEX idx_tabelas_tributarias_entrada_status ON tabelas_tributarias_entrada(status);
+-- TABELAS TRIBUTÁRIAS SAÍDA
 
--- Tabela: Tabelas Tributárias Saída
 DROP TABLE IF EXISTS tabelas_tributarias_saida;
 CREATE TABLE tabelas_tributarias_saida (
-    tabela_id_old TEXT,
-    descricao_old TEXT,
-    status TEXT CHECK(status IN ('C', 'U', 'D')) DEFAULT 'U',
-    tabela_id_new INTEGER PRIMARY KEY,
-    descricao_new TEXT,
+    tabela_id INTEGER,
+    regime_estadual_id INTEGER,
+    situacao_fiscal_id INTEGER,
+    figura_fiscal_id TEXT,
+    uf_origem TEXT,
+    classificacao_pessoa TEXT CHECK(classificacao_pessoa IN ('SAIDA_PARA_CONTRIBUINTE','SAIDA_PARA_NAO_CONTRIBUINTE','SAIDA_PARA_TRANSFERENCIA')),
+    uf_destino TEXT,
+    tributado_nf REAL DEFAULT 0,
+    isento_nf REAL DEFAULT 0,
+    outros_nf REAL DEFAULT 0,
+    aliquota REAL DEFAULT 0,
+    agregado REAL DEFAULT 0,
+    tributado_icms REAL DEFAULT 0,
+    carga_liquida REAL DEFAULT 0,
+    aliquota_interna REAL DEFAULT 0,
+    fecop REAL DEFAULT 0,
+    fecop_st REAL DEFAULT 0,
+    soma_ipi_bc INTEGER DEFAULT 0,
+    soma_ipi_bs INTEGER DEFAULT 0,
+    st_destacado INTEGER DEFAULT 0,
+    cst_id TEXT,
+    csosn TEXT,
+    tributacao TEXT,
+    cfop_id TEXT,
+    icms_desonerado INTEGER DEFAULT 0,
+    icms_origem TEXT,
+    icms_efetivo INTEGER DEFAULT 0,
+    reducao_origem REAL DEFAULT 0,
+    status TEXT CHECK(status IN ('C','U','D','E')) DEFAULT 'U',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    
+    PRIMARY KEY (tabela_id, classificacao_pessoa, uf_destino),
+    FOREIGN KEY (regime_estadual_id) REFERENCES regime_tributario(regime_id) ON DELETE SET NULL,
+    FOREIGN KEY (situacao_fiscal_id) REFERENCES situacoes_fiscais(situacao_id) ON DELETE SET NULL
 );
 
-CREATE INDEX idx_tabelas_tributarias_saida_old ON tabelas_tributarias_saida(tabela_id_old);
-CREATE INDEX idx_tabelas_tributarias_saida_status ON tabelas_tributarias_saida(status);
+-- TIPOS DE OPERAÇÕES
 
--- Tabela: Tipos de Operações
 DROP TABLE IF EXISTS tipos_operacoes;
 CREATE TABLE tipos_operacoes (
-    tipo_id_old TEXT,
-    descricao_old TEXT,
-    status TEXT CHECK(status IN ('C', 'U', 'D')) DEFAULT 'U',
-    tipo_id_new INTEGER PRIMARY KEY,
-    descricao_new TEXT,
+    operacao_id INTEGER PRIMARY KEY,
+    descricao TEXT,
+    tipo_de_operacao TEXT,
+    tipo_geracao_financeiro TEXT,
+    modalidade TEXT,
+    tipo_documento TEXT,
+    origem_da_nota TEXT,
+    atualiza_custos INTEGER DEFAULT 0,
+    atualiza_estoque INTEGER DEFAULT 0,
+    incide_impostos_federais INTEGER DEFAULT 0,
+    ipi_compoe_base_pis_cofins INTEGER DEFAULT 0,
+    outras_desp_base_pis_cofins INTEGER DEFAULT 0,
+    outras_desp_base_icms INTEGER DEFAULT 0,
+    gera_fiscal INTEGER DEFAULT 0,
+    destaca_ipi INTEGER DEFAULT 0,
+    destaca_icms INTEGER DEFAULT 0,
+    compoe_abc INTEGER DEFAULT 0,
+    imprime_descricao_nfe INTEGER DEFAULT 0,
+    envia_observacao_nfe INTEGER DEFAULT 0,
+    utiliza_conferencia INTEGER DEFAULT 0,
+    cfop_no_estado TEXT,
+    cfop_fora_do_estado TEXT,
+    cfop_exterior TEXT,
+    observacao TEXT,
+    codigo_cst TEXT,
+    cfops_relacionados TEXT,
+    status TEXT CHECK(status IN ('C','U','D','E')) DEFAULT 'U',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_tipos_operacoes_old ON tipos_operacoes(tipo_id_old);
-CREATE INDEX idx_tipos_operacoes_status ON tipos_operacoes(status);
+-- TIPOS DE AJUSTES
 
--- Tabela: Tipos de Ajustes
 DROP TABLE IF EXISTS tipos_ajustes;
 CREATE TABLE tipos_ajustes (
-    tipo_id_old TEXT,
-    descricao_old TEXT,
-    status TEXT CHECK(status IN ('C', 'U', 'D')) DEFAULT 'U',
-    tipo_id_new INTEGER PRIMARY KEY,
-    descricao_new TEXT,
+    ajuste_id INTEGER PRIMARY KEY,
+    descricao TEXT,
+    tipo TEXT CHECK(tipo IN ('ENTRADA','SAIDA')),
+    tipo_de_operacao TEXT,
+    tipo_reservado TEXT,
+    status TEXT CHECK(status IN ('C','U','D','E')) DEFAULT 'U',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_tipos_ajustes_old ON tipos_ajustes(tipo_id_old);
-CREATE INDEX idx_tipos_ajustes_status ON tipos_ajustes(status);
-
--- =====================================================
--- 8. LOGS DE SINCRONIZAÇÃO
--- =====================================================
+-- LOGS DE SINCRONIZAÇÃO
 
 DROP TABLE IF EXISTS log_sincronizacao;
 CREATE TABLE log_sincronizacao (
@@ -561,9 +703,7 @@ CREATE INDEX idx_log_entidade ON log_sincronizacao(entidade);
 CREATE INDEX idx_log_status ON log_sincronizacao(status);
 CREATE INDEX idx_log_data ON log_sincronizacao(data_execucao);
 
--- =====================================================
--- 9. TRIGGERS PARA ATUALIZAÇÃO AUTOMÁTICA
--- =====================================================
+-- TRIGGERS PARA ATUALIZAÇÃO AUTOMÁTICA
 
 -- Trigger: Atualizar data de modificação em Seções
 DROP TRIGGER IF EXISTS update_secoes_timestamp;
@@ -661,9 +801,7 @@ BEGIN
     UPDATE contas_correntes SET updated_at = CURRENT_TIMESTAMP WHERE conta_id_new = NEW.conta_id_new;
 END;
 
--- =====================================================
--- 10. VIEWS ÚTEIS
--- =====================================================
+-- VIEWS ÚTEIS
 
 -- View: Produtos Completo
 DROP VIEW IF EXISTS vw_produtos_completo;
@@ -803,8 +941,6 @@ SELECT
     SUM(CASE WHEN status = 'D' THEN 1 ELSE 0 END) AS deletados
 FROM lojas;
 
--- =====================================================
 -- FIM DO SCRIPT
--- =====================================================
 
 SELECT 'Banco de dados criado com sucesso! ✅' AS mensagem;
