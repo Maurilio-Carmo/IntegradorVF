@@ -39,7 +39,7 @@ CREATE TABLE grupos (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     
-    FOREIGN KEY (secao_id) REFERENCES secoes(secao_id) ON UPDATE CASCADE ON DELETE RESTRICT
+    FOREIGN KEY (secao_id) REFERENCES secoes(secao_id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE INDEX idx_grupos_grupo ON grupos(secao_id, grupo_id);
@@ -57,8 +57,7 @@ CREATE TABLE subgrupos (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     
-    FOREIGN KEY (secao_id) REFERENCES secoes(secao_id) ON UPDATE CASCADE ON DELETE RESTRICT,
-    FOREIGN KEY (grupo_id) REFERENCES grupos(grupo_id) ON UPDATE CASCADE ON DELETE RESTRICT
+    FOREIGN KEY (grupo_id) REFERENCES grupos(grupo_id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE INDEX idx_subgrupos_subgrupo ON subgrupos(secao_id, grupo_id, subgrupo_id);
