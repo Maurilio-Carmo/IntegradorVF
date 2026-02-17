@@ -2,42 +2,61 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Integrador Varejo Fácil</title>
 
+    <!-- SEO Meta Tags -->
+    <title>Integrador Varejo Fácil</title>
+    <meta name="description" content="Sistema para sincronização de dados entre API, banco local. Gerenciamento de dados simplificado.">
+    <meta name="keywords" content="integrador Varejo Fácil, sincronização api, importação, atualização e manutenção de dados">
+    <meta name="author" content="Maurilio Carmo">
+
+    <!-- Favicons -->
+    <link rel="icon" type="image/png" href="./assets/icons/favicon-96x96.png">
+    <link rel="icon" type="image/svg+xml" href="./assets/icons/favicon.svg">
+    <link rel="shortcut icon" href="./assets/icons/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="./assets/icons/apple-touch-icon.png">
+    <link rel="manifest" href="./assets/icons/site.webmanifest">
+
+    <!-- CSS -->
     <link rel="stylesheet" href="assets/css/main.css">
 
 </head>
+
 <body>
     <!-- Container Principal -->
     <div id="app">
+
         <!-- Header Component -->
-        <div id="header-component"></div>
+        <div id="header-component" role="banner"></div>
 
         <!-- Main Content -->
-        <main class="main">
+        <main class="main" id="main-content" role="main">
             <div class="container">
-                
+
                 <!-- Config Component (Modal) -->
-                <div id="config-component"></div>
+                <div id="config-component" aria-label="Configurações"></div>
 
                 <!-- Dashboard Section -->
-                <section id="dashboard-section" class="section">
+                <section id="dashboard-section" class="section" aria-label="Painel de controle de sincronização">
+
                     <!-- Stats Component -->
                     <div id="stats-component"></div>
 
-                    <!-- Import Tabs Component (NOVO) -->
+                    <!-- Import Tabs Component -->
                     <div id="import-tabs-component"></div>
 
                     <!-- Log Component -->
                     <div id="log-component"></div>
+
                 </section>
 
             </div>
         </main>
 
         <!-- Footer Component -->
-        <div id="footer-component"></div>
+        <div id="footer-component" role="contentinfo"></div>
+
     </div>
 
     <!-- Core Scripts -->
