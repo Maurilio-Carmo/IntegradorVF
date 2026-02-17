@@ -67,11 +67,15 @@ export const AppInitializer = {
             await this.initTabs();
             console.log('✅ Tabs inicializadas');
 
-            // 6. Carregar estatísticas do banco
+            // 6. Conectar Statistics ao sistema de tabs
+            await this.initStatisticsTab();
+            console.log('✅ Statistics vinculado às tabs');
+
+            // 7. Carregar estatísticas do banco
             await this.initStatistics();
             console.log('✅ Estatísticas carregadas');
 
-            // 7. Finalização
+            // 8. Finalização
             this.onInitComplete();
 
             console.log('✅ Aplicação inicializada com sucesso!');
@@ -153,6 +157,14 @@ export const AppInitializer = {
             Tabs.init();
             resolve();
         });
+    },
+
+    /**
+     * Inicializa com a aba ativa atual
+     */
+    async initStatisticsTab() {
+        const activeTab = Tabs.getActiveTab(); 
+        UI.statistics.init(activeTab);
     },
 
     /**

@@ -1,6 +1,6 @@
 /**
  * stats.css
- * Cards de estatísticas
+ * Cards de estatísticas e agrupamento por seção/módulo
  */
 
 .stat-card {
@@ -54,29 +54,61 @@
 
 /* Container de seção */
 .stats-section {
+    display: none; 
     margin-bottom: var(--spacing-2xl);
 }
 
-/* Título da seção */
+.stats-section--active {
+    display: block;
+    animation: statsFadeIn 0.25s ease;
+}
+
+.stats-section--hidden {
+    display: none;
+}
+
 .stats-section-title {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-xs);
+    border-bottom: 2px solid var(--border-color);
     font-size: var(--font-size-base);
     font-weight: var(--font-weight-semibold);
     color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    margin-bottom: var(--spacing-md);
-    padding-bottom: var(--spacing-xs);
-    border-bottom: 2px solid var(--border-color);
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
 }
 
 .stats-section-icon {
     font-size: var(--font-size-lg);
 }
 
+/* ANIMAÇÃO */
+
+@keyframes statsFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 /* Modo escuro */
+
+[data-theme="dark"] .stat-icon,
+[data-theme="dark"] .btn-toggle-password {
+    background: var(--bg-tertiary);
+}
+
+[data-theme="dark"] .stat-card:hover {
+    background: var(--bg-tertiary);
+}
+
 [data-theme="dark"] .stats-section-title {
     border-bottom-color: var(--border-color-dark);
     color: var(--text-tertiary);
