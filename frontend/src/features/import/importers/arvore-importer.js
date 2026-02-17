@@ -9,12 +9,12 @@ import { ImportBase } from '../import-base.js';
 import API from '../../../services/api/index.js';
 import UI from '../../../ui/ui.js';
 
-export class ArvoreMercadologicaImporter extends ImportBase {
+export class MercadologiaImporter extends ImportBase {
     
     /**
      * Importar estrutura completa: Seções → Grupos → Subgrupos
      */
-    async importarArvoreMercadologica(uiElement) {
+    async importarMercadologia(uiElement) {
         try {
             UI.log('📋 Sequência: Seções → Grupos → Subgrupos', 'info');
 
@@ -123,4 +123,4 @@ export class ArvoreMercadologicaImporter extends ImportBase {
     }
 }
 
-export default ArvoreMercadologicaImporter;
+export default MercadologiaImporter;

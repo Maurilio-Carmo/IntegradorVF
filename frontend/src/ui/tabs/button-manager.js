@@ -29,7 +29,7 @@ export class ImportButtonManager {
     _buildActionMap() {
         return {
             // PRODUTO
-            'importar-arvore-mercadologica': 'importarArvoreMercadologica',
+            'importar-mercadologia':         'importarMercadologia',
             'importar-marcas':               'importarMarcas',
             'importar-familias':             'importarFamilias',
             'importar-produtos':             'importarProdutos',
@@ -72,7 +72,7 @@ export class ImportButtonManager {
     _buildBulkMap() {
         return {
             'btnImportarTudoProduto': [
-                'importarArvoreMercadologica',
+                'importarMercadologia',
                 'importarMarcas',
                 'importarFamilias',
                 'importarProdutos'

@@ -11,7 +11,7 @@ import { FinanceiroImporter } from './importers/financeiro-importer.js';
 import { PDVImporter } from './importers/pdv-importer.js';
 import { FiscalImporter } from './importers/fiscal-importer.js';
 import { EstoqueImporter } from './importers/estoque-importer.js';
-import { ArvoreMercadologicaImporter } from './importers/arvore-importer.js';
+import { MercadologiaImporter } from './importers/arvore-importer.js';
 import DatabaseClient from '../../services/database/db-client.js';
 import UI from '../../ui/ui.js';
 
@@ -22,7 +22,7 @@ const financeiroImporter = new FinanceiroImporter();
 const pdvImporter = new PDVImporter();
 const fiscalImporter = new FiscalImporter();
 const estoqueImporter = new EstoqueImporter();
-const arvoreMercadologicaImporter = new ArvoreMercadologicaImporter();
+const mercadologiaImporter = new MercadologiaImporter();
 const db = new DatabaseClient();
 
 /**
@@ -64,9 +64,9 @@ const Importacao = {
      * Importar Árvore Mercadológica Completa
      * Importa Seções + Grupos + Subgrupos em sequência
      */
-    async importarArvoreMercadologica(uiElement) {
-        const result = await arvoreMercadologicaImporter.importarArvoreMercadologica(uiElement);
-        
+    async importarMercadologia(uiElement) {
+        const result = await mercadologiaImporter.importarMercadologia(uiElement);
+
         // Atualizar estatísticas após importação
         await this.atualizarEstatisticas();
         
