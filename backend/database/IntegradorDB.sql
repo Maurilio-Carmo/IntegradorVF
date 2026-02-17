@@ -8,11 +8,11 @@ PRAGMA foreign_keys = ON;
 
 -- =====================================================
 -- LEGENDA DE STATUS:
--- D = Deleted/Deletado (⛔)
--- U = Unmatched/Não vinculado (♻️)
--- C = Created/Vinculado (✳️)
--- E = Error/Erro (❌)
--- S = Success/Sucesso (✅)
+-- D = Deleted/Deletar  (⛔)
+-- U = Update/Atualizar (♻️)
+-- C = Created/Criar    (✳️)
+-- E = Error/Erro       (❌)
+-- S = Success/Sucesso  (✅)
 -- =====================================================
 
 -- =====================================================
@@ -22,92 +22,73 @@ PRAGMA foreign_keys = ON;
 -- Tabela: Seções
 DROP TABLE IF EXISTS secoes;
 CREATE TABLE secoes (
-    secao_id_old TEXT,
+    secao_id INTEGER PRIMARY KEY,
     descricao_old TEXT,
-    status TEXT CHECK(status IN ('C', 'U', 'D')) DEFAULT 'U',
-    secao_id_new INTEGER PRIMARY KEY,
     descricao_new TEXT,
+    status TEXT CHECK (status IN ('C','U','D')) DEFAULT 'U',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_secoes_old ON secoes(secao_id_old);
-CREATE INDEX idx_secoes_status ON secoes(status);
+CREATE INDEX idx_secoes ON secoes(secao_id);
 
 -- Tabela: Grupos
 DROP TABLE IF EXISTS grupos;
 CREATE TABLE grupos (
-    secao_id_old TEXT,
-    grupo_id_old TEXT,
+    grupo_id INTEGER PRIMARY KEY,
+    secao_id INTEGER NOT NULL,
     descricao_old TEXT,
-    status TEXT CHECK(status IN ('C', 'U', 'D')) DEFAULT 'U',
-    secao_id_new INTEGER,
-    grupo_id_new INTEGER PRIMARY KEY,
     descricao_new TEXT,
+    status TEXT CHECK (status IN ('C','U','D')) DEFAULT 'U',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (secao_id_new) REFERENCES secoes(secao_id_new) ON DELETE SET NULL
+    FOREIGN KEY (secao_id) REFERENCES secoes(secao_id) ON UPDATE CASCADE ON DELETE RESTRICT
 );
 
-CREATE INDEX idx_grupos_old ON grupos(grupo_id_old);
-CREATE INDEX idx_grupos_secao_old ON grupos(secao_id_old);
-CREATE INDEX idx_grupos_secao_new ON grupos(secao_id_new);
-CREATE INDEX idx_grupos_status ON grupos(status);
+CREATE INDEX idx_grupos ON grupos(secao_id, grupo_id);
 
 -- Tabela: Subgrupos
 DROP TABLE IF EXISTS subgrupos;
 CREATE TABLE subgrupos (
-    secao_id_old TEXT,
-    grupo_id_old TEXT,
-    subgrupo_id_old TEXT,
+    subgrupo_id INTEGER PRIMARY KEY,
+    secao_id INTEGER NOT NULL,
+    grupo_id INTEGER NOT NULL,
     descricao_old TEXT,
-    status TEXT CHECK(status IN ('C', 'U', 'D')) DEFAULT 'U',
-    secao_id_new INTEGER,
-    grupo_id_new INTEGER,
-    subgrupo_id_new INTEGER PRIMARY KEY,
     descricao_new TEXT,
+    status TEXT CHECK (status IN ('C','U','D')) DEFAULT 'U',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (secao_id_new) REFERENCES secoes(secao_id_new) ON DELETE SET NULL,
-    FOREIGN KEY (grupo_id_new) REFERENCES grupos(grupo_id_new) ON DELETE SET NULL
+    FOREIGN KEY (secao_id) REFERENCES secoes(secao_id) ON UPDATE CASCADE ON DELETE RESTRICT,
+    FOREIGN KEY (grupo_id) REFERENCES grupos(grupo_id) ON UPDATE CASCADE ON DELETE RESTRICT
 );
 
-CREATE INDEX idx_subgrupos_old ON subgrupos(subgrupo_id_old);
-CREATE INDEX idx_subgrupos_grupo_old ON subgrupos(grupo_id_old);
-CREATE INDEX idx_subgrupos_secao_old ON subgrupos(secao_id_old);
-CREATE INDEX idx_subgrupos_secao_new ON subgrupos(secao_id_new);
-CREATE INDEX idx_subgrupos_grupo_new ON subgrupos(grupo_id_new);
-CREATE INDEX idx_subgrupos_status ON subgrupos(status);
+CREATE INDEX idx_subgrupos ON subgrupos(secao_id, grupo_id, subgrupo_id);
 
 -- Tabela: Marcas
 DROP TABLE IF EXISTS marcas;
 CREATE TABLE marcas (
-    marca_id_old TEXT,
+    marca_id INTEGER PRIMARY KEY,
     descricao_old TEXT,
-    status TEXT CHECK(status IN ('C', 'U', 'D')) DEFAULT 'U',
-    marca_id_new INTEGER PRIMARY KEY,
     descricao_new TEXT,
+    status TEXT CHECK (status IN ('C','U','D')) DEFAULT 'U',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_marcas_old ON marcas(marca_id_old);
-CREATE INDEX idx_marcas_status ON marcas(status);
+CREATE INDEX idx_marcas ON marcas(marca_id);
 
 -- Tabela: Famílias
 DROP TABLE IF EXISTS familias;
 CREATE TABLE familias (
-    familia_id_old TEXT,
+    familia_id INTEGER PRIMARY KEY,
     descricao_old TEXT,
-    status TEXT CHECK(status IN ('C', 'U', 'D')) DEFAULT 'U',
-    familia_id_new INTEGER PRIMARY KEY,
     descricao_new TEXT,
+    status TEXT CHECK (status IN ('C','U','D')) DEFAULT 'U',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_familias_old ON familias(familia_id_old);
-CREATE INDEX idx_familias_status ON familias(status);
+CREATE INDEX idx_familias ON familias(familia_id);
 
 -- =====================================================
 -- 2. PRODUTOS

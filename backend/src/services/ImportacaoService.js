@@ -13,19 +13,17 @@ class ImportacaoService {
 
             const transaction = dbSQLite.db.transaction(() => {
                 const stmt = dbSQLite.db.prepare(`
-                    INSERT OR REPLACE INTO secoes (
-                        secao_id_old, descricao_old, status,
-                        secao_id_new, descricao_new
-                    ) VALUES (?, ?, ?, ?, ?)
+                    INSERT INTO secoes (secao_id, descricao_old, status)
+                    VALUES (?, ?, 'U')
+                    ON CONFLICT(secao_id) DO UPDATE SET
+                        descricao_old = excluded.descricao_old,
+                        updated_at    = CURRENT_TIMESTAMP
                 `);
 
                 for (const secao of secoes) {
                     stmt.run(
-                        secao.id?.toString() || null,
-                        secao.descricao || null,
-                        'U',
-                        null,
-                        null
+                        secao.id,
+                        secao.descricao || null
                     );
                 }
             });
@@ -49,21 +47,19 @@ class ImportacaoService {
 
             const transaction = dbSQLite.db.transaction(() => {
                 const stmt = dbSQLite.db.prepare(`
-                    INSERT OR REPLACE INTO grupos (
-                        secao_id_old, grupo_id_old, descricao_old, status,
-                        secao_id_new, grupo_id_new, descricao_new
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                    INSERT INTO grupos (grupo_id, secao_id, descricao_old, status)
+                    VALUES (?, ?, ?, 'U')
+                    ON CONFLICT(grupo_id) DO UPDATE SET
+                        secao_id      = excluded.secao_id,
+                        descricao_old = excluded.descricao_old,
+                        updated_at    = CURRENT_TIMESTAMP
                 `);
 
                 for (const grupo of grupos) {
                     stmt.run(
-                        grupo.secaoId?.toString() || null,
-                        grupo.id?.toString() || null,
-                        grupo.descricao || null,
-                        'U',
-                        null,
-                        null,
-                        null
+                        grupo.id,
+                        grupo.secaoId,
+                        grupo.descricao || null
                     );
                 }
             });
@@ -87,23 +83,21 @@ class ImportacaoService {
 
             const transaction = dbSQLite.db.transaction(() => {
                 const stmt = dbSQLite.db.prepare(`
-                    INSERT OR REPLACE INTO subgrupos (
-                        secao_id_old, grupo_id_old, subgrupo_id_old, descricao_old, status,
-                        secao_id_new, grupo_id_new, subgrupo_id_new, descricao_new
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    INSERT INTO subgrupos (subgrupo_id, secao_id, grupo_id, descricao_old, status)
+                    VALUES (?, ?, ?, ?, 'U')
+                    ON CONFLICT(subgrupo_id) DO UPDATE SET
+                        secao_id      = excluded.secao_id,
+                        grupo_id      = excluded.grupo_id,
+                        descricao_old = excluded.descricao_old,
+                        updated_at    = CURRENT_TIMESTAMP
                 `);
 
                 for (const subgrupo of subgrupos) {
                     stmt.run(
-                        subgrupo.secaoId?.toString() || null,
-                        subgrupo.grupoId?.toString() || null,
-                        subgrupo.id?.toString() || null,
-                        subgrupo.descricao || null,
-                        'U',
-                        null,
-                        null,
-                        null,
-                        null
+                        subgrupo.id,
+                        subgrupo.secaoId,
+                        subgrupo.grupoId,
+                        subgrupo.descricao || null
                     );
                 }
             });
@@ -127,19 +121,17 @@ class ImportacaoService {
 
             const transaction = dbSQLite.db.transaction(() => {
                 const stmt = dbSQLite.db.prepare(`
-                    INSERT OR REPLACE INTO marcas (
-                        marca_id_old, descricao_old, status,
-                        marca_id_new, descricao_new
-                    ) VALUES (?, ?, ?, ?, ?)
+                    INSERT INTO marcas (marca_id, descricao_old, status)
+                    VALUES (?, ?, 'U')
+                    ON CONFLICT(marca_id) DO UPDATE SET
+                        descricao_old = excluded.descricao_old,
+                        updated_at    = CURRENT_TIMESTAMP
                 `);
 
                 for (const marca of marcas) {
                     stmt.run(
-                        marca.id?.toString() || null,
-                        marca.descricao || null,
-                        'U',
-                        null,
-                        null
+                        marca.id,
+                        marca.descricao || null
                     );
                 }
             });
@@ -163,19 +155,17 @@ class ImportacaoService {
 
             const transaction = dbSQLite.db.transaction(() => {
                 const stmt = dbSQLite.db.prepare(`
-                    INSERT OR REPLACE INTO familias (
-                        familia_id_old, descricao_old, status,
-                        familia_id_new, descricao_new
-                    ) VALUES (?, ?, ?, ?, ?)
+                    INSERT INTO familias (familia_id, descricao_old, status)
+                    VALUES (?, ?, 'U')
+                    ON CONFLICT(familia_id) DO UPDATE SET
+                        descricao_old = excluded.descricao_old,
+                        updated_at    = CURRENT_TIMESTAMP
                 `);
 
                 for (const familia of familias) {
                     stmt.run(
-                        familia.id?.toString() || null,
-                        familia.descricao || null,
-                        'U',
-                        null,
-                        null
+                        familia.id,
+                        familia.descricao || null
                     );
                 }
             });
@@ -188,7 +178,6 @@ class ImportacaoService {
             throw error;
         }
     }
-
     /**
      * Importar produtos
      */

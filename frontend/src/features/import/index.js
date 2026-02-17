@@ -5,12 +5,12 @@
  * Agrupa todos os importadores e expõe métodos públicos
  */
 
-import { ProdutoImporter } from './importers.js';
-import { PessoaImporter } from './importers.js';
-import { FinanceiroImporter } from './importers.js';
-import { PDVImporter } from './importers.js';
-import { FiscalImporter } from './importers.js';
-import { EstoqueImporter } from './importers.js';
+import { ProdutoImporter } from './importers/produto-importer.js';
+import { PessoaImporter } from './importers/pessoa-importer.js';
+import { FinanceiroImporter } from './importers/financeiro-importer.js';
+import { PDVImporter } from './importers/pdv-importer.js';
+import { FiscalImporter } from './importers/fiscal-importer.js';
+import { EstoqueImporter } from './importers/estoque-importer.js';
 import { ArvoreMercadologicaImporter } from './importers/arvore-importer.js';
 import DatabaseClient from '../../services/database/db-client.js';
 import UI from '../../ui/ui.js';
