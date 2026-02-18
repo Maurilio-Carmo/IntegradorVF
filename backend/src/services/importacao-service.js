@@ -154,7 +154,7 @@ class ImportacaoService {
         try {
             const tabelas = [
                 'secoes', 'grupos', 'subgrupos', 'marcas', 'familias', 'produtos',
-                'categorias', 'agentes', 'contas_correntes', 'especies_documentos', 'historico_padrao',
+                'categorias', 'agentes', 'contas_correntes', 'especies_documentos', 'historico_padrao', 
                 'caixas', 'pagamentos_pdv', 'recebimentos_pdv', 'motivos_desconto', 'motivos_devolucao', 'motivos_cancelamento',
                 'regime_tributario', 'situacoes_fiscais', 'tipos_operacoes', 'impostos_federais',
                 'tabelas_tributarias_entrada', 'tabelas_tributarias_saida',

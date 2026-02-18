@@ -34,38 +34,36 @@ export class ImportButtonManager {
             'importar-familias':             'importarFamilias',
             'importar-produtos':             'importarProdutos',
 
-            // PESSOA
-            'importar-lojas':                'importarLojas',
-            'importar-clientes':             'importarClientes',
-            'importar-fornecedores':         'importarFornecedores',
-
             // FINANCEIRO
             'importar-categorias':           'importarCategorias',
             'importar-agentes':              'importarAgentes',
             'importar-contas-correntes':     'importarContasCorrentes',
             'importar-especies-documento':   'importarEspeciesDocumento',
             'importar-historico-padrao':     'importarHistoricoPadrao',
-            'importar-formas-pagamento':     'importarFormasPagamento',
 
             // PDV / FRENTE DE LOJA
             'importar-caixas':               'importarCaixas',
-            'importar-motivos-cancelamento': 'importarMotivosCancelamento',
-            'importar-motivos-desconto':     'importarMotivosDesconto',
-            'importar-motivos-devolucao':    'importarMotivosDevolucao',
             'importar-pagamentos-pdv':       'importarPagamentosPDV',
             'importar-recebimentos-pdv':     'importarRecebimentosPDV',
-
-            // FISCAL
-            'importar-impostos-federais':            'importarImpostosFederais',
-            'importar-regime-tributario':            'importarRegimeTributario',
-            'importar-situacoes-fiscais':            'importarSituacoesFiscais',
-            'importar-tabelas-tributarias-entrada':  'importarTabelasTributariasEntrada',
-            'importar-tabelas-tributarias-saida':    'importarTabelasTributariasSaida',
-            'importar-tipos-operacoes':              'importarTiposOperacoes',
+            'importar-motivos-desconto':     'importarMotivosDesconto',
+            'importar-motivos-devolucao':    'importarMotivosDevolucao',
+            'importar-motivos-cancelamento': 'importarMotivosCancelamento',
 
             // ESTOQUE
             'importar-local-estoque': 'importarLocalEstoque',
-            'importar-tipos-ajustes': 'importarTiposAjustes'
+            'importar-tipos-ajustes': 'importarTiposAjustes',
+
+            // FISCAL
+            'importar-regime-tributario':            'importarRegimeTributario',
+            'importar-situacoes-fiscais':            'importarSituacoesFiscais',
+            'importar-tipos-operacoes':              'importarTiposOperacoes',
+            'importar-impostos-federais':            'importarImpostosFederais',
+            'importar-tabelas-tributarias':          'importarTabelasTributarias',
+
+            // PESSOA
+            'importar-lojas':                'importarLojas',
+            'importar-clientes':             'importarClientes',
+            'importar-fornecedores':         'importarFornecedores',
         };
     }
 
@@ -77,11 +75,6 @@ export class ImportButtonManager {
                 'importarFamilias',
                 'importarProdutos'
             ],
-            'btnImportarTudoPessoa': [
-                'importarLojas',
-                'importarClientes',
-                'importarFornecedores'
-            ],
             'btnImportarTudoFinanceiro': [
                 'importarCategorias',
                 'importarAgentes',
@@ -91,24 +84,28 @@ export class ImportButtonManager {
             ],
             'btnImportarTudoFrenteLoja': [
                 'importarCaixas',
-                'importarMotivosCancelamento',
+                'importarPagamentosPDV',
+                'importarRecebimentosPDV',
                 'importarMotivosDesconto',
                 'importarMotivosDevolucao',
-                'importarPagamentosPDV',
-                'importarRecebimentosPDV'
-            ],
-            'btnImportarTudoFiscal': [
-                'importarImpostosFederais',
-                'importarRegimeTributario',
-                'importarSituacoesFiscais',
-                'importarTabelasTributariasEntrada',
-                'importarTabelasTributariasSaida',
-                'importarTiposOperacoes'
+                'importarMotivosCancelamento'
             ],
             'btnImportarTudoEstoque': [
                 'importarLocalEstoque',
                 'importarTiposAjustes'
-            ]
+            ],
+            'btnImportarTudoFiscal': [
+                'importarRegimeTributario',
+                'importarSituacoesFiscais',
+                'importarTiposOperacoes',
+                'importarImpostosFederais',
+                'importarTabelasTributarias'
+            ],
+            'btnImportarTudoPessoa': [
+                'importarLojas',
+                'importarClientes',
+                'importarFornecedores'
+            ],
         };
     }
 
