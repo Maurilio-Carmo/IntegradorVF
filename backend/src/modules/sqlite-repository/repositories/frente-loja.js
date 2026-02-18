@@ -48,6 +48,9 @@ class FrenteLojaRepository extends BaseRepository {
         );
     }
 
+    // ─── FORMAS DE PAGAMENTO ──────────────────────────────────────────────────
+
+
     // ─── PAGAMENTOS PDV ───────────────────────────────────────────────────────
 
     static importarPagamentosPDV(pagamentos) {

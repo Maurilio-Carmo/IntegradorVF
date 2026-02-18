@@ -28,10 +28,12 @@ export const Statistics = {
         'categorias':                   'statCategorias',
         'agentes':                      'statAgentes',
         'contas_correntes':             'statContasCorrentes',
-        'especies_documento':           'statEspeciesDocumento',
+        'especies_documentos':          'statEspeciesDocumento',
         'historico_padrao':             'statHistoricoPadrao',
+        'limites_credito':              'statLimitesCredito',
         // Frente de Loja
         'caixas':                       'statCaixas',
+        'formas_pagamento':             'statFormasPagamento',
         'motivos_cancelamento':         'statMotivosCancelamento',
         'motivos_desconto':             'statMotivosDesconto',
         'motivos_devolucao':            'statMotivosDevolucao',

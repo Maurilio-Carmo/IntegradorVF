@@ -147,6 +147,31 @@ class ImportacaoService {
     static async importarFornecedores(fornecedores) {
         return Pessoa.importarFornecedores(fornecedores);
     }
+
+    // ESTATÍSTICAS
+
+    static async obterEstatisticas() {
+        try {
+            const tabelas = [
+                'secoes', 'grupos', 'subgrupos', 'marcas', 'familias', 'produtos',
+                'categorias', 'agentes', 'contas_correntes', 'especies_documentos', 'historico_padrao',
+                'caixas', 'pagamentos_pdv', 'recebimentos_pdv', 'motivos_desconto', 'motivos_devolucao', 'motivos_cancelamento',
+                'regime_tributario', 'situacoes_fiscais', 'tipos_operacoes', 'impostos_federais',
+                'tabelas_tributarias_entrada', 'tabelas_tributarias_saida',
+                'local_estoque', 'tipos_ajustes',
+                'lojas', 'clientes', 'fornecedores',
+            ];
+
+            return tabelas.reduce((acc, tabela) => {
+                acc[tabela] = dbSQLite.count(tabela);
+                return acc;
+            }, {});
+
+        } catch (error) {
+            console.error('❌ Erro ao obter estatísticas:', error.message);
+            return {};
+        }
+    }
 }
 
 module.exports = ImportacaoService;

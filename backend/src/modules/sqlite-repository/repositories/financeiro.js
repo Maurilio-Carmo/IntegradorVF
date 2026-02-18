@@ -197,7 +197,6 @@ class FinanceiroRepository extends BaseRepository {
         );
     }
 
-
     // ─── HISTÓRICO PADRÃO ─────────────────────────────────────────────────────
 
     static importarHistoricoPadrao(historicos) {
@@ -220,6 +219,10 @@ class FinanceiroRepository extends BaseRepository {
             }]
         );
     }
+
+    // ─── LIMITE DE CRÉDITO ─────────────────────────────────────────────────────
+
+
 }
 
 module.exports = FinanceiroRepository;
