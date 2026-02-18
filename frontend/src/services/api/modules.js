@@ -54,6 +54,14 @@ export class PDVAPI extends APIBase {
         return await this.fetchAll('pdv/caixas', onProgress);
     }
 
+    async buscarPagamentosPDV(onProgress) {
+        return await this.fetchAll('financeiro/pagamentos-pdv', onProgress);
+    }
+
+    async buscarRecebimentosPDV(onProgress) {
+        return await this.fetchAll('financeiro/recebimentos-pdv', onProgress);
+    }
+
     async buscarMotivosCancelamento(onProgress) {
         return await this.fetchAll('motivos-cancelamento', onProgress);
     }
@@ -64,14 +72,6 @@ export class PDVAPI extends APIBase {
 
     async buscarMotivosDevolucao(onProgress) {
         return await this.fetchAll('financeiro/motivos-devolucao', onProgress);
-    }
-
-    async buscarPagamentosPDV(onProgress) {
-        return await this.fetchAll('financeiro/pagamentos-pdv', onProgress);
-    }
-
-    async buscarRecebimentosPDV(onProgress) {
-        return await this.fetchAll('financeiro/recebimentos-pdv', onProgress);
     }
 }
 
@@ -96,6 +96,7 @@ export class FiscalAPI extends APIBase {
     async buscarTabelasTributarias(onProgress) {
         return await this.fetchAll('fiscal/tabelas-tributarias', onProgress);
     }
+}
 
 // ESTOQUE API
 export class EstoqueAPI extends APIBase {
