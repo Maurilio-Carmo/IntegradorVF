@@ -5,78 +5,47 @@
  * Agrupa todos os importadores e expõe métodos públicos
  */
 
-import { ProdutoImporter } from './importers/produto-importer.js';
-import { PessoaImporter } from './importers/pessoa-importer.js';
-import { FinanceiroImporter } from './importers/financeiro-importer.js';
-import { PDVImporter } from './importers/pdv-importer.js';
-import { FiscalImporter } from './importers/fiscal-importer.js';
-import { EstoqueImporter } from './importers/estoque-importer.js';
+import { ProdutoImporter }      from './importers/produto-importer.js';
+import { PessoaImporter }       from './importers/pessoa-importer.js';
+import { FinanceiroImporter }   from './importers/financeiro-importer.js';
+import { PDVImporter }          from './importers/pdv-importer.js';
+import { FiscalImporter }       from './importers/fiscal-importer.js';
+import { EstoqueImporter }      from './importers/estoque-importer.js';
 import { MercadologiaImporter } from './importers/arvore-importer.js';
-import DatabaseClient from '../../services/database/db-client.js';
-import UI from '../../ui/ui.js';
+import DatabaseClient           from '../../services/database/db-client.js';
+import UI                       from '../../ui/ui.js';
 
-// Instanciar importadores
-const produtoImporter = new ProdutoImporter();
-const pessoaImporter = new PessoaImporter();
-const financeiroImporter = new FinanceiroImporter();
-const pdvImporter = new PDVImporter();
-const fiscalImporter = new FiscalImporter();
-const estoqueImporter = new EstoqueImporter();
+const produtoImporter      = new ProdutoImporter();
+const pessoaImporter       = new PessoaImporter();
+const financeiroImporter   = new FinanceiroImporter();
+const pdvImporter          = new PDVImporter();
+const fiscalImporter       = new FiscalImporter();
+const estoqueImporter      = new EstoqueImporter();
 const mercadologiaImporter = new MercadologiaImporter();
-const db = new DatabaseClient();
+const db                   = new DatabaseClient();
 
-/**
- * API Pública de Importação
- * Cada método corresponde a uma ação do usuário
- */
 const Importacao = {
-    // ========================================
-    // ESTATÍSTICAS (NOVO - NECESSÁRIO)
-    // ========================================
-    
-    /**
-     * Atualizar estatísticas do banco
-     */
+
+    // ESTATÍSTICAS
+
     async atualizarEstatisticas() {
         try {
-            console.log('📊 Carregando estatísticas do banco...');
             const stats = await db.getStatistics();
-            
-            if (stats) {
-                UI.statistics.update(stats);
-                console.log('✅ Estatísticas atualizadas:', stats);
-            } else {
-                console.warn('⚠️ Nenhuma estatística retornada');
-            }
-            
+            if (stats) UI.statistics.update(stats);
             return stats;
         } catch (error) {
             console.error('❌ Erro ao atualizar estatísticas:', error);
-            throw error;
         }
     },
 
-    // ========================================
-    // ÁRVORE MERCADOLÓGICA
-    // ========================================
-    
-    /**
-     * Importar Árvore Mercadológica Completa
-     * Importa Seções + Grupos + Subgrupos em sequência
-     */
+    // PRODUTO — ÁRVORE MERCADOLÓGICA
+
     async importarMercadologia(uiElement) {
         const result = await mercadologiaImporter.importarMercadologia(uiElement);
-
-        // Atualizar estatísticas após importação
         await this.atualizarEstatisticas();
-        
         return result;
     },
 
-    // ========================================
-    // PRODUTOS
-    // ========================================
-    
     async importarMarcas(uiElement) {
         const result = await produtoImporter.importarMarcas(uiElement);
         await this.atualizarEstatisticas();
@@ -95,32 +64,8 @@ const Importacao = {
         return result;
     },
 
-    // ========================================
-    // PESSOAS
-    // ========================================
-    
-    async importarClientes(uiElement) {
-        const result = await pessoaImporter.importarClientes(uiElement);
-        await this.atualizarEstatisticas();
-        return result;
-    },
-
-    async importarFornecedores(uiElement) {
-        const result = await pessoaImporter.importarFornecedores(uiElement);
-        await this.atualizarEstatisticas();
-        return result;
-    },
-
-    async importarLojas(uiElement) {
-        const result = await pessoaImporter.importarLojas(uiElement);
-        await this.atualizarEstatisticas();
-        return result;
-    },
-
-    // ========================================
     // FINANCEIRO
-    // ========================================
-    
+
     async importarCategorias(uiElement) {
         const result = await financeiroImporter.importarCategorias(uiElement);
         await this.atualizarEstatisticas();
@@ -151,36 +96,10 @@ const Importacao = {
         return result;
     },
 
-    async importarFormasPagamento(uiElement) {
-        const result = await financeiroImporter.importarFormasPagamento(uiElement);
-        await this.atualizarEstatisticas();
-        return result;
-    },
-
-    // ========================================
     // PDV / FRENTE DE LOJA
-    // ========================================
-    
+
     async importarCaixas(uiElement) {
         const result = await pdvImporter.importarCaixas(uiElement);
-        await this.atualizarEstatisticas();
-        return result;
-    },
-
-    async importarMotivosCancelamento(uiElement) {
-        const result = await pdvImporter.importarMotivosCancelamento(uiElement);
-        await this.atualizarEstatisticas();
-        return result;
-    },
-
-    async importarMotivosDesconto(uiElement) {
-        const result = await pdvImporter.importarMotivosDesconto(uiElement);
-        await this.atualizarEstatisticas();
-        return result;
-    },
-
-    async importarMotivosDevolucao(uiElement) {
-        const result = await pdvImporter.importarMotivosDevolucao(uiElement);
         await this.atualizarEstatisticas();
         return result;
     },
@@ -197,10 +116,40 @@ const Importacao = {
         return result;
     },
 
-    // ========================================
+    async importarMotivosDesconto(uiElement) {
+        const result = await pdvImporter.importarMotivosDesconto(uiElement);
+        await this.atualizarEstatisticas();
+        return result;
+    },
+
+    async importarMotivosDevolucao(uiElement) {
+        const result = await pdvImporter.importarMotivosDevolucao(uiElement);
+        await this.atualizarEstatisticas();
+        return result;
+    },
+
+    async importarMotivosCancelamento(uiElement) {
+        const result = await pdvImporter.importarMotivosCancelamento(uiElement);
+        await this.atualizarEstatisticas();
+        return result;
+    },
+
+    // ESTOQUE
+
+    async importarLocalEstoque(uiElement) {
+        const result = await estoqueImporter.importarLocalEstoque(uiElement);
+        await this.atualizarEstatisticas();
+        return result;
+    },
+
+    async importarTiposAjustes(uiElement) {
+        const result = await estoqueImporter.importarTiposAjustes(uiElement);
+        await this.atualizarEstatisticas();
+        return result;
+    },
+
     // FISCAL
-    // ========================================
-    
+
     async importarImpostosFederais(uiElement) {
         const result = await fiscalImporter.importarImpostosFederais(uiElement);
         await this.atualizarEstatisticas();
@@ -219,6 +168,12 @@ const Importacao = {
         return result;
     },
 
+    async importarTiposOperacoes(uiElement) {
+        const result = await fiscalImporter.importarTiposOperacoes(uiElement);
+        await this.atualizarEstatisticas();
+        return result;
+    },
+
     async importarTabelasTributariasEntrada(uiElement) {
         const result = await fiscalImporter.importarTabelasTributariasEntrada(uiElement);
         await this.atualizarEstatisticas();
@@ -231,27 +186,40 @@ const Importacao = {
         return result;
     },
 
-    async importarTiposOperacoes(uiElement) {
-        const result = await fiscalImporter.importarTiposOperacoes(uiElement);
+    /**
+     * Importar tabelas tributárias (entrada + saída)
+     */
+    async importarTabelasTributarias(uiElement) {
+        UI.log('📋 Importando tabelas tributárias (entrada + saída)...', 'info');
+        const entrada = await fiscalImporter.importarTabelasTributariasEntrada(uiElement);
+        const saida   = await fiscalImporter.importarTabelasTributariasSaida(uiElement);
+        await this.atualizarEstatisticas();
+        return {
+            success: entrada.success && saida.success,
+            entrada,
+            saida
+        };
+    },
+
+    // PESSOA
+
+    async importarLojas(uiElement) {
+        const result = await pessoaImporter.importarLojas(uiElement);
         await this.atualizarEstatisticas();
         return result;
     },
 
-    // ========================================
-    // ESTOQUE
-    // ========================================
-    
-    async importarLocalEstoque(uiElement) {
-        const result = await estoqueImporter.importarLocalEstoque(uiElement);
+    async importarClientes(uiElement) {
+        const result = await pessoaImporter.importarClientes(uiElement);
         await this.atualizarEstatisticas();
         return result;
     },
 
-    async importarTiposAjustes(uiElement) {
-        const result = await estoqueImporter.importarTiposAjustes(uiElement);
+    async importarFornecedores(uiElement) {
+        const result = await pessoaImporter.importarFornecedores(uiElement);
         await this.atualizarEstatisticas();
         return result;
-    }
+    },
 };
 
 export default Importacao;

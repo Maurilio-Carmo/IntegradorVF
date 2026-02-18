@@ -1,16 +1,13 @@
 // frontend/src/services/api/modules.js
 
-/**
- * Módulos de API por Domínio
- * Organização modular dos endpoints da API Varejo Fácil
- */
-
 import { APIBase } from './api-base.js';
 
-// ========================================
-// PESSOA API
-// ========================================
+// PESSOA 
 export class PessoaAPI extends APIBase {
+    async buscarLojas(onProgress) {
+        return await this.fetchAll('pessoa/lojas', onProgress);
+    }
+
     async buscarClientes(onProgress) {
         return await this.fetchAll('pessoa/clientes', onProgress);
     }
@@ -28,16 +25,14 @@ export class PessoaAPI extends APIBase {
     }
 }
 
-// ========================================
 // FINANCEIRO API
-// ========================================
 export class FinanceiroAPI extends APIBase {
     async buscarCategorias(onProgress) {
         return await this.fetchAll('financeiro/categorias', onProgress);
     }
 
     async buscarAgentes(onProgress) {
-        return await this.fetchAll('financeiro/agentes-financeiros', onProgress);
+        return await this.fetchAll('pessoa/agentes-financeiros', onProgress);
     }
 
     async buscarContasCorrentes(onProgress) {
@@ -45,93 +40,76 @@ export class FinanceiroAPI extends APIBase {
     }
 
     async buscarEspeciesDocumento(onProgress) {
-        return await this.fetchAll('financeiro/especies-documento', onProgress);
+        return await this.fetchAll('financeiro/especies-documentos', onProgress);
     }
 
     async buscarHistoricoPadrao(onProgress) {
-        return await this.fetchAll('financeiro/historico-padrao', onProgress);
+        return await this.fetchAll('financeiro/historicos-padrao', onProgress);
     }
 }
 
-// ========================================
 // PDV API
-// ========================================
 export class PDVAPI extends APIBase {
     async buscarCaixas(onProgress) {
         return await this.fetchAll('pdv/caixas', onProgress);
     }
 
     async buscarMotivosCancelamento(onProgress) {
-        return await this.fetchAll('pdv/motivos-cancelamento', onProgress);
+        return await this.fetchAll('motivos-cancelamento', onProgress);
     }
 
     async buscarMotivosDesconto(onProgress) {
-        return await this.fetchAll('pdv/motivos-desconto', onProgress);
+        return await this.fetchAll('motivos-desconto', onProgress);
     }
 
     async buscarMotivosDevolucao(onProgress) {
-        return await this.fetchAll('pdv/motivos-devolucao', onProgress);
+        return await this.fetchAll('financeiro/motivos-devolucao', onProgress);
     }
 
     async buscarPagamentosPDV(onProgress) {
-        return await this.fetchAll('pdv/formas-pagamento', onProgress);
+        return await this.fetchAll('financeiro/pagamentos-pdv', onProgress);
     }
 
     async buscarRecebimentosPDV(onProgress) {
-        return await this.fetchAll('pdv/formas-recebimento', onProgress);
+        return await this.fetchAll('financeiro/recebimentos-pdv', onProgress);
     }
 }
 
-// ========================================
 // FISCAL API
-// ========================================
 export class FiscalAPI extends APIBase {
     async buscarImpostosFederais(onProgress) {
         return await this.fetchAll('fiscal/impostos-federais', onProgress);
     }
 
     async buscarRegimeTributario(onProgress) {
-        return await this.fetchAll('fiscal/regimes-tributarios', onProgress);
+        return await this.fetchAll('fiscal/regime-estadual-tributario', onProgress);
     }
 
     async buscarSituacoesFiscais(onProgress) {
-        return await this.fetchAll('fiscal/situacoes-fiscais', onProgress);
-    }
-
-    async buscarTabelasTributariasEntrada(onProgress) {
-        return await this.fetchAll('fiscal/tabelas-tributarias-entrada', onProgress);
-    }
-
-    async buscarTabelasTributariasSaida(onProgress) {
-        return await this.fetchAll('fiscal/tabelas-tributarias-saida', onProgress);
+        return await this.fetchAll('fiscal/situacoes', onProgress);
     }
 
     async buscarTiposOperacoes(onProgress) {
-        return await this.fetchAll('fiscal/tipos-operacoes', onProgress);
+        return await this.fetchAll('fiscal/operacoes', onProgress);
     }
-}
 
-// ========================================
+    async buscarTabelasTributarias(onProgress) {
+        return await this.fetchAll('fiscal/tabelas-tributarias', onProgress);
+    }
+
 // ESTOQUE API
-// ========================================
 export class EstoqueAPI extends APIBase {
     async buscarLocalEstoque(onProgress) {
-        return await this.fetchAll('estoque/locais-estoque', onProgress);
+        return await this.fetchAll('estoque/locais', onProgress);
     }
 
     async buscarTiposAjustes(onProgress) {
-        return await this.fetchAll('estoque/tipos-ajustes', onProgress);
+        return await this.fetchAll('estoque/tipos-ajuste', onProgress);
     }
 }
 
-// ========================================
 // ADMINISTRAÇÃO API
-// ========================================
 export class AdministracaoAPI extends APIBase {
-    async buscarLojas(onProgress) {
-        return await this.fetchAll('administracao/lojas', onProgress);
-    }
-
     async buscarLicenciamento() {
         return await this.http.get('administracao/licenciamento');
     }

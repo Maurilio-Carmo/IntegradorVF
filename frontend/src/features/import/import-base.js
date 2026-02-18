@@ -14,15 +14,25 @@ export class ImportBase {
     }
 
     /**
-     * Executar importação genérica
+     * Executar importação genérica.
+     *
+     * @param {object} config
+     * @param {string}    config.name       - Nome amigável da entidade (para logs/UI)
+     * @param {string}    config.endpoint   - Endpoint do backend  POST /api/importacao/<endpoint>
+     * @param {Function}  config.apiMethod  - Função que busca dados da API (retorna Array)
+     * @param {Function}  [config.transform]- Transformação opcional aplicada ANTES de salvar
+     *                                        (data: Array) => Array
+     * @param {*}         config.uiElement  - Elemento de UI para feedback visual
+     * @param {number}    [config.estimate] - Estimativa de registros (para barra de progresso)
      */
     async execute(config) {
         const {
-            name,           // Nome amigável da entidade
-            endpoint,       // Endpoint do banco
-            apiMethod,      // Método da API para buscar dados
-            uiElement,      // Elemento UI para feedback
-            estimate = 500  // Estimativa de registros
+            name,
+            endpoint,
+            apiMethod,
+            transform = null,   // ← novo campo opcional
+            uiElement,
+            estimate = 500
         } = config;
 
         try {
@@ -31,20 +41,27 @@ export class ImportBase {
             UI.status.updateImport(uiElement, 'loading', `Buscando ${name}...`);
 
             // 2. Buscar dados da API
-            const data = await apiMethod((total) => {
+            const rawData = await apiMethod((total) => {
                 UI.log(`   📄 ${name}: ${total} registros`, 'info');
                 const percentage = Math.min(Math.floor((total / estimate) * 100), 99);
                 UI.status.updateImport(uiElement, 'progress', percentage);
             });
 
-            UI.log(`✅ ${data.length} ${name} buscados da API`, 'success');
+            UI.log(`✅ ${rawData.length} ${name} buscados da API`, 'success');
 
-            // 3. Salvar no banco
-            UI.log(`💾 Salvando ${name} no banco...`, 'info');
+            // 3. ✅ Aplicar transformação se fornecida (flatMap, desestruturação, etc.)
+            const data = transform ? transform(rawData) : rawData;
+
+            if (transform) {
+                UI.log(`🔄 ${name}: ${rawData.length} → ${data.length} registros após transformação`, 'info');
+            }
+
+            // 4. Salvar no banco
+            UI.log(`💾 Salvando ${data.length} ${name} no banco...`, 'info');
             await this.db.save(endpoint, data);
             UI.log(`✅ ${data.length} ${name} salvos no banco`, 'success');
 
-            // 4. Atualizar UI
+            // 5. Atualizar UI
             UI.status.updateImport(uiElement, 'success', `${data.length} registros`);
 
             return {
@@ -56,7 +73,7 @@ export class ImportBase {
         } catch (error) {
             UI.log(`❌ Erro ao importar ${name}: ${error.message}`, 'error');
             UI.status.updateImport(uiElement, 'error', error.message);
-            
+
             return {
                 success: false,
                 error: error.message
@@ -65,7 +82,7 @@ export class ImportBase {
     }
 
     /**
-     * Executar múltiplas importações em sequência
+     * Executar múltiplas importações em sequência.
      */
     async executeBatch(imports) {
         const results = {
@@ -77,23 +94,14 @@ export class ImportBase {
         for (const importConfig of imports) {
             try {
                 const result = await this.execute(importConfig);
-                
+
                 if (result.success) {
-                    results.success.push({
-                        name: importConfig.name,
-                        count: result.count
-                    });
+                    results.success.push({ name: importConfig.name, count: result.count });
                 } else {
-                    results.failed.push({
-                        name: importConfig.name,
-                        error: result.error
-                    });
+                    results.failed.push({ name: importConfig.name, error: result.error });
                 }
             } catch (error) {
-                results.failed.push({
-                    name: importConfig.name,
-                    error: error.message
-                });
+                results.failed.push({ name: importConfig.name, error: error.message });
             }
         }
 
@@ -101,7 +109,7 @@ export class ImportBase {
     }
 
     /**
-     * Atualizar estatísticas do banco na UI
+     * Atualizar estatísticas do banco na UI.
      */
     async updateStatistics() {
         try {

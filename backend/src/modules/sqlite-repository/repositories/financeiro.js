@@ -1,5 +1,7 @@
 // backend/src/modules/sqlite-repository/repositories/financeiro.js
 
+'use strict';
+
 const BaseRepository = require('../base-repository');
 
 /**
@@ -34,14 +36,14 @@ class FinanceiroRepository extends BaseRepository {
                 WHERE status NOT IN ('C', 'D')
             `),
             (c) => [{
-                categoria_id:     c.id              ?? null,
-                descricao:        c.descricao       ?? null,
-                categoria_pai_id: c.categoriaPai    ?? null,
-                codigo_contabil:  c.codigoContabil  ?? null,
+                categoria_id:     c.id                            ?? null,
+                descricao:        c.descricao                     ?? null,
+                categoria_pai_id: c.codigoDaCategoriaPai         ?? c.categoriaPai ?? null,
+                codigo_contabil:  c.codigoContabilExterno        ?? c.codigoContabil ?? null,
                 inativa:          BaseRepository._bool(c.inativa),
-                posicao:          c.posicao         ?? null,
-                classificacao:    c.classificacao   ?? null,
-                tipo:             c.tipo            ?? null,
+                posicao:          c.posicao                       ?? null,
+                classificacao:    c.classificacaoDaCategoria      ?? c.classificacao ?? null,
+                tipo:             c.tipoDeCategoria               ?? c.tipo ?? null,
                 status: 'U'
             }]
         );
@@ -74,25 +76,25 @@ class FinanceiroRepository extends BaseRepository {
                 WHERE status NOT IN ('C', 'D')
             `),
             (a) => [{
-                agente_id:          a.id                        ?? null,
-                nome:               a.nome                      ?? null,
-                fantasia:           a.nomeFantasia              ?? null,
-                codigo_do_banco:    a.codigoDoBanco             ?? null,
-                tipo:               a.pessoaFisicaOuJuridica    ?? null,
-                documento:          a.cpfCnpj                   ?? null,
-                tipo_contribuinte:  a.tipoContribuinte          ?? null,
-                inscricao_estadual: a.inscricaoEstadual         ?? null,
-                telefone1:          a.telefone1                 ?? null,
-                holding_id:         a.holdingId                 ?? null,
-                cep:                a.endereco?.cep             ?? null,
-                logradouro:         a.endereco?.logradouro      ?? null,
-                numero:             a.endereco?.numero          ?? null,
-                bairro:             a.endereco?.bairro          ?? null,
-                municipio:          a.endereco?.municipio       ?? null,
-                ibge:               a.endereco?.ibge            ?? null,
-                uf:                 a.endereco?.uf              ?? null,
-                pais:               a.endereco?.pais            ?? null,
-                tipo_de_endereco:   a.tipoDeEndereco            ?? null,
+                agente_id:          a.id                             ?? null,
+                nome:               a.nome                           ?? null,
+                fantasia:           a.fantasia                       ?? a.nomeFantasia ?? null,
+                codigo_do_banco:    a.codigoDoBanco                  ?? null,
+                tipo:               a.tipo                           ?? a.pessoaFisicaOuJuridica ?? null,
+                documento:          a.numeroDoDocumento              ?? a.cpfCnpj ?? null,
+                tipo_contribuinte:  a.tipoContribuinte               ?? null,
+                inscricao_estadual: a.numeroDeIdentificacao          ?? a.inscricaoEstadual ?? null,
+                telefone1:          a.telefone1                      ?? null,
+                holding_id:         a.holdingId                      ?? null,
+                cep:                (a.endereco?.cep ?? '').replace('-', '') || null,
+                logradouro:         a.endereco?.logradouro           ?? null,
+                numero:             a.endereco?.numero               ?? null,
+                bairro:             a.endereco?.bairro               ?? null,
+                municipio:          a.endereco?.municipio            ?? null,
+                ibge:               a.endereco?.codigoIbge           ?? a.endereco?.ibge ?? null,
+                uf:                 a.endereco?.uf                   ?? null,
+                pais:               a.endereco?.codigoDoPais         ?? a.endereco?.pais ?? null,
+                tipo_de_endereco:   a.endereco?.tipoDeEndereco       ?? null,
                 status: 'U'
             }]
         );
@@ -107,15 +109,15 @@ class FinanceiroRepository extends BaseRepository {
             (db) => db.prepare(`
                 INSERT INTO contas_correntes (
                     conta_id, descricao, tipo, ativa,
-                    compoe_fluxo_de_caixa, lancamento_consolidado,
-                    loja_id, nome_loja, agente_financeiro_id, nome_banco,
-                    codigo_banco, agencia, conta,
+                    compoe_fluxo_caixa, lancamento_consolidado,
+                    loja_id, nome_loja, agente_financeiro_id,
+                    nome_banco, codigo_banco, agencia, conta,
                     local_de_pagamento, identificacao_ofx, status
                 ) VALUES (
                     @conta_id, @descricao, @tipo, @ativa,
-                    @compoe_fluxo_de_caixa, @lancamento_consolidado,
-                    @loja_id, @nome_loja, @agente_financeiro_id, @nome_banco,
-                    @codigo_banco, @agencia, @conta,
+                    @compoe_fluxo_caixa, @lancamento_consolidado,
+                    @loja_id, @nome_loja, @agente_financeiro_id,
+                    @nome_banco, @codigo_banco, @agencia, @conta,
                     @local_de_pagamento, @identificacao_ofx, @status
                 )
                 ON CONFLICT(conta_id) DO UPDATE SET
@@ -125,21 +127,21 @@ class FinanceiroRepository extends BaseRepository {
                 WHERE status NOT IN ('C', 'D')
             `),
             (c) => [{
-                conta_id:               c.id                    ?? null,
-                descricao:              c.descricao             ?? null,
-                tipo:                   c.tipo                  ?? null,
-                ativa:                  BaseRepository._bool(c.ativa !== false),
-                compoe_fluxo_de_caixa:  BaseRepository._bool(c.compoeFluxoDeCaixa),
-                lancamento_consolidado: BaseRepository._bool(c.lancamentoConsolidado),
-                loja_id:                c.lojaId                ?? null,
-                nome_loja:              c.nomeLoja              ?? null,
-                agente_financeiro_id:   c.agenteFinanceiroId    ?? null,
-                nome_banco:             c.nomeBanco             ?? null,
-                codigo_banco:           c.codigoBanco           ?? null,
-                agencia:                c.agencia               ?? null,
-                conta:                  c.conta                 ?? null,
-                local_de_pagamento:     c.localDePagamento      ?? null,
-                identificacao_ofx:      c.identificacaoOfx      ?? null,
+                conta_id:              c.id                                            ?? null,
+                descricao:             c.descricao                                     ?? null,
+                tipo:                  c.tipo                                          ?? null,
+                ativa:                 BaseRepository._bool(c.ativa),
+                compoe_fluxo_caixa:    BaseRepository._bool(c.compoeFluxoDeCaixa),
+                lancamento_consolidado:BaseRepository._bool(c.lancamentoConsolidadoLiquidacaoMultipla),
+                loja_id:               c.lojaId                                        ?? null,
+                nome_loja:             c.nomeLoja                                      ?? null,
+                agente_financeiro_id:  c.agenteFinanceiroId                            ?? null,
+                nome_banco:            c.nomeBanco                                     ?? null,
+                codigo_banco:          c.codigoBanco                                   ?? null,
+                agencia:               c.agencia                                       ?? null,
+                conta:                 c.conta                                         ?? null,
+                local_de_pagamento:    c.localDePagamento                              ?? null,
+                identificacao_ofx:     c.identificacaoContaCorrenteOFX                 ?? c.identificacaoOfx ?? null,
                 status: 'U'
             }]
         );
@@ -174,47 +176,50 @@ class FinanceiroRepository extends BaseRepository {
                 WHERE status NOT IN ('C', 'D')
             `),
             (e) => [{
-                especie_id:                  e.id                        ?? null,
-                descricao:                   e.descricao                 ?? null,
-                sigla:                       e.sigla                     ?? null,
-                genero:                      e.genero                    ?? null,
-                especie_nfe:                 e.especieNfe                ?? null,
-                modalidade:                  e.modalidade                ?? null,
-                dias_para_juros:             e.diasParaJuros             ?? null,
-                tipo_valor_mora_diaria:      e.tipoValorMoraDiaria       ?? null,
-                mora_diaria_por_atraso:      e.moraDiariaPorAtraso       ?? null,
-                dias_para_multa:             e.diasParaMulta             ?? null,
-                tipo_valor_multa:            e.tipoValorMulta            ?? null,
-                valor_multa_por_atraso:      e.valorMultaPorAtraso       ?? null,
+                especie_id:                  e.id                                   ?? null,
+                descricao:                   e.descricao                            ?? null,
+                sigla:                       e.sigla                                ?? null,
+                genero:                      e.genero                               ?? null,
+                especie_nfe:                 e.especieDocumentoNFe                  ?? e.especieNfe ?? null,
+                modalidade:                  e.modalidade                           ?? null,
+                dias_para_juros:             e.diasParaIncidenciaDeJuros            ?? e.diasParaJuros ?? null,
+                tipo_valor_mora_diaria:      e.tipoValorMoraDiaria                  ?? null,
+                mora_diaria_por_atraso:      e.moraDiariaPorAtraso                  ?? null,
+                dias_para_multa:             e.diasParaIncidenciaDeMulta            ?? e.diasParaMulta ?? null,
+                tipo_valor_multa:            e.tipoValorMulta                       ?? null,
+                valor_multa_por_atraso:      e.valorMultaPorAtraso                  ?? null,
                 emite_documento_vinculado:   BaseRepository._bool(e.emiteDocumentoVinculado),
-                quantidade_vias:             e.quantidadeVias            ?? null,
-                quantidade_autenticacoes:    e.quantidadeAutenticacoes   ?? null,
-                especie_pdv:                 e.especiePdv                ?? null,
-                controla_limite_credito:     BaseRepository._bool(e.controlaLimiteCredito),
-                tipo:                        e.tipo                      ?? null,
+                quantidade_vias:             e.quantidadeDeVias                     ?? e.quantidadeVias ?? null,
+                quantidade_autenticacoes:    e.quantidadeDeAutenticacoes            ?? e.quantidadeAutenticacoes ?? null,
+                especie_pdv:                 e.especiePDV                           ?? e.especiePdv ?? null,
+                controla_limite_credito:     BaseRepository._bool(e.controlaLimiteDeCredito ?? e.controlaLimiteCredito),
+                tipo:                        e.tipo                                 ?? null,
                 status: 'U'
             }]
         );
     }
 
-    // ─── HISTÓRICO PADRÃO ─────────────────────────────────────────────────────
+    // ─── HISTÓRICO PADRÃO ────────────────────────────────────────────────────
 
     static importarHistoricoPadrao(historicos) {
         return BaseRepository._executarTransacao(
-            'históricos padrão',
+            'histórico padrão',
             historicos,
             (db) => db.prepare(`
-                INSERT INTO historico_padrao (historico_id, descricao, tipo, status)
-                VALUES (@historico_id, @descricao, @tipo, @status)
+                INSERT INTO historico_padrao (
+                    historico_id, descricao, tipo, status
+                ) VALUES (
+                    @historico_id, @descricao, @tipo, @status
+                )
                 ON CONFLICT(historico_id) DO UPDATE SET
                     descricao  = excluded.descricao,
                     updated_at = CURRENT_TIMESTAMP
                 WHERE status NOT IN ('C', 'D')
             `),
             (h) => [{
-                historico_id: h.id         ?? null,
-                descricao:    h.descricao  ?? null,
-                tipo:         h.tipo       ?? null,
+                historico_id: h.id            ?? null,
+                descricao:    h.descricao     ? h.descricao.trim() : null,
+                tipo:         h.tipo          ?? null,
                 status: 'U'
             }]
         );
