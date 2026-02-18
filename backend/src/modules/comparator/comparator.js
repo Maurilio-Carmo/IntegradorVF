@@ -1,6 +1,6 @@
 // backend/src/modules/comparator/Comparator.js
 
-const Logger = require('../../utils/Logger');
+const Logger = require('../../utils/logger.js');
 
 /**
  * Módulo de Comparação (Sync Comparator)
@@ -12,6 +12,7 @@ const Logger = require('../../utils/Logger');
  * 
  * NÃO acessa diretamente API ou UI (baixo acoplamento)
  */
+
 class Comparator {
     /**
      * Comparar dois conjuntos de dados

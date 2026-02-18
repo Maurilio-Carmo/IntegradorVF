@@ -2,7 +2,7 @@
 
 const express = require('express');
 const router = express.Router();
-const ImportacaoService = require('../services/ImportacaoService');
+const ImportacaoService = require('../services/importacao-service.js');
 
 /**
  * POST /api/importacao/secoes

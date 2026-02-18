@@ -1,4 +1,4 @@
-// backend/src/utils/Logger.js
+// backend/src/utils/logger.js
 
 const fs = require('fs');
 const path = require('path');

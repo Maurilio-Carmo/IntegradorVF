@@ -1,4 +1,4 @@
-// backend/src/services/ImportacaoService.js
+// backend/src/services/importacao-service.js
 
 /**
  * ImportacaoService — Orquestrador de Importação
@@ -13,11 +13,9 @@ const {
     Estoque,
     Fiscal,
     Pessoa,
-} = require('../modules/sqlite-repository/base-repository.js');
+} = require('../modules/sqlite-repository/index.js');
 
 const dbSQLite = require('../config/database-sqlite.js');
-const { escape } = require('node-firebird');
-
 class ImportacaoService {
 
     // MERCADOLÓGICA
@@ -148,37 +146,6 @@ class ImportacaoService {
 
     static async importarFornecedores(fornecedores) {
         return Pessoa.importarFornecedores(fornecedores);
-    }
-
-    // ESTATÍSTICAS
-
-    static async obterEstatisticas() {
-        try {
-            dbSQLite.getConnection();
-
-            // Lista de tabelas reais conforme IntegradorDB.sql
-            const tabelas = [
-                'secoes', 'grupos', 'subgrupos', 'marcas', 'familias',
-                'produtos', 'clientes', 'fornecedores', 'lojas', 'caixas',
-                'local_estoque', 'agentes', 'categorias', 'contas_correntes',
-                'especies_documentos',          // ← nome correto com 's'
-                'historico_padrao',
-                'motivos_cancelamento', 'motivos_desconto', 'motivos_devolucao',
-                'pagamentos_pdv', 'recebimentos_pdv',
-                'impostos_federais', 'regime_tributario', 'situacoes_fiscais',
-                'tabelas_tributarias_entrada', 'tabelas_tributarias_saida',
-                'tipos_operacoes', 'tipos_ajustes',
-            ];
-
-            return tabelas.reduce((acc, tabela) => {
-                acc[tabela] = dbSQLite.count(tabela);
-                return acc;
-            }, {});
-
-        } catch (error) {
-            console.error('❌ Erro ao obter estatísticas:', error.message);
-            return {};
-        }
     }
 }
 
