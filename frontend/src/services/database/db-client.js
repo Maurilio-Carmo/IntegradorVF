@@ -2,8 +2,55 @@
 
 /**
  * Cliente de Banco de Dados
- * Gerencia comunicação com o backend para operações de banco de dados
+ * Gerencia comunicação com o backend para operações de banco de dados.
  */
+
+/** Mapeia nomes curtos (usados pelos importers) → rota real do backend */
+const ENDPOINT_MAP = {
+    // ── Produto ────────────────────────────────────────────────────────────
+    'familias':               'importar-familias',
+    'marcas':                 'importar-marcas',
+    'produtos':               'importar-produtos',
+    'mercadologia':           'importar-mercadologia',
+
+    // ── Financeiro ─────────────────────────────────────────────────────────
+    'categorias':             'importar-categorias',
+    'agentes-financeiros':    'importar-agentes',
+    'agentes':                'importar-agentes',
+    'contas-correntes':       'importar-contas-correntes',
+    'especies-documentos':    'importar-especies-documento',
+    'especies-documento':     'importar-especies-documento',
+    'historicos-padrao':      'importar-historico-padrao',
+    'historico-padrao':       'importar-historico-padrao',
+
+    // ── PDV / Frente de Loja ───────────────────────────────────────────────
+    'caixas':                 'importar-caixas',
+    'pagamentos-pdv':         'importar-pagamentos-pdv',
+    'recebimentos-pdv':       'importar-recebimentos-pdv',
+    'motivos-desconto':       'importar-motivos-desconto',
+    'motivos-devolucao':      'importar-motivos-devolucao',
+    'motivos-cancelamento':   'importar-motivos-cancelamento',
+
+    // ── Estoque ────────────────────────────────────────────────────────────
+    'local-estoque':          'importar-local-estoque',
+    'locais-estoque':         'importar-local-estoque',
+    'tipos-ajustes':          'importar-tipos-ajustes',
+
+    // ── Fiscal ─────────────────────────────────────────────────────────────
+    'regime-tributario':            'importar-regime-tributario',
+    'regime-estadual-tributario':   'importar-regime-tributario',
+    'situacoes-fiscais':            'importar-situacoes-fiscais',
+    'situacoes':                    'importar-situacoes-fiscais',
+    'tipos-operacoes':              'importar-tipos-operacoes',
+    'operacoes':                    'importar-tipos-operacoes',
+    'impostos-federais':            'importar-impostos-federais',
+    'tabelas-tributarias':          'importar-tabelas-tributarias',
+
+    // ── Pessoa ─────────────────────────────────────────────────────────────
+    'lojas':                  'importar-lojas',
+    'clientes':               'importar-clientes',
+    'fornecedores':           'importar-fornecedores',
+};
 
 export class DatabaseClient {
     constructor(baseURL = 'http://localhost:3000/api/importacao') {
@@ -11,26 +58,45 @@ export class DatabaseClient {
     }
 
     /**
-     * Salvar dados no banco
+     * Resolve o endpoint real a partir do nome curto.
+     * Se não houver mapeamento, usa o nome original (compatibilidade).
+     * @param {string} endpoint
+     * @returns {string}
      */
-    async save(endpoint, data) {
+    _resolveEndpoint(endpoint) {
+        const resolved = ENDPOINT_MAP[endpoint];
+        if (!resolved) {
+            console.warn(
+                `[db-client] Endpoint "${endpoint}" não encontrado no ENDPOINT_MAP. ` +
+                'Usando o nome original — verifique se a rota existe no backend.'
+            );
+        }
+        return resolved ?? endpoint;
+    }
+
+    /**
+     * Salvar dados no banco
+     * @param {string} endpoint  - Nome curto (ex: 'familias') ou rota completa
+     * @param {Array}  data      - Array de registros
+     * @param {Object} [extra]   - Campos extras enviados junto ao body (ex: { lojaId })
+     */
+    async save(endpoint, data, extra = {}) {
+        const rota = this._resolveEndpoint(endpoint);
         try {
-            const response = await fetch(`${this.baseURL}/${endpoint}`, {
+            const response = await fetch(`${this.baseURL}/${rota}`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ data })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ data, ...extra }),
             });
 
             if (!response.ok) {
                 const error = await this.extractError(response);
-                throw new Error(error.message || `Erro ao salvar: ${response.statusText}`);
+                throw new Error(error.message || `HTTP ${response.status}: ${response.statusText}`);
             }
 
             return await response.json();
         } catch (error) {
-            console.error(`Erro ao salvar ${endpoint}:`, error);
+            console.error(`Erro ao salvar "${endpoint}" → /${rota}:`, error);
             throw error;
         }
     }
@@ -41,7 +107,7 @@ export class DatabaseClient {
     async getStatistics() {
         try {
             const response = await fetch(`${this.baseURL}/estatisticas`);
-            
+
             if (!response.ok) {
                 throw new Error('Erro ao buscar estatísticas');
             }
@@ -57,19 +123,20 @@ export class DatabaseClient {
      * Buscar dados do banco
      */
     async get(endpoint, params = {}) {
+        const rota = this._resolveEndpoint(endpoint);
         try {
             const queryString = new URLSearchParams(params).toString();
-            const url = `${this.baseURL}/${endpoint}${queryString ? '?' + queryString : ''}`;
-            
+            const url = `${this.baseURL}/${rota}${queryString ? '?' + queryString : ''}`;
+
             const response = await fetch(url);
-            
+
             if (!response.ok) {
                 throw new Error(`Erro ao buscar: ${response.statusText}`);
             }
 
             return await response.json();
         } catch (error) {
-            console.error(`Erro ao buscar ${endpoint}:`, error);
+            console.error(`Erro ao buscar "${endpoint}":`, error);
             throw error;
         }
     }
@@ -78,9 +145,10 @@ export class DatabaseClient {
      * Deletar dados do banco
      */
     async delete(endpoint, id) {
+        const rota = this._resolveEndpoint(endpoint);
         try {
-            const response = await fetch(`${this.baseURL}/${endpoint}/${id}`, {
-                method: 'DELETE'
+            const response = await fetch(`${this.baseURL}/${rota}/${id}`, {
+                method: 'DELETE',
             });
 
             if (!response.ok) {
@@ -89,7 +157,7 @@ export class DatabaseClient {
 
             return await response.json();
         } catch (error) {
-            console.error(`Erro ao deletar ${endpoint}:`, error);
+            console.error(`Erro ao deletar "${endpoint}/${id}":`, error);
             throw error;
         }
     }
@@ -98,13 +166,12 @@ export class DatabaseClient {
      * Atualizar dados no banco
      */
     async update(endpoint, id, data) {
+        const rota = this._resolveEndpoint(endpoint);
         try {
-            const response = await fetch(`${this.baseURL}/${endpoint}/${id}`, {
+            const response = await fetch(`${this.baseURL}/${rota}/${id}`, {
                 method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data),
             });
 
             if (!response.ok) {
@@ -113,7 +180,7 @@ export class DatabaseClient {
 
             return await response.json();
         } catch (error) {
-            console.error(`Erro ao atualizar ${endpoint}:`, error);
+            console.error(`Erro ao atualizar "${endpoint}/${id}":`, error);
             throw error;
         }
     }
@@ -122,9 +189,10 @@ export class DatabaseClient {
      * Limpar toda a tabela
      */
     async clear(endpoint) {
+        const rota = this._resolveEndpoint(endpoint);
         try {
-            const response = await fetch(`${this.baseURL}/${endpoint}/clear`, {
-                method: 'DELETE'
+            const response = await fetch(`${this.baseURL}/${rota}/clear`, {
+                method: 'DELETE',
             });
 
             if (!response.ok) {
@@ -133,7 +201,7 @@ export class DatabaseClient {
 
             return await response.json();
         } catch (error) {
-            console.error(`Erro ao limpar ${endpoint}:`, error);
+            console.error(`Erro ao limpar "${endpoint}":`, error);
             throw error;
         }
     }
@@ -154,7 +222,9 @@ export class DatabaseClient {
      */
     async healthCheck() {
         try {
-            const response = await fetch(this.baseURL.replace('/api/importacao', '/health'));
+            const response = await fetch(
+                this.baseURL.replace('/api/importacao', '/health')
+            );
             return response.ok;
         } catch {
             return false;

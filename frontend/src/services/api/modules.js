@@ -16,6 +16,10 @@ export class PessoaAPI extends APIBase {
         return await this.fetchAll('pessoa/fornecedores', onProgress);
     }
 
+    async buscarLojaPorId(id) {
+        return await this.http.get(`administracao/lojas/${id}`);
+    }
+
     async buscarClientePorId(id) {
         return await this.http.get(`pessoa/clientes/${id}`);
     }
@@ -115,7 +119,4 @@ export class AdministracaoAPI extends APIBase {
         return await this.http.get('administracao/licenciamento');
     }
 
-    async buscarLojaPorId(id) {
-        return await this.http.get(`administracao/lojas/${id}`);
-    }
 }

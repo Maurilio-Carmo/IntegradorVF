@@ -957,7 +957,7 @@ SELECT 'Motivos Desconto'         AS entidade, COUNT(*) AS total, SUM(status='U'
 SELECT 'Motivos Devolução'        AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM motivos_devolucao UNION ALL
 SELECT 'Motivos Cancelamento'     AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM motivos_cancelamento UNION ALL
 SELECT 'Local Estoque'            AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM local_estoque UNION ALL
-SELECT 'Tipos Ajustes'            AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM tipos_ajustes;
+SELECT 'Tipos Ajustes'            AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM tipos_ajustes UNION ALL
 SELECT 'Regime Tributário'        AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM regime_tributario UNION ALL
 SELECT 'Situações Fiscais'        AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM situacoes_fiscais UNION ALL
 SELECT 'Tipos Operações'          AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM tipos_operacoes UNION ALL
@@ -966,7 +966,7 @@ SELECT 'Tab. Tributárias Entrada' AS entidade, COUNT(*) AS total, SUM(status='U
 SELECT 'Tab. Tributárias Saída'   AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM tabelas_tributarias_saida UNION ALL
 SELECT 'Lojas'                    AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM lojas UNION ALL
 SELECT 'Clientes'                 AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM clientes UNION ALL
-SELECT 'Fornecedores'             AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM fornecedores UNION ALL
+SELECT 'Fornecedores'             AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM fornecedores;
 
 -- =====================================================
 SELECT 'Banco de dados criado com sucesso! ✅' AS mensagem;
