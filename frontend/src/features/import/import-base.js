@@ -20,11 +20,10 @@ export class ImportBase {
      * @param {string}    config.name       - Nome amigável da entidade (para logs/UI)
      * @param {string}    config.endpoint   - Endpoint do backend  POST /api/importacao/<endpoint>
      * @param {Function}  config.apiMethod  - Função que busca dados da API (retorna Array)
-     * @param {Function}  [config.transform]- Transformação opcional aplicada ANTES de salvar
-     *                                        (data: Array) => Array
+     * @param {Function}  [config.transform]- Transformação opcional aplicada ANTES de salvar (data: Array) => Array
      * @param {*}         config.uiElement  - Elemento de UI para feedback visual
-     * @param {number}    [config.estimate] - Estimativa de registros (para barra de progresso)
      */
+
     async execute(config) {
         const {
             name,
@@ -32,7 +31,6 @@ export class ImportBase {
             apiMethod,
             transform = null,   // ← novo campo opcional
             uiElement,
-            estimate = 500
         } = config;
 
         try {
@@ -41,9 +39,20 @@ export class ImportBase {
             UI.status.updateImport(uiElement, 'loading', `Buscando ${name}...`);
 
             // 2. Buscar dados da API
-            const rawData = await apiMethod((total) => {
-                UI.log(`   📄 ${name}: ${total} registros`, 'info');
-                const percentage = Math.min(Math.floor((total / estimate) * 100), 99);
+            const rawData = await apiMethod((atual, _itensDaPagina, totalReal) => {
+                const divisor = totalReal;
+                const percentage = Math.min(Math.floor((atual / divisor) * 100), 99);
+
+                // Atualiza texto com contagem real
+                const statusDiv = uiElement?.querySelector('.import-item-status');
+                if (statusDiv) {
+                    const label = totalReal
+                        ? `${atual} de ${totalReal} (${percentage}%)`
+                        : `${atual} registros... (${percentage}%)`;
+                    statusDiv.textContent = label;
+                }
+
+                UI.log(`   📄 ${name}: ${atual}${totalReal ? '/' + totalReal : ''} registros`, 'info');
                 UI.status.updateImport(uiElement, 'progress', percentage);
             });
 

@@ -192,6 +192,24 @@
     width: 0%;
 }
 
+/* Estado indeterminado: enquanto total real ainda não chegou */
+.import-item-progress-fill.indeterminate {
+    width: 100% !important;
+    background: linear-gradient(
+        90deg,
+        var(--primary-color) 0%,
+        var(--primary-light) 50%,
+        var(--primary-color) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite linear;
+}
+
+@keyframes shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
 /* Animação de entrada */
 @keyframes fadeIn {
     from {

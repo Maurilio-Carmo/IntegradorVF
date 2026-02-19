@@ -58,23 +58,30 @@ export class APIBase {
         let start = 0;
         let allData = [];
         let hasMore = true;
+        let totalConhecido = null;
 
         while (hasMore) {
             const response = await this.fetchPaginated(endpoint, start, pageSize);
             const items = response.items || response.data || [];
+
+            // Captura o total real da API
+            if (response.total !== undefined && response.total !== null) {
+                totalConhecido = response.total;
+            }
 
             if (items.length === 0) break;
 
             allData = allData.concat(items);
             start += items.length;
 
-            // Callback de progresso
             if (onProgress) {
-                onProgress(allData.length, items.length);
+                onProgress(allData.length, items.length, totalConhecido);
             }
 
-            // Se retornou menos que o tamanho da página, acabou
-            if (items.length < pageSize) {
+            // Usar total como critério de parada
+            if (totalConhecido !== null && allData.length >= totalConhecido) {
+                hasMore = false;
+            } else if (items.length < pageSize) {
                 hasMore = false;
             }
 
