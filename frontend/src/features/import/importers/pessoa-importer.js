@@ -7,8 +7,6 @@
 
 import { ImportBase } from '../import-base.js';
 import API from '../../../services/api/index.js';
-import { ESTIMATES } from '../../../config/constants.js';
-
 export class PessoaImporter extends ImportBase {
     /**
      * Importar clientes
@@ -19,7 +17,6 @@ export class PessoaImporter extends ImportBase {
             endpoint: 'clientes',
             apiMethod: API.pessoa.buscarClientes.bind(API.pessoa),
             uiElement,
-            estimate: ESTIMATES.CLIENTES
         });
     }
 
@@ -32,7 +29,6 @@ export class PessoaImporter extends ImportBase {
             endpoint: 'fornecedores',
             apiMethod: API.pessoa.buscarFornecedores.bind(API.pessoa),
             uiElement,
-            estimate: ESTIMATES.FORNECEDORES
         });
     }
 
@@ -45,7 +41,6 @@ export class PessoaImporter extends ImportBase {
             endpoint: 'lojas',
             apiMethod: API.pessoa.buscarLojas.bind(API.pessoa),
             uiElement,
-            estimate: ESTIMATES.LOJAS
         });
     }
 }

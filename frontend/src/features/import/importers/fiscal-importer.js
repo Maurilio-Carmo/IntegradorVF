@@ -7,8 +7,6 @@
 
 import { ImportBase } from '../import-base.js';
 import API from '../../../services/api/index.js';
-import { ESTIMATES } from '../../../config/constants.js';
-
 export class FiscalImporter extends ImportBase {
     /**
      * Importar impostos federais
@@ -38,7 +36,6 @@ export class FiscalImporter extends ImportBase {
                 };
             }),
             uiElement,
-            estimate: ESTIMATES.IMPOSTOS_FEDERAIS
         });
     }
 
@@ -51,7 +48,6 @@ export class FiscalImporter extends ImportBase {
             endpoint: 'importar-regime-tributario',
             apiMethod: API.fiscal.buscarRegimeTributario.bind(API.fiscal),
             uiElement,
-            estimate: ESTIMATES.REGIME_TRIBUTARIO
         });
     }
 
@@ -64,7 +60,6 @@ export class FiscalImporter extends ImportBase {
             endpoint: 'importar-situacoes-fiscais',
             apiMethod: API.fiscal.buscarSituacoesFiscais.bind(API.fiscal),
             uiElement,
-            estimate: ESTIMATES.SITUACOES_FISCAIS
         });
     }
 
@@ -77,7 +72,6 @@ export class FiscalImporter extends ImportBase {
             endpoint: 'importar-tipos-operacoes',
             apiMethod: API.fiscal.buscarTiposOperacoes.bind(API.fiscal),
             uiElement,
-            estimate: ESTIMATES.TIPOS_OPERACOES
         });
     }
 
@@ -90,7 +84,6 @@ export class FiscalImporter extends ImportBase {
             endpoint: 'importar-tabelas-tributarias',
             apiMethod: API.fiscal.buscarTabelasTributarias.bind(API.fiscal),
             uiElement,
-            estimate: ESTIMATES.TABELAS_TRIBUTARIAS
         });
     }
 
@@ -152,7 +145,6 @@ export class FiscalImporter extends ImportBase {
                     reducaoOrigem:       i.reducaoOrigem         ?? 0,
                 }))),
             uiElement,
-            estimate: ESTIMATES.TABELAS_TRIBUTARIAS_ENTRADA
         });
     }
 
@@ -195,7 +187,6 @@ export class FiscalImporter extends ImportBase {
                     reducaoOrigem:       i.reducaoOrigem         ?? 0,
                 }))),
             uiElement,
-            estimate: ESTIMATES.TABELAS_TRIBUTARIAS_SAIDA
         });
     }
 }

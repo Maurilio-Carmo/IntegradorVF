@@ -8,6 +8,9 @@
 /** Mapeia nomes curtos (usados pelos importers) → rota real do backend */
 const ENDPOINT_MAP = {
     // ── Produto ────────────────────────────────────────────────────────────
+    secoes:                 'secoes',
+    'grupos':                 'grupos',
+    'subgrupos':              'subgrupos',
     'familias':               'importar-familias',
     'marcas':                 'importar-marcas',
     'produtos':               'importar-produtos',
@@ -101,7 +104,7 @@ export class DatabaseClient {
 
     async _saveChunk(endpoint, data) {
         try {
-            const response = await fetch(`${this.baseURL}/${endpoint}`, {
+            const response = await fetch(`${this.baseURL}/${ENDPOINT_MAP[endpoint]}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ data })

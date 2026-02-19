@@ -7,7 +7,6 @@
 
 import { ImportBase } from '../import-base.js';
 import API from '../../../services/api/index.js';
-import { ESTIMATES } from '../../../config/constants.js';
 
 export class ProdutoImporter extends ImportBase {
     /**
@@ -18,8 +17,7 @@ export class ProdutoImporter extends ImportBase {
             name: 'seções',
             endpoint: 'secoes',
             apiMethod: API.produto.buscarSecoes.bind(API.produto),
-            uiElement,
-            estimate: ESTIMATES.SECOES
+            uiElement
         });
     }
 
@@ -31,8 +29,7 @@ export class ProdutoImporter extends ImportBase {
             name: 'grupos',
             endpoint: 'grupos',
             apiMethod: API.produto.buscarGrupos.bind(API.produto),
-            uiElement,
-            estimate: ESTIMATES.GRUPOS
+            uiElement
         });
     }
 
@@ -44,8 +41,7 @@ export class ProdutoImporter extends ImportBase {
             name: 'subgrupos',
             endpoint: 'subgrupos',
             apiMethod: API.produto.buscarSubgrupos.bind(API.produto),
-            uiElement,
-            estimate: ESTIMATES.SUBGRUPOS
+            uiElement
         });
     }
 
@@ -57,8 +53,7 @@ export class ProdutoImporter extends ImportBase {
             name: 'marcas',
             endpoint: 'marcas',
             apiMethod: API.produto.buscarMarcas.bind(API.produto),
-            uiElement,
-            estimate: ESTIMATES.MARCAS
+            uiElement
         });
     }
 
@@ -70,8 +65,7 @@ export class ProdutoImporter extends ImportBase {
             name: 'famílias',
             endpoint: 'familias',
             apiMethod: API.produto.buscarFamilias.bind(API.produto),
-            uiElement,
-            estimate: ESTIMATES.FAMILIAS
+            uiElement
         });
     }
 
@@ -83,8 +77,7 @@ export class ProdutoImporter extends ImportBase {
             name: 'produtos',
             endpoint: 'produtos',
             apiMethod: API.produto.buscarProdutos.bind(API.produto),
-            uiElement,
-            estimate: ESTIMATES.PRODUTOS
+            uiElement
         });
     }
 }

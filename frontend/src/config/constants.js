@@ -297,7 +297,6 @@ export default {
     STATUS_DESCRIPTIONS,
     IMPORT_STATUS,
     MESSAGES,
-    ESTIMATES,
     ENDPOINTS,
     VALIDATION,
     THEMES,

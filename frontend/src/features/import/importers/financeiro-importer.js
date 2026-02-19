@@ -7,8 +7,6 @@
 
 import { ImportBase } from '../import-base.js';
 import API from '../../../services/api/index.js';
-import { ESTIMATES } from '../../../config/constants.js';
-
 export class FinanceiroImporter extends ImportBase {
     /**
      * Importar categorias financeiras
@@ -19,7 +17,6 @@ export class FinanceiroImporter extends ImportBase {
             endpoint: 'categorias',
             apiMethod: API.financeiro.buscarCategorias.bind(API.financeiro),
             uiElement,
-            estimate: ESTIMATES.CATEGORIAS
         });
     }
 
@@ -32,7 +29,6 @@ export class FinanceiroImporter extends ImportBase {
             endpoint: 'agentes',
             apiMethod: API.financeiro.buscarAgentes.bind(API.financeiro),
             uiElement,
-            estimate: ESTIMATES.AGENTES
         });
     }
 
@@ -45,7 +41,6 @@ export class FinanceiroImporter extends ImportBase {
             endpoint: 'contas-correntes',
             apiMethod: API.financeiro.buscarContasCorrentes.bind(API.financeiro),
             uiElement,
-            estimate: ESTIMATES.CONTAS_CORRENTES
         });
     }
 
@@ -58,7 +53,6 @@ export class FinanceiroImporter extends ImportBase {
             endpoint: 'especies-documento',
             apiMethod: API.financeiro.buscarEspeciesDocumento.bind(API.financeiro),
             uiElement,
-            estimate: ESTIMATES.ESPECIES_DOCUMENTO
         });
     }
 
@@ -71,7 +65,6 @@ export class FinanceiroImporter extends ImportBase {
             endpoint: 'historico-padrao',
             apiMethod: API.financeiro.buscarHistoricoPadrao.bind(API.financeiro),
             uiElement,
-            estimate: ESTIMATES.HISTORICO_PADRAO
         });
     }
 
@@ -84,7 +77,6 @@ export class FinanceiroImporter extends ImportBase {
             endpoint: 'formas-pagamento',
             apiMethod: API.financeiro.buscarFormasPagamento.bind(API.financeiro),
             uiElement,
-            estimate: ESTIMATES.FORMAS_PAGAMENTO
         });
     }
 }

@@ -7,8 +7,6 @@
 
 import { ImportBase } from '../import-base.js';
 import API from '../../../services/api/index.js';
-import { ESTIMATES } from '../../../config/constants.js';
-
 export class EstoqueImporter extends ImportBase {
     /**
      * Importar locais de estoque
@@ -19,7 +17,6 @@ export class EstoqueImporter extends ImportBase {
             endpoint: 'local-estoque',
             apiMethod: API.estoque.buscarLocalEstoque.bind(API.estoque),
             uiElement,
-            estimate: ESTIMATES.LOCAL_ESTOQUE
         });
     }
 
@@ -32,7 +29,6 @@ export class EstoqueImporter extends ImportBase {
             endpoint: 'tipos-ajustes',
             apiMethod: API.estoque.buscarTiposAjustes.bind(API.estoque),
             uiElement,
-            estimate: ESTIMATES.TIPOS_AJUSTES
         });
     }
 }

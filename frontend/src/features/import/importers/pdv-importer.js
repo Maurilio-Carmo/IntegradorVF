@@ -7,8 +7,6 @@
 
 import { ImportBase } from '../import-base.js';
 import API from '../../../services/api/index.js';
-import { ESTIMATES } from '../../../config/constants.js';
-
 export class PDVImporter extends ImportBase {
     /**
      * Importar motivos de cancelamento
@@ -19,7 +17,6 @@ export class PDVImporter extends ImportBase {
             endpoint: 'importar-motivos-cancelamento',
             apiMethod: API.pdv.buscarMotivosCancelamento.bind(API.pdv),
             uiElement,
-            estimate: ESTIMATES.MOTIVOS_CANCELAMENTO
         });
     }
 
@@ -32,7 +29,6 @@ export class PDVImporter extends ImportBase {
             endpoint: 'importar-motivos-desconto',
             apiMethod: API.pdv.buscarMotivosDesconto.bind(API.pdv),
             uiElement,
-            estimate: ESTIMATES.MOTIVOS_DESCONTO
         });
     }
 
@@ -45,7 +41,6 @@ export class PDVImporter extends ImportBase {
             endpoint: 'importar-motivos-devolucao',
             apiMethod: API.pdv.buscarMotivosDevolucao.bind(API.pdv),
             uiElement,
-            estimate: ESTIMATES.MOTIVOS_DEVOLUCAO
         });
     }
 
@@ -67,7 +62,6 @@ export class PDVImporter extends ImportBase {
                 }))
             ),
             uiElement,
-            estimate: ESTIMATES.PAGAMENTOS_PDV
         });
     }
 
@@ -94,7 +88,6 @@ export class PDVImporter extends ImportBase {
                 }))
             ),
             uiElement,
-            estimate: ESTIMATES.RECEBIMENTOS_PDV
         });
     }
 }
