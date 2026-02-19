@@ -54,10 +54,6 @@ export class FinanceiroAPI extends APIBase {
 
 // PDV API
 export class PDVAPI extends APIBase {
-    async buscarCaixas(onProgress) {
-        return await this.fetchAll('pdv/caixas', onProgress);
-    }
-
     async buscarPagamentosPDV(onProgress) {
         return await this.fetchAll('financeiro/pagamentos-pdv', onProgress);
     }

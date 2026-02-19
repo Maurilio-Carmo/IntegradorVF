@@ -11,19 +11,6 @@ import { ESTIMATES } from '../../../config/constants.js';
 
 export class PDVImporter extends ImportBase {
     /**
-     * Importar caixas
-     */
-    async importarCaixas(uiElement) {
-        return await this.execute({
-            name: 'caixas',
-            endpoint: 'importar-caixas',
-            apiMethod: API.pdv.buscarCaixas.bind(API.pdv),
-            uiElement,
-            estimate: ESTIMATES.CAIXAS
-        });
-    }
-
-    /**
      * Importar motivos de cancelamento
      */
     async importarMotivosCancelamento(uiElement) {

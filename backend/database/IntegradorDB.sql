@@ -278,26 +278,6 @@ CREATE TABLE fornecedores (
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
--- CAIXAS
-
-DROP TABLE IF EXISTS caixas;
-CREATE TABLE caixas (
-    loja_id INTEGER,
-    caixa_id INTEGER PRIMARY KEY,
-    numero INTEGER,
-    serie_do_equipamento TEXT,
-    versao TEXT,
-    data_ultima_venda TEXT,
-    hora TEXT,
-    visivel_monitoramento INTEGER DEFAULT 1,
-    tipo_frente_loja TEXT CHECK(tipo_frente_loja IN ('SYSPDV','EASY_ASSIST')),
-    status TEXT CHECK(status IN ('C','U','D','E')) DEFAULT 'U',
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    
-    FOREIGN KEY (loja_id) REFERENCES lojas(loja_id) ON DELETE SET NULL
-);
-
 -- LOCAL DE ESTOQUE
 
 DROP TABLE IF EXISTS local_estoque;
@@ -365,7 +345,7 @@ CREATE TABLE contas_correntes (
     descricao TEXT,
     tipo TEXT CHECK(tipo IN ('CAIXA','BANCARIA')),
     ativa INTEGER DEFAULT 1,
-    compoe_fluxo_de_caixa INTEGER DEFAULT 0,
+    compoe_fluxo_caixa INTEGER DEFAULT 0,
     lancamento_consolidado INTEGER DEFAULT 0,
     loja_id INTEGER,
     nome_loja TEXT,

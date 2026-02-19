@@ -24,7 +24,6 @@ const ENDPOINT_MAP = {
     'historico-padrao':       'importar-historico-padrao',
 
     // ── PDV / Frente de Loja ───────────────────────────────────────────────
-    'caixas':                 'importar-caixas',
     'pagamentos-pdv':         'importar-pagamentos-pdv',
     'recebimentos-pdv':       'importar-recebimentos-pdv',
     'motivos-desconto':       'importar-motivos-desconto',

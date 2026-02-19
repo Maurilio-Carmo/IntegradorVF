@@ -129,15 +129,6 @@ class VarejoFacilAPI {
         return await this.produto.buscarProdutos(onProgress);
     }
 
-    // Pessoas
-    async buscarClientes(onProgress) {
-        return await this.pessoa.buscarClientes(onProgress);
-    }
-
-    async buscarFornecedores(onProgress) {
-        return await this.pessoa.buscarFornecedores(onProgress);
-    }
-
     // Financeiro
     async buscarCategorias(onProgress) {
         return await this.financeiro.buscarCategorias(onProgress);
@@ -160,12 +151,12 @@ class VarejoFacilAPI {
     }
 
     // PDV
-    async buscarCaixas(onProgress) {
-        return await this.pdv.buscarCaixas(onProgress);
+    async buscarPagamentosPDV(onProgress) {
+        return await this.pdv.buscarPagamentosPDV(onProgress);
     }
 
-    async buscarMotivosCancelamento(onProgress) {
-        return await this.pdv.buscarMotivosCancelamento(onProgress);
+    async buscarRecebimentosPDV(onProgress) {
+        return await this.pdv.buscarRecebimentosPDV(onProgress);
     }
 
     async buscarMotivosDesconto(onProgress) {
@@ -176,12 +167,17 @@ class VarejoFacilAPI {
         return await this.pdv.buscarMotivosDevolucao(onProgress);
     }
 
-    async buscarPagamentosPDV(onProgress) {
-        return await this.pdv.buscarPagamentosPDV(onProgress);
+    async buscarMotivosCancelamento(onProgress) {
+        return await this.pdv.buscarMotivosCancelamento(onProgress);
     }
 
-    async buscarRecebimentosPDV(onProgress) {
-        return await this.pdv.buscarRecebimentosPDV(onProgress);
+    // Estoque
+    async buscarLocalEstoque(onProgress) {
+        return await this.estoque.buscarLocalEstoque(onProgress);
+    }
+
+    async buscarTiposAjustes(onProgress) {
+        return await this.estoque.buscarTiposAjustes(onProgress);
     }
 
     // Fiscal
@@ -209,18 +205,17 @@ class VarejoFacilAPI {
         return await this.fiscal.buscarTiposOperacoes(onProgress);
     }
 
-    // Estoque
-    async buscarLocalEstoque(onProgress) {
-        return await this.estoque.buscarLocalEstoque(onProgress);
-    }
-
-    async buscarTiposAjustes(onProgress) {
-        return await this.estoque.buscarTiposAjustes(onProgress);
-    }
-
-    // Administração
+    // Pessoas
     async buscarLojas(onProgress) {
-        return await this.administracao.buscarLojas(onProgress);
+        return await this.pessoa.buscarLojas(onProgress);
+    }
+
+    async buscarClientes(onProgress) {
+        return await this.pessoa.buscarClientes(onProgress);
+    }
+
+    async buscarFornecedores(onProgress) {
+        return await this.pessoa.buscarFornecedores(onProgress);
     }
 
     // ========================================
