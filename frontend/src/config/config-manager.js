@@ -7,6 +7,7 @@
 
 import Config from '../services/config.js';
 import API from '../services/api/index.js';
+import Tabs from '../ui/tabs/tabs-manager.js';
 import UI from '../ui/ui.js';
 
 export const ConfigManager = {
@@ -70,7 +71,12 @@ export const ConfigManager = {
                 UI.mostrarAlerta('✅ Configuração salva e conectada com sucesso!', 'success');
                 
                 // Fechar modal após delay
-                setTimeout(() => UI.fecharConfig(), 1500);
+                setTimeout(() => {
+                    UI.fecharConfig();
+                    Tabs.goTo('pessoa');
+                    const btnLojas = document.querySelector('[data-action="importar-lojas"]');
+                    if (btnLojas) btnLojas.click();
+                }, 1500);
                 
                 return { success: true, data: resultado.data };
             } else {

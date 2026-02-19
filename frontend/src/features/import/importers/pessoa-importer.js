@@ -43,7 +43,7 @@ export class PessoaImporter extends ImportBase {
         return await this.execute({
             name: 'lojas',
             endpoint: 'lojas',
-            apiMethod: API.administracao.buscarLojas.bind(API.administracao),
+            apiMethod: API.pessoa.buscarLojas.bind(API.pessoa),
             uiElement,
             estimate: ESTIMATES.LOJAS
         });
