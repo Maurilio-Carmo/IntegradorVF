@@ -161,65 +161,9 @@ export const MESSAGES = {
 };
 
 // ============================================
-// ESTIMATIVAS DE REGISTROS
-// ============================================
-export const ESTIMATES = {
-    // Produtos
-    SECOES: 100,
-    GRUPOS: 500,
-    SUBGRUPOS: 1000,
-    MARCAS: 500,
-    FAMILIAS: 200,
-    PRODUTOS: 5000,
-    
-    // Pessoas
-    CLIENTES: 1000,
-    FORNECEDORES: 300,
-    LOJAS: 50,
-    
-    // Financeiro
-    CATEGORIAS: 200,
-    AGENTES: 100,
-    CONTAS_CORRENTES: 50,
-    ESPECIES_DOCUMENTO: 50,
-    HISTORICO_PADRAO: 100,
-    FORMAS_PAGAMENTO: 50,
-    
-    // PDV
-    CAIXAS: 50,
-    MOTIVOS_CANCELAMENTO: 50,
-    MOTIVOS_DESCONTO: 50,
-    MOTIVOS_DEVOLUCAO: 50,
-    PAGAMENTOS_PDV: 50,
-    RECEBIMENTOS_PDV: 50,
-    
-    // Fiscal
-    IMPOSTOS_FEDERAIS: 50,
-    REGIME_TRIBUTARIO: 50,
-    SITUACOES_FISCAIS: 100,
-    TABELAS_TRIBUTARIAS_ENTRADA: 100,
-    TABELAS_TRIBUTARIAS_SAIDA: 100,
-    TIPOS_OPERACOES: 100,
-    
-    // Estoque
-    LOCAL_ESTOQUE: 50,
-    TIPOS_AJUSTES: 50
-};
-
-// ============================================
 // ENDPOINTS
 // ============================================
 export const ENDPOINTS = {
-    // Backend
-    BACKEND: {
-        IMPORTACAO: '/api/importacao',
-        ESTATISTICAS: '/api/importacao/estatisticas',
-        SECOES: '/api/importacao/secoes',
-        GRUPOS: '/api/importacao/grupos',
-        SUBGRUPOS: '/api/importacao/subgrupos',
-        MARCAS: '/api/importacao/marcas'
-    },
-    
     // API Varejo Fácil (via proxy)
     VF: {
         BASE: '/produto',
