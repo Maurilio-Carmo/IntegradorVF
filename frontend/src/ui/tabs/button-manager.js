@@ -42,7 +42,6 @@ export class ImportButtonManager {
             'importar-historico-padrao':     'importarHistoricoPadrao',
 
             // PDV / FRENTE DE LOJA
-            'importar-caixas':               'importarCaixas',
             'importar-pagamentos-pdv':       'importarPagamentosPDV',
             'importar-recebimentos-pdv':     'importarRecebimentosPDV',
             'importar-motivos-desconto':     'importarMotivosDesconto',
@@ -50,7 +49,7 @@ export class ImportButtonManager {
             'importar-motivos-cancelamento': 'importarMotivosCancelamento',
 
             // ESTOQUE
-            'importar-local-estoque': 'importarLocalEstoque',
+            'importar-locais-estoque': 'importarLocalEstoque',
             'importar-tipos-ajustes': 'importarTiposAjustes',
 
             // FISCAL
@@ -83,7 +82,6 @@ export class ImportButtonManager {
                 'importarHistoricoPadrao'
             ],
             'btnImportarTudoFrenteLoja': [
-                'importarCaixas',
                 'importarPagamentosPDV',
                 'importarRecebimentosPDV',
                 'importarMotivosDesconto',

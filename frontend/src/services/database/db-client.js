@@ -24,15 +24,14 @@ const ENDPOINT_MAP = {
     'historico-padrao':       'importar-historico-padrao',
 
     // ── PDV / Frente de Loja ───────────────────────────────────────────────
-    'pagamentos-pdv':         'importar-pagamentos-pdv',
-    'recebimentos-pdv':       'importar-recebimentos-pdv',
-    'motivos-desconto':       'importar-motivos-desconto',
-    'motivos-devolucao':      'importar-motivos-devolucao',
-    'motivos-cancelamento':   'importar-motivos-cancelamento',
+    'importar-pagamentos-pdv':       'importar-pagamentos-pdv',
+    'importar-recebimentos-pdv':     'importar-recebimentos-pdv',
+    'importar-motivos-desconto':     'importar-motivos-desconto',
+    'importar-motivos-devolucao':    'importar-motivos-devolucao',
+    'importar-motivos-cancelamento': 'importar-motivos-cancelamento',
 
     // ── Estoque ────────────────────────────────────────────────────────────
-    'local-estoque':          'importar-local-estoque',
-    'locais-estoque':         'importar-local-estoque',
+    'local-estoque':         'importar-local-estoque',
     'tipos-ajustes':          'importar-tipos-ajustes',
 
     // ── Fiscal ─────────────────────────────────────────────────────────────
@@ -79,23 +78,43 @@ export class DatabaseClient {
      * @param {Array}  data      - Array de registros
      * @param {Object} [extra]   - Campos extras enviados junto ao body (ex: { lojaId })
      */
-    async save(endpoint, data, extra = {}) {
-        const rota = this._resolveEndpoint(endpoint);
+    async save(endpoint, data) {
+        // Produtos podem ter milhares de registros — envia em lotes de 200
+        const BATCH_SIZE = 1000;
+
+        if (!Array.isArray(data) || data.length <= BATCH_SIZE) {
+            return this._saveChunk(endpoint, data);
+        }
+
+        console.log(`📦 [db-client] Enviando ${data.length} registros em lotes de ${BATCH_SIZE}...`);
+
+        let totalSalvos = 0;
+        for (let i = 0; i < data.length; i += BATCH_SIZE) {
+            const chunk = data.slice(i, i + BATCH_SIZE);
+            const result = await this._saveChunk(endpoint, chunk);
+            totalSalvos += result?.salvos ?? chunk.length;
+            console.log(`   ✅ Lote ${Math.floor(i / BATCH_SIZE) + 1}: ${chunk.length} registros`);
+        }
+
+        return { salvos: totalSalvos };
+    }
+
+    async _saveChunk(endpoint, data) {
         try {
-            const response = await fetch(`${this.baseURL}/${rota}`, {
+            const response = await fetch(`${this.baseURL}/${endpoint}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ data, ...extra }),
+                body: JSON.stringify({ data })
             });
 
             if (!response.ok) {
                 const error = await this.extractError(response);
-                throw new Error(error.message || `HTTP ${response.status}: ${response.statusText}`);
+                throw new Error(error.message || `Erro ao salvar: ${response.statusText}`);
             }
 
             return await response.json();
         } catch (error) {
-            console.error(`Erro ao salvar "${endpoint}" → /${rota}:`, error);
+            console.error(`Erro ao salvar "${endpoint}" → /${endpoint}:`, error);
             throw error;
         }
     }
