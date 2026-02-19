@@ -354,9 +354,7 @@ CREATE TABLE categorias (
     tipo TEXT CHECK(tipo IN ('SINTETICA','ANALITICA')),
     status TEXT CHECK(status IN ('C','U','D','E')) DEFAULT 'U',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    
-    FOREIGN KEY (categoria_pai_id) REFERENCES categorias(categoria_id) ON DELETE SET NULL
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
 -- CONTAS CORRENTES
@@ -486,7 +484,6 @@ CREATE TABLE pagamentos_pdv (
 DROP TABLE IF EXISTS recebimentos_pdv;
 CREATE TABLE recebimentos_pdv (
     recebimento_id INTEGER PRIMARY KEY,
-    id_externo TEXT,
     descricao TEXT,
     categoria_id INTEGER,
     loja_id INTEGER,

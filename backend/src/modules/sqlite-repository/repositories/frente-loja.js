@@ -29,7 +29,12 @@ class FrenteLojaRepository extends BaseRepository {
                 ON CONFLICT(caixa_id) DO UPDATE SET
                     loja_id         = excluded.loja_id,
                     numero          = excluded.numero,
+                    serie_do_equipamento = excluded.serie_do_equipamento,
                     versao          = excluded.versao,
+                    data_ultima_venda = excluded.data_ultima_venda,
+                    hora            = excluded.hora,
+                    visivel_monitoramento = excluded.visivel_monitoramento,
+                    tipo_frente_loja = excluded.tipo_frente_loja,
                     updated_at      = CURRENT_TIMESTAMP
                 WHERE status NOT IN ('C', 'D')
             `),
@@ -67,6 +72,9 @@ class FrenteLojaRepository extends BaseRepository {
                 )
                 ON CONFLICT(pagamento_id) DO UPDATE SET
                     descricao  = excluded.descricao,
+                    categoria_id = excluded.categoria_id,
+                    loja_id = excluded.loja_id,
+                    valor_maximo = excluded.valor_maximo,
                     updated_at = CURRENT_TIMESTAMP
                 WHERE status NOT IN ('C', 'D')
             `),
@@ -89,22 +97,28 @@ class FrenteLojaRepository extends BaseRepository {
             recebimentos,
             (db) => db.prepare(`
                 INSERT INTO recebimentos_pdv (
-                    recebimento_id, id_externo, descricao, categoria_id,
+                    recebimento_id, descricao, categoria_id,
                     loja_id, tipo_recebimento, qtd_autenticacoes,
                     imprime_doc, qtd_impressoes, valor_recebimento, status
                 ) VALUES (
-                    @recebimento_id, @id_externo, @descricao, @categoria_id,
+                    @recebimento_id, @descricao, @categoria_id,
                     @loja_id, @tipo_recebimento, @qtd_autenticacoes,
                     @imprime_doc, @qtd_impressoes, @valor_recebimento, @status
                 )
                 ON CONFLICT(recebimento_id) DO UPDATE SET
                     descricao  = excluded.descricao,
+                    categoria_id = excluded.categoria_id,
+                    loja_id = excluded.loja_id,
+                    tipo_recebimento = excluded.tipo_recebimento,
+                    qtd_autenticacoes = excluded.qtd_autenticacoes,
+                    imprime_doc = excluded.imprime_doc,
+                    qtd_impressoes = excluded.qtd_impressoes,
+                    valor_recebimento = excluded.valor_recebimento,
                     updated_at = CURRENT_TIMESTAMP
                 WHERE status NOT IN ('C', 'D')
             `),
             (r) => [{
                 recebimento_id:     r.id                    ?? null,
-                id_externo:         r.idExterno             ?? null,
                 descricao:          r.descricao             ?? null,
                 categoria_id:       r.categoriaId           ?? null,
                 loja_id:            r.lojaId                ?? null,
@@ -136,6 +150,10 @@ class FrenteLojaRepository extends BaseRepository {
                 )
                 ON CONFLICT(motivo_id) DO UPDATE SET
                     descricao  = excluded.descricao,
+                    tipo_aplicacao_desconto = excluded.tipo_aplicacao_desconto,
+                    tipo_calculo_aplicacao_desconto = excluded.tipo_calculo_aplicacao_desconto,
+                    solicita_justificativa = excluded.solicita_justificativa,
+                    desconto_fidelidade = excluded.desconto_fidelidade,
                     updated_at = CURRENT_TIMESTAMP
                 WHERE status NOT IN ('C', 'D')
             `),
@@ -158,8 +176,11 @@ class FrenteLojaRepository extends BaseRepository {
             'motivos de devolução',
             motivos,
             (db) => db.prepare(`
-                INSERT INTO motivos_devolucao (motivo_id, descricao, status)
-                VALUES (@motivo_id, @descricao, @status)
+                INSERT INTO motivos_devolucao (
+                    motivo_id, descricao, status
+                ) VALUES (
+                    @motivo_id, @descricao, @status
+                )
                 ON CONFLICT(motivo_id) DO UPDATE SET
                     descricao  = excluded.descricao,
                     updated_at = CURRENT_TIMESTAMP
@@ -189,6 +210,8 @@ class FrenteLojaRepository extends BaseRepository {
                 )
                 ON CONFLICT(motivo_id) DO UPDATE SET
                     descricao  = excluded.descricao,
+                    tipo_aplicacao = excluded.tipo_aplicacao,
+                    solicita_justificativa = excluded.solicita_justificativa,
                     updated_at = CURRENT_TIMESTAMP
                 WHERE status NOT IN ('C', 'D')
             `),

@@ -25,7 +25,10 @@ class FiscalRepository extends BaseRepository {
                     @loja, @fornecedor, @status
                 )
                 ON CONFLICT(regime_id) DO UPDATE SET
-                    descricao  = excluded.descricao,
+                    descricao = excluded.descricao,
+                    classificacao = excluded.classificacao,
+                    loja = excluded.loja,
+                    fornecedor = excluded.fornecedor,
                     updated_at = CURRENT_TIMESTAMP
                 WHERE status NOT IN ('C', 'D')
             `),
@@ -57,6 +60,7 @@ class FiscalRepository extends BaseRepository {
                 ON CONFLICT(situacao_id) DO UPDATE SET
                     descricao          = excluded.descricao,
                     descricao_completa = excluded.descricao_completa,
+                    substituto         = excluded.substituto,
                     updated_at         = CURRENT_TIMESTAMP
                 WHERE status NOT IN ('C', 'D')
             `),
@@ -98,6 +102,30 @@ class FiscalRepository extends BaseRepository {
                 )
                 ON CONFLICT(operacao_id) DO UPDATE SET
                     descricao  = excluded.descricao,
+                    tipo_de_operacao = excluded.tipo_de_operacao,
+                    tipo_geracao_financeiro = excluded.tipo_geracao_financeiro,
+                    modalidade = excluded.modalidade,
+                    tipo_documento = excluded.tipo_documento,
+                    origem_da_nota = excluded.origem_da_nota,
+                    atualiza_custos = excluded.atualiza_custos,
+                    atualiza_estoque = excluded.atualiza_estoque,
+                    incide_impostos_federais = excluded.incide_impostos_federais,
+                    ipi_compoe_base_pis_cofins = excluded.ipi_compoe_base_pis_cofins,
+                    outras_desp_base_pis_cofins = excluded.outras_desp_base_pis_cofins,
+                    outras_desp_base_icms = excluded.outras_desp_base_icms,
+                    gera_fiscal = excluded.gera_fiscal,
+                    destaca_ipi = excluded.destaca_ipi,
+                    destaca_icms = excluded.destaca_icms,
+                    compoe_abc = excluded.compoe_abc,
+                    imprime_descricao_nfe = excluded.imprime_descricao_nfe,
+                    envia_observacao_nfe = excluded.envia_observacao_nfe,
+                    utiliza_conferencia = excluded.utiliza_conferencia,
+                    cfop_no_estado = excluded.cfop_no_estado,
+                    cfop_fora_do_estado = excluded.cfop_fora_do_estado,
+                    cfop_exterior = excluded.cfop_exterior,
+                    observacao = excluded.observacao,
+                    codigo_cst = excluded.codigo_cst,
+                    cfops_relacionados = excluded.cfops_relacionados,
                     updated_at = CURRENT_TIMESTAMP
                 WHERE status NOT IN ('C', 'D')
             `),
@@ -156,7 +184,18 @@ class FiscalRepository extends BaseRepository {
                     @cst_entrada_simples, @cst_saida_simples, @status
                 )
                 ON CONFLICT(imposto_id) DO UPDATE SET
-                    descricao  = excluded.descricao,
+                    descricao = excluded.descricao,
+                    tipo_imposto = excluded.tipo_imposto,
+                    cst_entrada_real = excluded.cst_entrada_real,
+                    cst_saida_real = excluded.cst_saida_real,
+                    aliquota_entrada_real = excluded.aliquota_entrada_real,
+                    aliquota_saida_real = excluded.aliquota_saida_real,
+                    cst_entrada_presumido = excluded.cst_entrada_presumido,
+                    cst_saida_presumido = excluded.cst_saida_presumido,
+                    aliquota_entrada_presumido = excluded.aliquota_entrada_presumido,
+                    aliquota_saida_presumido = excluded.aliquota_saida_presumido,
+                    cst_entrada_simples = excluded.cst_entrada_simples,
+                    cst_saida_simples = excluded.cst_saida_simples,
                     updated_at = CURRENT_TIMESTAMP
                 WHERE status NOT IN ('C', 'D')
             `),
@@ -205,7 +244,27 @@ class FiscalRepository extends BaseRepository {
                     @icms_desonerado, @icms_origem, @icms_efetivo, @reducao_origem, @status
                 )
                 ON CONFLICT(tabela_id, classificacao_pessoa, uf_destino) DO UPDATE SET
+                    tributado_nf = excluded.tributado_nf,
+                    isento_nf    = excluded.isento_nf,
+                    outros_nf    = excluded.outros_nf,
                     aliquota   = excluded.aliquota,
+                    agregado   = excluded.agregado,
+                    tributado_icms = excluded.tributado_icms,
+                    carga_liquida = excluded.carga_liquida,
+                    aliquota_interna = excluded.aliquota_interna,
+                    fecop = excluded.fecop,
+                    fecop_st = excluded.fecop_st,
+                    soma_ipi_bc = excluded.soma_ipi_bc,
+                    soma_ipi_bs = excluded.soma_ipi_bs,
+                    st_destacado = excluded.st_destacado,
+                    cst_id = excluded.cst_id,
+                    csosn = excluded.csosn,
+                    tributacao = excluded.tributacao,
+                    cfop_id = excluded.cfop_id,
+                    icms_desonerado = excluded.icms_desonerado,
+                    icms_origem = excluded.icms_origem,
+                    icms_efetivo = excluded.icms_efetivo,
+                    reducao_origem = excluded.reducao_origem,
                     updated_at = CURRENT_TIMESTAMP
                 WHERE status NOT IN ('C', 'D')
             `),
@@ -238,7 +297,27 @@ class FiscalRepository extends BaseRepository {
                     @icms_desonerado, @icms_origem, @icms_efetivo, @reducao_origem, @status
                 )
                 ON CONFLICT(tabela_id, classificacao_pessoa, uf_destino) DO UPDATE SET
-                    aliquota   = excluded.aliquota,
+                    tributado_nf = excluded.tributado_nf,
+                    isento_nf    = excluded.isento_nf,
+                    outros_nf    = excluded.outros_nf,
+                    aliquota     = excluded.aliquota,
+                    agregado   = excluded.agregado,
+                    tributado_icms = excluded.tributado_icms,
+                    carga_liquida = excluded.carga_liquida,
+                    aliquota_interna = excluded.aliquota_interna,
+                    fecop = excluded.fecop,
+                    fecop_st = excluded.fecop_st,
+                    soma_ipi_bc = excluded.soma_ipi_bc,
+                    soma_ipi_bs = excluded.soma_ipi_bs,
+                    st_destacado = excluded.st_destacado,
+                    cst_id = excluded.cst_id,
+                    csosn = excluded.csosn,
+                    tributacao = excluded.tributacao,
+                    cfop_id = excluded.cfop_id,
+                    icms_desonerado = excluded.icms_desonerado,
+                    icms_origem = excluded.icms_origem,
+                    icms_efetivo = excluded.icms_efetivo,
+                    reducao_origem = excluded.reducao_origem,
                     updated_at = CURRENT_TIMESTAMP
                 WHERE status NOT IN ('C', 'D')
             `),

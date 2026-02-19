@@ -16,8 +16,11 @@ class ProdutoRepository extends BaseRepository {
             'marcas',
             marcas,
             (db) => db.prepare(`
-                INSERT INTO marcas (marca_id, descricao_old, status)
-                VALUES (@marca_id, @descricao_old, 'U')
+                INSERT INTO marcas (
+                    marca_id, descricao_old, status
+                ) VALUES (
+                    @marca_id, @descricao_old, 'U'
+                )
                 ON CONFLICT(marca_id) DO UPDATE SET
                     descricao_old = excluded.descricao_old,
                     updated_at    = CURRENT_TIMESTAMP
@@ -34,8 +37,11 @@ class ProdutoRepository extends BaseRepository {
             'famílias',
             familias,
             (db) => db.prepare(`
-                INSERT INTO familias (familia_id, descricao_old, status)
-                VALUES (@familia_id, @descricao_old, 'U')
+                INSERT INTO familias (
+                    familia_id, descricao_old, status
+                ) VALUES (
+                    @familia_id, @descricao_old, 'U'
+                )
                 ON CONFLICT(familia_id) DO UPDATE SET
                     descricao_old = excluded.descricao_old,
                     updated_at    = CURRENT_TIMESTAMP

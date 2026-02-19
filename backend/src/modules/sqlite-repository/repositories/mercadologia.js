@@ -16,8 +16,11 @@ class MercadologiaRepository extends BaseRepository {
             'seções',
             secoes,
             (db) => db.prepare(`
-                INSERT INTO secoes (secao_id, descricao_old, status)
-                VALUES (@secao_id, @descricao_old, 'U')
+                INSERT INTO secoes (
+                    secao_id, descricao_old, status
+                ) VALUES (
+                    @secao_id, @descricao_old, 'U'
+                )
                 ON CONFLICT(secao_id) DO UPDATE SET
                     descricao_old = excluded.descricao_old,
                     updated_at    = CURRENT_TIMESTAMP
@@ -34,8 +37,11 @@ class MercadologiaRepository extends BaseRepository {
             'grupos',
             grupos,
             (db) => db.prepare(`
-                INSERT INTO grupos (grupo_id, secao_id, descricao_old, status)
-                VALUES (@grupo_id, @secao_id, @descricao_old, 'U')
+                INSERT INTO grupos (
+                    grupo_id, secao_id, descricao_old, status
+                ) VALUES (
+                    @grupo_id, @secao_id, @descricao_old, 'U'
+                )
                 ON CONFLICT(grupo_id) DO UPDATE SET
                     secao_id      = excluded.secao_id,
                     descricao_old = excluded.descricao_old,
@@ -57,8 +63,11 @@ class MercadologiaRepository extends BaseRepository {
             'subgrupos',
             subgrupos,
             (db) => db.prepare(`
-                INSERT INTO subgrupos (subgrupo_id, secao_id, grupo_id, descricao_old, status)
-                VALUES (@subgrupo_id, @secao_id, @grupo_id, @descricao_old, 'U')
+                INSERT INTO subgrupos (
+                    subgrupo_id, secao_id, grupo_id, descricao_old, status
+                ) VALUES (
+                    @subgrupo_id, @secao_id, @grupo_id, @descricao_old, 'U'
+                )
                 ON CONFLICT(subgrupo_id) DO UPDATE SET
                     secao_id      = excluded.secao_id,
                     grupo_id      = excluded.grupo_id,

@@ -26,6 +26,8 @@ class EstoqueRepository extends BaseRepository {
                 ON CONFLICT(local_id) DO UPDATE SET
                     descricao       = excluded.descricao,
                     tipo_de_estoque = excluded.tipo_de_estoque,
+                    bloqueio        = excluded.bloqueio,
+                    avaria          = excluded.avaria,
                     updated_at      = CURRENT_TIMESTAMP
                 WHERE status NOT IN ('C', 'D')
             `),
@@ -56,6 +58,9 @@ class EstoqueRepository extends BaseRepository {
                 )
                 ON CONFLICT(ajuste_id) DO UPDATE SET
                     descricao  = excluded.descricao,
+                    tipo       = excluded.tipo,
+                    tipo_de_operacao = excluded.tipo_de_operacao,
+                    tipo_reservado   = excluded.tipo_reservado,
                     updated_at = CURRENT_TIMESTAMP
                 WHERE status NOT IN ('C', 'D')
             `),

@@ -29,21 +29,25 @@ class FinanceiroRepository extends BaseRepository {
                     @classificacao, @tipo, @status
                 )
                 ON CONFLICT(categoria_id) DO UPDATE SET
-                    descricao        = excluded.descricao,
+                    descricao = excluded.descricao,
                     categoria_pai_id = excluded.categoria_pai_id,
-                    inativa          = excluded.inativa,
-                    updated_at       = CURRENT_TIMESTAMP
+                    codigo_contabil = excluded.codigo_contabil,
+                    inativa = excluded.inativa,
+                    posicao = excluded.posicao,
+                    classificacao = excluded.classificacao,
+                    tipo = excluded.tipo,
+                    updated_at = CURRENT_TIMESTAMP
                 WHERE status NOT IN ('C', 'D')
             `),
             (c) => [{
                 categoria_id:     c.id                            ?? null,
                 descricao:        c.descricao                     ?? null,
-                categoria_pai_id: c.codigoDaCategoriaPai         ?? c.categoriaPai ?? null,
-                codigo_contabil:  c.codigoContabilExterno        ?? c.codigoContabil ?? null,
+                categoria_pai_id: c.codigoDaCategoriaPai          ?? null,
+                codigo_contabil:  c.codigoContabilExterno         ?? null,
                 inativa:          BaseRepository._bool(c.inativa),
                 posicao:          c.posicao                       ?? null,
-                classificacao:    c.classificacaoDaCategoria      ?? c.classificacao ?? null,
-                tipo:             c.tipoDeCategoria               ?? c.tipo ?? null,
+                classificacao:    c.classificacaoDaCategoria      ?? null,
+                tipo:             c.tipoDeCategoria               ?? null,
                 status: 'U'
             }]
         );
@@ -70,20 +74,36 @@ class FinanceiroRepository extends BaseRepository {
                     @municipio, @ibge, @uf, @pais, @tipo_de_endereco, @status
                 )
                 ON CONFLICT(agente_id) DO UPDATE SET
-                    nome       = excluded.nome,
-                    fantasia   = excluded.fantasia,
+                    nome = excluded.nome,
+                    fantasia = excluded.fantasia,
+                    codigo_do_banco = excluded.codigo_do_banco,
+                    tipo = excluded.tipo,
+                    documento = excluded.documento,
+                    tipo_contribuinte = excluded.tipo_contribuinte,
+                    inscricao_estadual = excluded.inscricao_estadual,
+                    telefone1 = excluded.telefone1,
+                    holding_id = excluded.holding_id,
+                    cep = excluded.cep,
+                    logradouro = excluded.logradouro,
+                    numero = excluded.numero,
+                    bairro = excluded.bairro,
+                    municipio = excluded.municipio,
+                    ibge = excluded.ibge,
+                    uf = excluded.uf,
+                    pais = excluded.pais,
+                    tipo_de_endereco = excluded.tipo_de_endereco,
                     updated_at = CURRENT_TIMESTAMP
                 WHERE status NOT IN ('C', 'D')
             `),
             (a) => [{
                 agente_id:          a.id                             ?? null,
                 nome:               a.nome                           ?? null,
-                fantasia:           a.fantasia                       ?? a.nomeFantasia ?? null,
+                fantasia:           a.fantasia                       ?? null,
                 codigo_do_banco:    a.codigoDoBanco                  ?? null,
-                tipo:               a.tipo                           ?? a.pessoaFisicaOuJuridica ?? null,
-                documento:          a.numeroDoDocumento              ?? a.cpfCnpj ?? null,
+                tipo:               a.tipo                           ?? null,
+                documento:          a.numeroDoDocumento              ?? null,
                 tipo_contribuinte:  a.tipoContribuinte               ?? null,
-                inscricao_estadual: a.numeroDeIdentificacao          ?? a.inscricaoEstadual ?? null,
+                inscricao_estadual: a.numeroDeIdentificacao          ?? null,
                 telefone1:          a.telefone1                      ?? null,
                 holding_id:         a.holdingId                      ?? null,
                 cep:                (a.endereco?.cep ?? '').replace('-', '') || null,
@@ -91,9 +111,9 @@ class FinanceiroRepository extends BaseRepository {
                 numero:             a.endereco?.numero               ?? null,
                 bairro:             a.endereco?.bairro               ?? null,
                 municipio:          a.endereco?.municipio            ?? null,
-                ibge:               a.endereco?.codigoIbge           ?? a.endereco?.ibge ?? null,
+                ibge:               a.endereco?.codigoIbge           ?? null,
                 uf:                 a.endereco?.uf                   ?? null,
-                pais:               a.endereco?.codigoDoPais         ?? a.endereco?.pais ?? null,
+                pais:               a.endereco?.codigoDoPais         ?? null,
                 tipo_de_endereco:   a.endereco?.tipoDeEndereco       ?? null,
                 status: 'U'
             }]
@@ -121,8 +141,20 @@ class FinanceiroRepository extends BaseRepository {
                     @local_de_pagamento, @identificacao_ofx, @status
                 )
                 ON CONFLICT(conta_id) DO UPDATE SET
-                    descricao  = excluded.descricao,
-                    ativa      = excluded.ativa,
+                    descricao = excluded.descricao,
+                    tipo = excluded.tipo,
+                    ativa = excluded.ativa,
+                    compoe_fluxo_caixa = excluded.compoe_fluxo_caixa,
+                    lancamento_consolidado = excluded.lancamento_consolidado,
+                    loja_id = excluded.loja_id,
+                    nome_loja = excluded.nome_loja,
+                    agente_financeiro_id = excluded.agente_financeiro_id,
+                    nome_banco = excluded.nome_banco,
+                    codigo_banco = excluded.codigo_banco,
+                    agencia = excluded.agencia,
+                    conta = excluded.conta,
+                    local_de_pagamento = excluded.local_de_pagamento,
+                    identificacao_ofx = excluded.identificacao_ofx,
                     updated_at = CURRENT_TIMESTAMP
                 WHERE status NOT IN ('C', 'D')
             `),
@@ -141,7 +173,7 @@ class FinanceiroRepository extends BaseRepository {
                 agencia:               c.agencia                                       ?? null,
                 conta:                 c.conta                                         ?? null,
                 local_de_pagamento:    c.localDePagamento                              ?? null,
-                identificacao_ofx:     c.identificacaoContaCorrenteOFX                 ?? c.identificacaoOfx ?? null,
+                identificacao_ofx:     c.identificacaoContaCorrenteOFX                 ?? null,
                 status: 'U'
             }]
         );
@@ -170,8 +202,23 @@ class FinanceiroRepository extends BaseRepository {
                     @especie_pdv, @controla_limite_credito, @tipo, @status
                 )
                 ON CONFLICT(especie_id) DO UPDATE SET
-                    descricao  = excluded.descricao,
-                    sigla      = excluded.sigla,
+                    descricao = excluded.descricao,
+                    sigla = excluded.sigla,
+                    genero = excluded.genero,
+                    especie_nfe = excluded.especie_nfe,
+                    modalidade = excluded.modalidade,
+                    dias_para_juros = excluded.dias_para_juros,
+                    tipo_valor_mora_diaria = excluded.tipo_valor_mora_diaria,
+                    mora_diaria_por_atraso = excluded.mora_diaria_por_atraso,
+                    dias_para_multa = excluded.dias_para_multa,
+                    tipo_valor_multa = excluded.tipo_valor_multa,
+                    valor_multa_por_atraso = excluded.valor_multa_por_atraso,
+                    emite_documento_vinculado = excluded.emite_documento_vinculado,
+                    quantidade_vias = excluded.quantidade_vias,
+                    quantidade_autenticacoes = excluded.quantidade_autenticacoes,
+                    especie_pdv = excluded.especie_pdv,
+                    controla_limite_credito = excluded.controla_limite_credito,
+                    tipo = excluded.tipo,
                     updated_at = CURRENT_TIMESTAMP
                 WHERE status NOT IN ('C', 'D')
             `),
@@ -180,19 +227,19 @@ class FinanceiroRepository extends BaseRepository {
                 descricao:                   e.descricao                            ?? null,
                 sigla:                       e.sigla                                ?? null,
                 genero:                      e.genero                               ?? null,
-                especie_nfe:                 e.especieDocumentoNFe                  ?? e.especieNfe ?? null,
+                especie_nfe:                 e.especieDocumentoNFe                  ?? null,
                 modalidade:                  e.modalidade                           ?? null,
-                dias_para_juros:             e.diasParaIncidenciaDeJuros            ?? e.diasParaJuros ?? null,
+                dias_para_juros:             e.diasParaIncidenciaDeJuros            ?? null,
                 tipo_valor_mora_diaria:      e.tipoValorMoraDiaria                  ?? null,
                 mora_diaria_por_atraso:      e.moraDiariaPorAtraso                  ?? null,
-                dias_para_multa:             e.diasParaIncidenciaDeMulta            ?? e.diasParaMulta ?? null,
+                dias_para_multa:             e.diasParaIncidenciaDeMulta            ?? null,
                 tipo_valor_multa:            e.tipoValorMulta                       ?? null,
                 valor_multa_por_atraso:      e.valorMultaPorAtraso                  ?? null,
                 emite_documento_vinculado:   BaseRepository._bool(e.emiteDocumentoVinculado),
-                quantidade_vias:             e.quantidadeDeVias                     ?? e.quantidadeVias ?? null,
-                quantidade_autenticacoes:    e.quantidadeDeAutenticacoes            ?? e.quantidadeAutenticacoes ?? null,
-                especie_pdv:                 e.especiePDV                           ?? e.especiePdv ?? null,
-                controla_limite_credito:     BaseRepository._bool(e.controlaLimiteDeCredito ?? e.controlaLimiteCredito),
+                quantidade_vias:             e.quantidadeDeVias                     ?? null,
+                quantidade_autenticacoes:    e.quantidadeDeAutenticacoes            ?? null,
+                especie_pdv:                 e.especiePDV                           ?? null,
+                controla_limite_credito:     BaseRepository._bool(e.controlaLimiteDeCredito),
                 tipo:                        e.tipo                                 ?? null,
                 status: 'U'
             }]
@@ -212,7 +259,8 @@ class FinanceiroRepository extends BaseRepository {
                     @historico_id, @descricao, @tipo, @status
                 )
                 ON CONFLICT(historico_id) DO UPDATE SET
-                    descricao  = excluded.descricao,
+                    descricao = excluded.descricao,
+                    tipo = excluded.tipo,
                     updated_at = CURRENT_TIMESTAMP
                 WHERE status NOT IN ('C', 'D')
             `),
