@@ -38,14 +38,14 @@ const ENDPOINT_MAP = {
     'tipos-ajustes':          'importar-tipos-ajustes',
 
     // ── Fiscal ─────────────────────────────────────────────────────────────
-    'regime-tributario':            'importar-regime-tributario',
-    'regime-estadual-tributario':   'importar-regime-tributario',
-    'situacoes-fiscais':            'importar-situacoes-fiscais',
-    'situacoes':                    'importar-situacoes-fiscais',
-    'tipos-operacoes':              'importar-tipos-operacoes',
-    'operacoes':                    'importar-tipos-operacoes',
-    'impostos-federais':            'importar-impostos-federais',
-    'tabelas-tributarias':          'importar-tabelas-tributarias',
+    'importar-regime-tributario':            'importar-regime-tributario',
+    'importar-regime-estadual-tributario':   'importar-regime-tributario',
+    'importar-situacoes-fiscais':            'importar-situacoes-fiscais',
+    'importar-situacoes':                    'importar-situacoes-fiscais',
+    'importar-tipos-operacoes':              'importar-tipos-operacoes',
+    'importar-operacoes':                    'importar-tipos-operacoes',
+    'importar-impostos-federais':            'importar-impostos-federais',
+    'importar-tabelas-tributarias':          'importar-tabelas-tributarias',
 
     // ── Pessoa ─────────────────────────────────────────────────────────────
     'lojas':                  'importar-lojas',
