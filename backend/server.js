@@ -5,11 +5,14 @@
 const express = require('express');
 const cors    = require('cors');
 const path    = require('path');
+const host    = '0.0.0.0'
 require('dotenv').config();
+
+const os = require('os');
 
 // Importar rotas
 const importacaoRoutes = require('./src/routes/importacao');
-const apiProxyRoutes   = require('./src/routes/api-proxy');   // ← módulo completo
+const apiProxyRoutes   = require('./src/routes/api-proxy');
 const app  = express();
 const PORT = process.env.PORT || 3000;
 
@@ -45,11 +48,25 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(frontendPath, 'index.html'));
 });
 
+function getLocalIP() {
+    const interfaces = os.networkInterfaces();
+
+    for (const name of Object.keys(interfaces)) {
+        for (const iface of interfaces[name]) {
+            if (iface.family === 'IPv4' && !iface.internal) {
+                return iface.address;
+            }
+        }
+    }
+
+    return 'localhost';
+}
+
 // Iniciar servidor
-app.listen(PORT, () => {
-    console.log(`🚀 Servidor:    http://localhost:${PORT}`);
-    console.log(`🔗 Health:      http://localhost:${PORT}/health`);
-    console.log(`📡 Proxy API:   http://localhost:${PORT}/api/vf/*`);
-    console.log(`💾 Importação:  http://localhost:${PORT}/api/importacao/*`);
-    console.log(`✅ CORS habilitado | Limite JSON: 50mb`);
+const localIP = getLocalIP();
+
+app.listen(PORT, host, () => {
+    console.log(`🚀 Servidor local:    http://localhost:${PORT}`);
+    console.log(`🌐 Servidor rede:     http://${localIP}:${PORT}`)
+    console.log(`🔗 Health:            http://${localIP}:${PORT}/health`);
 });

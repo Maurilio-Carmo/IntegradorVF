@@ -5,6 +5,7 @@
  * Agrega todos os módulos de API e mantém compatibilidade com código legado
  */
 
+import { API as API_CONFIG } from '../../config/constants.js';
 import HttpClient from './http-client.js';
 import {
     ProdutoAPI,
@@ -22,7 +23,7 @@ import {
 class VarejoFacilAPI {
     constructor() {
         // Criar HttpClient base
-        this.proxyURL = 'http://localhost:3000/api/vf';
+        this.proxyURL = API_CONFIG.PROXY_URL;
         this.http = new HttpClient(this.proxyURL);
 
         // Inicializar módulos

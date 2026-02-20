@@ -10,14 +10,14 @@
  *   healthCheck()   → GET  /health
  */
 
+import { API } from '../../config/constants.js';
 import { ENDPOINT_MAP } from './endpoint-map.js';
 
 const BATCH_SIZE = 1000;
 
 export class DatabaseClient {
-
-    constructor(baseURL = 'http://localhost:3000/api/importacao') {
-        this.baseURL = baseURL;
+    constructor(baseURL = null) {
+        this.baseURL = baseURL ?? `${API.PROXY_BASE}/api/importacao`;
     }
 
     // PÚBLICO

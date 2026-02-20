@@ -5,13 +5,17 @@
  * Centraliza todos os valores fixos e configurações
  */
 
+const _origin = typeof window !== 'undefined' 
+    ? window.location.origin 
+    : 'http://localhost:3000';
+
 // ============================================
 // CONFIGURAÇÕES DE API
 // ============================================
 export const API = {
-    // Proxy local
-    PROXY_URL: 'http://localhost:3000/api/vf',
-    PROXY_BASE: 'http://localhost:3000',
+    // Proxy
+    PROXY_URL: `${_origin}/api/vf`,
+    PROXY_BASE: _origin,
     
     // Paginação
     DEFAULT_PAGE_SIZE: 500,
