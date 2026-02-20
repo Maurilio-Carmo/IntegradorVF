@@ -53,7 +53,7 @@ export class APIBase {
     /**
      * Buscar todos os dados (paginação automática)
      */
-    async fetchAll(endpoint, onProgress = null) {
+    async fetchAll(endpoint, onProgress = null, onPageFetched = null) {
         const pageSize = 500;
         let start = 0;
         let allData = [];
@@ -64,19 +64,17 @@ export class APIBase {
             const response = await this.fetchPaginated(endpoint, start, pageSize);
             const items = response.items || response.data || [];
 
-            // Captura o total real da API
-            if (response.total !== undefined && response.total !== null) {
-                totalConhecido = response.total;
-            }
-
+            if (response.total !== undefined) totalConhecido = response.total;
             if (items.length === 0) break;
+
+            if (onPageFetched) {
+                await onPageFetched(items, start, totalConhecido);
+            }
 
             allData = allData.concat(items);
             start += items.length;
 
-            if (onProgress) {
-                onProgress(allData.length, items.length, totalConhecido);
-            }
+            if (onProgress) onProgress(allData.length, items.length, totalConhecido);
 
             // Usar total como critério de parada
             if (totalConhecido !== null && allData.length >= totalConhecido) {

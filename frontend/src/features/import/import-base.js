@@ -29,8 +29,8 @@ export class ImportBase {
             name,
             endpoint,
             apiMethod,
-            transform = null,   // ← novo campo opcional
-            uiElement,
+            transform = null,
+            uiElement
         } = config;
 
         try {
@@ -38,55 +38,46 @@ export class ImportBase {
             UI.log(`📥 Iniciando importação de ${name}...`, 'info');
             UI.status.updateImport(uiElement, 'loading', `Buscando ${name}...`);
 
-            // 2. Buscar dados da API
-            const rawData = await apiMethod((atual, _itensDaPagina, totalReal) => {
-                const divisor = totalReal;
-                const percentage = Math.min(Math.floor((atual / divisor) * 100), 99);
+            let totalSalvos = 0;
 
-                // Atualiza texto com contagem real
-                const statusDiv = uiElement?.querySelector('.import-item-status');
-                if (statusDiv) {
-                    const label = totalReal
-                        ? `${atual} de ${totalReal} (${percentage}%)`
-                        : `${atual} registros... (${percentage}%)`;
-                    statusDiv.textContent = label;
+            // Callback executado a cada página recebida da API
+            const onPageFetched = async (items, offset, totalReal) => {
+                const data = transform ? transform(items) : items;
+
+                await this.db.save(endpoint, data);
+
+                totalSalvos += data.length;
+
+                const pct = totalReal
+                    ? Math.min(Math.floor((totalSalvos / totalReal) * 100), 99)
+                    : null;
+
+                UI.log(
+                    `💾 ${name}: ${totalSalvos}${totalReal ? ' / ' + totalReal : ''} gravados`,
+                    'info'
+                );
+
+                if (pct !== null) {
+                    UI.status.updateImport(uiElement, 'progress', pct);
                 }
-
-                UI.log(`   📄 ${name}: ${atual}${totalReal ? '/' + totalReal : ''} registros`, 'info');
-                UI.status.updateImport(uiElement, 'progress', percentage);
-            });
-
-            UI.log(`✅ ${rawData.length} ${name} buscados da API`, 'success');
-
-            // 3. ✅ Aplicar transformação se fornecida (flatMap, desestruturação, etc.)
-            const data = transform ? transform(rawData) : rawData;
-
-            if (transform) {
-                UI.log(`🔄 ${name}: ${rawData.length} → ${data.length} registros após transformação`, 'info');
-            }
-
-            // 4. Salvar no banco
-            UI.log(`💾 Salvando ${data.length} ${name} no banco...`, 'info');
-            await this.db.save(endpoint, data);
-            UI.log(`✅ ${data.length} ${name} salvos no banco`, 'success');
-
-            // 5. Atualizar UI
-            UI.status.updateImport(uiElement, 'success', `${data.length} registros`);
-
-            return {
-                success: true,
-                count: data.length,
-                data
             };
+
+            const rawData = await apiMethod(
+                (atual, _itens, totalReal) => {
+                    UI.log(`📄 ${name}: ${atual} buscados`, 'info');
+                },
+                onPageFetched
+            );
+
+            UI.log(`✅ ${name}: ${totalSalvos} registros importados com sucesso`, 'success');
+            UI.status.updateImport(uiElement, 'success', `${totalSalvos} registros`);
+
+            return { total: totalSalvos };
 
         } catch (error) {
             UI.log(`❌ Erro ao importar ${name}: ${error.message}`, 'error');
             UI.status.updateImport(uiElement, 'error', error.message);
-
-            return {
-                success: false,
-                error: error.message
-            };
+            throw error;
         }
     }
 

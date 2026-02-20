@@ -42,10 +42,6 @@ class ImportacaoService {
         return Produto.importarFamilias(familias);
     }
 
-    /**
-     * @param {Array}  produtos
-     * @param {number} lojaId  - ID da loja para resolver estoque e regime fiscal
-     */
     static async importarProdutos(produtos, lojaId) {
         return Produto.importarProdutos(produtos, lojaId);
     }
