@@ -63,7 +63,7 @@ class ProdutoRepository extends BaseRepository {
             produtos,
             (db) => db.prepare(`
                 INSERT INTO produtos (
-                    produto_id, descricao, descricao_reduzida, codigo_interno,
+                    produto_id, descricao, descricao_reduzida,
                     secao_id, grupo_id, subgrupo_id, familia_id, marca_id,
                     estoque_minimo, estoque_maximo,
                     composicao, peso_variavel,
@@ -83,7 +83,7 @@ class ProdutoRepository extends BaseRepository {
                     fora_de_linha, data_saida, data_inclusao, data_alteracao,
                     status
                 ) VALUES (
-                    @produto_id, @descricao, @descricao_reduzida, @codigo_interno,
+                    @produto_id, @descricao, @descricao_reduzida,
                     @secao_id, @grupo_id, @subgrupo_id, @familia_id, @marca_id,
                     @estoque_minimo, @estoque_maximo,
                     @composicao, @peso_variavel,
@@ -106,7 +106,6 @@ class ProdutoRepository extends BaseRepository {
                 ON CONFLICT(produto_id) DO UPDATE SET
                     descricao            = excluded.descricao,
                     descricao_reduzida   = excluded.descricao_reduzida,
-                    codigo_interno       = excluded.codigo_interno,
                     secao_id             = excluded.secao_id,
                     grupo_id             = excluded.grupo_id,
                     subgrupo_id          = excluded.subgrupo_id,
@@ -134,7 +133,6 @@ class ProdutoRepository extends BaseRepository {
                     produto_id:               prod.id           ?? null,
                     descricao:                prod.descricao    ?? null,
                     descricao_reduzida:       prod.descricaoReduzida ?? null,
-                    codigo_interno:           prod.codigoInterno ?? null,
 
                     // Hierarquia mercadológica
                     secao_id:                 prod.secaoId      ?? null,
@@ -196,9 +194,9 @@ class ProdutoRepository extends BaseRepository {
 
                     // Linha e datas
                     fora_de_linha:   prod.foraDeLinha === 'S' ? 1 : 0,
-                    data_saida:      BaseRepository._date(prod.dataSaida),
-                    data_inclusao:   BaseRepository._date(prod.dataInclusao),
-                    data_alteracao:  BaseRepository._date(prod.dataAlteracao),
+                    data_saida:      prod.dataSaida,
+                    data_inclusao:   prod.dataInclusao,
+                    data_alteracao:  prod.dataAlteracao,
 
                     status: 'U'
                 }];
