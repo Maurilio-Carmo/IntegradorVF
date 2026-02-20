@@ -147,29 +147,22 @@ export class ProdutoAPI extends APIBase {
     /**
      * Buscar marcas
      */
-    async buscarMarcas(onProgress) {
-        return await this.fetchAll('produto/marcas', onProgress);
+    async buscarMarcas(onProgress, onPageFetched) {
+        return await this.fetchAll('produto/marcas', onProgress, onPageFetched);
     }
 
     /**
      * Buscar famílias
      */
-    async buscarFamilias(onProgress) {
-        return await this.fetchAll('produto/familias', onProgress);
+    async buscarFamilias(onProgress, onPageFetched) {
+        return await this.fetchAll('produto/familias', onProgress, onPageFetched);
     }
 
     /**
      * Buscar produtos
      */
-    async buscarProdutos(onProgress) {
-        return await this.fetchAll('produto/produtos', onProgress);
-    }
-
-    /**
-     * Buscar produto por ID
-     */
-    async buscarProdutoPorId(id) {
-        return await this.http.get(`produto/produtos/${id}`);
+    async buscarProdutos(onProgress, onPageFetched) {
+        return await this.fetchAll('produto/produtos', onProgress, onPageFetched);
     }
 
     /**
@@ -182,16 +175,12 @@ export class ProdutoAPI extends APIBase {
             secoes: await this.buscarSecoes(onProgress),
             grupos: await this.buscarGrupos(onProgress),
             subgrupos: await this.buscarSubgrupos(onProgress),
-            marcas: await this.buscarMarcas(onProgress),
-            familias: await this.buscarFamilias(onProgress)
         };
 
         console.log('✅ Estrutura mercadológica completa:', {
             secoes: estrutura.secoes.length,
             grupos: estrutura.grupos.length,
             subgrupos: estrutura.subgrupos.length,
-            marcas: estrutura.marcas.length,
-            familias: estrutura.familias.length
         });
 
         return estrutura;

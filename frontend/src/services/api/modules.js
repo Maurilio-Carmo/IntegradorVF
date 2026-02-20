@@ -2,110 +2,190 @@
 
 import { APIBase } from './api-base.js';
 
-// PESSOA 
-export class PessoaAPI extends APIBase {
-    async buscarLojas(onProgress) {
-        return await this.fetchAll('pessoa/lojas', onProgress);
+// PRODUTO
+export class ProdutoAPI extends APIBase {
+
+    async buscarSecoes(onProgress, onPageFetched) {
+        return await this.fetchAll('produto/secoes', onProgress, onPageFetched);
     }
 
-    async buscarClientes(onProgress) {
-        return await this.fetchAll('pessoa/clientes', onProgress);
+    async buscarMarcas(onProgress, onPageFetched) {
+        return await this.fetchAll('produto/marcas', onProgress, onPageFetched);
     }
 
-    async buscarFornecedores(onProgress) {
-        return await this.fetchAll('pessoa/fornecedores', onProgress);
+    async buscarFamilias(onProgress, onPageFetched) {
+        return await this.fetchAll('produto/familias', onProgress, onPageFetched);
     }
 
-    async buscarLojaPorId(id) {
-        return await this.http.get(`administracao/lojas/${id}`);
+    async buscarProdutos(onProgress, onPageFetched) {
+        return await this.fetchAll('produto/produtos', onProgress, onPageFetched);
     }
 
-    async buscarClientePorId(id) {
-        return await this.http.get(`pessoa/clientes/${id}`);
+    /**
+     * Busca hierárquica — grupos dependem de seções
+     * onPageFetched não se aplica: loop manual, não usa fetchAll paginado
+     */
+    async buscarGrupos(onProgress) {
+        const secoes = await this.fetchAll('produto/secoes');
+        if (secoes.length === 0) return [];
+
+        let todosGrupos = [];
+        let totalProcessado = 0;
+
+        for (const secao of secoes) {
+            try {
+                const grupos = await this.fetchAll(`produto/secoes/${secao.id}/grupos`);
+
+                todosGrupos = todosGrupos.concat(
+                    grupos.map(g => ({ ...g, secaoId: secao.id }))
+                );
+                totalProcessado += grupos.length;
+
+                if (onProgress) onProgress(totalProcessado);
+                await this.delay(100);
+
+            } catch (error) {
+                console.error(`❌ Grupos da seção ${secao.id}:`, error.message);
+            }
+        }
+
+        return todosGrupos;
     }
 
-    async buscarFornecedorPorId(id) {
-        return await this.http.get(`pessoa/fornecedores/${id}`);
+    /**
+     * Busca hierárquica — subgrupos dependem de seções e grupos
+     * onPageFetched não se aplica: loop manual, não usa fetchAll paginado
+     */
+    async buscarSubgrupos(onProgress) {
+        const secoes = await this.fetchAll('produto/secoes');
+        if (secoes.length === 0) return [];
+
+        let todosSubgrupos = [];
+        let totalProcessado = 0;
+
+        for (const secao of secoes) {
+            try {
+                const grupos = await this.fetchAll(`produto/secoes/${secao.id}/grupos`);
+
+                for (const grupo of grupos) {
+                    try {
+                        const subgrupos = await this.fetchAll(
+                            `produto/secoes/${secao.id}/grupos/${grupo.id}/subgrupos`
+                        );
+
+                        todosSubgrupos = todosSubgrupos.concat(
+                            subgrupos.map(s => ({ ...s, secaoId: secao.id, grupoId: grupo.id }))
+                        );
+                        totalProcessado += subgrupos.length;
+
+                        if (onProgress) onProgress(totalProcessado);
+                        await this.delay(100);
+
+                    } catch (error) {
+                        console.error(`❌ Subgrupos do grupo ${grupo.id}:`, error.message);
+                    }
+                }
+            } catch (error) {
+                console.error(`❌ Seção ${secao.id}:`, error.message);
+            }
+        }
+
+        return todosSubgrupos;
     }
 }
 
 // FINANCEIRO API
 export class FinanceiroAPI extends APIBase {
-    async buscarCategorias(onProgress) {
-        return await this.fetchAll('financeiro/categorias', onProgress);
+    async buscarCategorias(onProgress, onPageFetched) {
+        return await this.fetchAll('financeiro/categorias', onProgress, onPageFetched);
     }
 
-    async buscarAgentes(onProgress) {
-        return await this.fetchAll('pessoa/agentes-financeiros', onProgress);
+    async buscarAgentes(onProgress, onPageFetched) {
+        return await this.fetchAll('pessoa/agentes-financeiros', onProgress, onPageFetched);
     }
 
-    async buscarContasCorrentes(onProgress) {
-        return await this.fetchAll('financeiro/contas-correntes', onProgress);
+    async buscarContasCorrentes(onProgress, onPageFetched) {
+        return await this.fetchAll('financeiro/contas-correntes', onProgress, onPageFetched);
     }
 
-    async buscarEspeciesDocumento(onProgress) {
-        return await this.fetchAll('financeiro/especies-documentos', onProgress);
+    async buscarEspeciesDocumento(onProgress, onPageFetched) {
+        return await this.fetchAll('financeiro/especies-documentos', onProgress, onPageFetched);
     }
 
-    async buscarHistoricoPadrao(onProgress) {
-        return await this.fetchAll('financeiro/historicos-padrao', onProgress);
+    async buscarHistoricoPadrao(onProgress, onPageFetched) {
+        return await this.fetchAll('financeiro/historicos-padrao', onProgress, onPageFetched);
     }
 }
 
 // PDV API
 export class PDVAPI extends APIBase {
-    async buscarPagamentosPDV(onProgress) {
-        return await this.fetchAll('financeiro/pagamentos-pdv', onProgress);
+    async buscarPagamentosPDV(onProgress, onPageFetched) {
+        return await this.fetchAll('financeiro/pagamentos-pdv', onProgress, onPageFetched);
     }
 
-    async buscarRecebimentosPDV(onProgress) {
-        return await this.fetchAll('financeiro/recebimentos-pdv', onProgress);
+    async buscarRecebimentosPDV(onProgress, onPageFetched) {
+        return await this.fetchAll('financeiro/recebimentos-pdv', onProgress, onPageFetched);
     }
 
-    async buscarMotivosCancelamento(onProgress) {
-        return await this.fetchAll('motivos-cancelamento', onProgress);
+    async buscarMotivosCancelamento(onProgress, onPageFetched) {
+        return await this.fetchAll('motivos-cancelamento', onProgress, onPageFetched);
     }
 
-    async buscarMotivosDesconto(onProgress) {
-        return await this.fetchAll('motivos-desconto', onProgress);
+    async buscarMotivosDesconto(onProgress, onPageFetched) {
+        return await this.fetchAll('motivos-desconto', onProgress, onPageFetched);
     }
 
-    async buscarMotivosDevolucao(onProgress) {
-        return await this.fetchAll('financeiro/motivos-devolucao', onProgress);
-    }
-}
-
-// FISCAL API
-export class FiscalAPI extends APIBase {
-    async buscarImpostosFederais(onProgress) {
-        return await this.fetchAll('fiscal/impostos-federais', onProgress);
-    }
-
-    async buscarRegimeTributario(onProgress) {
-        return await this.fetchAll('fiscal/regime-estadual-tributario', onProgress);
-    }
-
-    async buscarSituacoesFiscais(onProgress) {
-        return await this.fetchAll('fiscal/situacoes', onProgress);
-    }
-
-    async buscarTiposOperacoes(onProgress) {
-        return await this.fetchAll('fiscal/operacoes', onProgress);
-    }
-
-    async buscarTabelasTributarias(onProgress) {
-        return await this.fetchAll('fiscal/tabelas-tributarias', onProgress);
+    async buscarMotivosDevolucao(onProgress, onPageFetched) {
+        return await this.fetchAll('financeiro/motivos-devolucao', onProgress, onPageFetched);
     }
 }
 
 // ESTOQUE API
 export class EstoqueAPI extends APIBase {
-    async buscarLocalEstoque(onProgress) {
-        return await this.fetchAll('estoque/locais', onProgress);
+    async buscarLocalEstoque(onProgress, onPageFetched) {
+        return await this.fetchAll('estoque/locais', onProgress, onPageFetched);
     }
 
-    async buscarTiposAjustes(onProgress) {
-        return await this.fetchAll('estoque/tipos-ajuste', onProgress);
+    async buscarTiposAjustes(onProgress, onPageFetched) {
+        return await this.fetchAll('estoque/tipos-ajuste', onProgress, onPageFetched);
+    }
+}
+
+// FISCAL API
+export class FiscalAPI extends APIBase {
+    async buscarImpostosFederais(onProgress, onPageFetched) {
+        return await this.fetchAll('fiscal/impostos-federais', onProgress, onPageFetched);
+    }
+
+    async buscarRegimeTributario(onProgress, onPageFetched) {
+        return await this.fetchAll('fiscal/regime-estadual-tributario', onProgress, onPageFetched);
+    }
+
+    async buscarSituacoesFiscais(onProgress, onPageFetched) {
+        return await this.fetchAll('fiscal/situacoes', onProgress, onPageFetched);
+    }
+
+    async buscarTiposOperacoes(onProgress, onPageFetched) {
+        return await this.fetchAll('fiscal/operacoes', onProgress, onPageFetched);
+    }
+
+    async buscarTabelasTributarias(onProgress, onPageFetched) {
+        return await this.fetchAll('fiscal/tabelas-tributarias', onProgress, onPageFetched);
+    }
+}
+
+// PESSOA 
+export class PessoaAPI extends APIBase {
+    async buscarLojas(onProgress, onPageFetched) {
+        return await this.fetchAll('pessoa/lojas', onProgress, onPageFetched);
+    }
+
+    async buscarClientes(onProgress, onPageFetched) {
+        return await this.fetchAll('pessoa/clientes', onProgress, onPageFetched);
+    }
+
+    async buscarFornecedores(onProgress, onPageFetched) {
+        return await this.fetchAll('pessoa/fornecedores', onProgress, onPageFetched);
     }
 }
 
