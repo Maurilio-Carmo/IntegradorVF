@@ -26,8 +26,8 @@ export const ENDPOINT_MAP = {
     historicoPadrao:                   'importar-historico-padrao',
 
     // PDV / Frente de Loja
-    pagamentosPdv:                     'importar-pagamentos-pdv',
-    recebimentosPdv:                   'importar-recebimentos-pdv',
+    pagamentosPDV:                     'importar-pagamentos-pdv',
+    recebimentosPDV:                   'importar-recebimentos-pdv',
     motivosDesconto:                   'importar-motivos-desconto',
     motivosDevolucao:                  'importar-motivos-devolucao',
     motivosCancelamento:               'importar-motivos-cancelamento',
