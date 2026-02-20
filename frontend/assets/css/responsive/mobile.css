@@ -4,134 +4,175 @@
  */
 
 @media (max-width: 768px) {
+
     /* Header */
     .header-content {
         flex-direction: column;
         align-items: flex-start;
+        gap: var(--spacing-sm);
     }
-    
+
     .header-actions {
         width: 100%;
         justify-content: space-between;
     }
-    
+
     .logo {
         font-size: var(--font-size-xl);
     }
-    
-    /* Stats Grid */
-    .stats-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    /* Import Grid */
-    .import-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    /* Form */
-    .form-actions {
-        flex-direction: column;
-    }
-    
-    .form-actions .btn {
-        width: 100%;
-    }
-    
-    /* Cards */
-    .card-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: var(--spacing-sm);
-    }
-    
-    .card-header .btn {
-        width: 100%;
-    }
-    
-    /* Modal/Config */
-    .section-config {
-        padding: var(--spacing-sm);
-    }
-    
-    .section-config .card {
-        max-height: 95vh;
-    }
-    
-    /* Container */
+
+    /* Container / Main */
     .container {
         padding: 0 var(--spacing-sm);
     }
-    
-    /* Main */
+
     .main {
         padding: var(--spacing-md) 0;
     }
-    
-    /* Stat Card */
-    .stat-card {
+
+    /* Cards
+       IMPORTANTE: mantém flex-direction row para que o botão
+       "Limpar" fique sempre à direita via justify-content: space-between
+       já definido no card.css base. */
+    .card-header {
+        flex-wrap: wrap;
+        gap: var(--spacing-xs);
         padding: var(--spacing-md);
     }
-    
-    .stat-icon {
-        width: 50px;
-        height: 50px;
-        font-size: var(--font-size-2xl);
+
+    .card-header h2 {
+        flex: 1;
+        min-width: 0;
     }
-    
+
+    .card-header .btn {
+        flex-shrink: 0;
+        white-space: nowrap;
+        min-height: 36px;
+    }
+
+    /* Stats Grid — 2 colunas */
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--spacing-sm);
+    }
+
+    .stat-card {
+        padding: var(--spacing-sm) var(--spacing-md);
+        gap: var(--spacing-sm);
+        align-items: center;
+    }
+
+    .stat-icon {
+        width: 44px;
+        height: 44px;
+        font-size: var(--font-size-2xl);
+        flex-shrink: 0;
+    }
+
     .stat-value {
         font-size: var(--font-size-xl);
     }
-    
-    /* Import Card */
+
+    .stat-label {
+        font-size: var(--font-size);
+    }
+
+    /* Import Grid — 2 colunas */
+    .import-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
     .import-card {
         padding: var(--spacing-md);
     }
-    
+
     .import-icon {
         font-size: var(--font-size-3xl);
     }
-    
+
+    /* Abas — somente ícone, espaçadas igualmente
+       - tabs-header vira flex sem gap para cada botão controlar seu espaço
+       - cada .tab-button recebe flex: 1 para ocupar fatia igual da largura
+       - font-size: 0 esconde o text node ("PRODUTO", "FISCAL"...)
+       - .tab-icon restaura o tamanho do emoji */
+    .tabs-header {
+        padding: var(--spacing-xs) 0 0;
+        gap: 0;
+    }
+
+    .tab-button {
+        flex: 1;
+        min-width: 0;
+        padding: var(--spacing-xs) 0;
+        font-size: 0;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 0;
+    }
+
+    .tab-button .tab-icon {
+        font-size: var(--font-size-xl);
+        margin-right: 0;
+    }
+
+    .tabs-content {
+        padding: var(--spacing-md);
+    }
+
+    /* Grid de itens de importação — 2 colunas */
+    .tab-items-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .tab-bulk-actions {
+        flex-direction: column;
+        gap: var(--spacing-md);
+        align-items: stretch;
+    }
+
+    /* Formulários */
+    .form-actions {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+    }
+
+    .form-actions .btn {
+        width: 100%;
+        min-height: 44px;
+    }
+
+    /* Modal / Config */
+    .section-config {
+        padding: var(--spacing-sm);
+    }
+
+    .section-config .card {
+        max-height: 95vh;
+        max-width: 100%;
+    }
+
     /* Log */
     .log-container {
         max-height: 300px;
         font-size: var(--font-size-xs);
     }
-    
-    /* Footer */
-    .footer {
-        padding: var(--spacing-md) 0;
-    }
-    
-    /* Buttons */
+
+    /* Botões */
     .btn-large {
         padding: var(--spacing-sm) var(--spacing-lg);
         font-size: var(--font-size-base);
     }
-    
-    /* Typography */
+
+    /* Tipografia */
     h1 { font-size: var(--font-size-3xl); }
     h2 { font-size: var(--font-size-2xl); }
     h3 { font-size: var(--font-size-xl); }
-}
 
-/* Extra small devices (< 480px) */
-@media (max-width: 480px) {
-    .logo {
-        font-size: var(--font-size-lg);
-    }
-    
-    .stat-icon {
-        width: 40px;
-        height: 40px;
-        font-size: var(--font-size-xl);
-    }
-    
-    .stat-value {
-        font-size: var(--font-size-lg);
-    }
-    
-    .import-icon {
-        font-size: var(--font-size-2xl);
+    /* Footer */
+    .footer {
+        padding: var(--spacing-md) 0;
     }
 }
