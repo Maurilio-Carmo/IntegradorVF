@@ -1,0 +1,138 @@
+/* ── Keyframe compartilhado ───────────────────────────────────── */
+@keyframes skeleton-shimmer {
+    0%   { background-position: -400px 0; }
+    100% { background-position:  400px 0; }
+}
+
+/* ── Mixin de shimmer (aplicado via variáveis) ────────────────── */
+.skeleton,
+[data-skeleton] {
+    background: linear-gradient(
+        90deg,
+        var(--bg-tertiary)  25%,
+        var(--bg-secondary) 37%,
+        var(--bg-tertiary)  63%
+    );
+    background-size: 800px 100%;
+    animation: skeleton-shimmer 1.4s ease infinite;
+    border-radius: var(--border-radius);
+    transform: translateZ(0); /* promove para camada GPU */
+}
+
+/* ── Header placeholder ───────────────────────────────────────── */
+/* Reserva 72px (altura real do .header com padding + border)     */
+#header-component:empty {
+    display: block;
+    height: 72px;
+    min-height: 72px;
+    background: var(--bg-primary);
+    border-bottom: 1px solid var(--border-color);
+    contain: layout style;
+}
+
+/* ── Footer placeholder ───────────────────────────────────────── */
+#footer-component:empty {
+    display: block;
+    height: 60px;
+    min-height: 60px;
+    background: var(--bg-primary);
+    border-top: 1px solid var(--border-color);
+    contain: layout style;
+}
+
+/* ── Config placeholder ───────────────────────────────────────── */
+/* Modal: oculto por padrão, não gera shift */
+#config-component:empty {
+    display: none;
+}
+
+/* ── Stats Cards placeholder ──────────────────────────────────── */
+/* Simula grid de 4 cards antes do HTML chegar */
+#stats-component:empty {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-xl);
+    min-height: 108px;
+}
+
+#stats-component:empty::before,
+#stats-component:empty::after {
+    content: '';
+    height: 108px;
+    border-radius: var(--border-radius);
+    background: linear-gradient(
+        90deg,
+        var(--bg-tertiary)  25%,
+        var(--bg-secondary) 37%,
+        var(--bg-tertiary)  63%
+    );
+    background-size: 800px 100%;
+    animation: skeleton-shimmer 1.4s ease infinite;
+}
+
+/* ── Import Tabs placeholder ──────────────────────────────────── */
+#import-tabs-component:empty {
+    display: block;
+    min-height: 380px;
+    border-radius: var(--border-radius);
+    margin-bottom: var(--spacing-xl);
+    background: linear-gradient(
+        90deg,
+        var(--bg-tertiary)  25%,
+        var(--bg-secondary) 37%,
+        var(--bg-tertiary)  63%
+    );
+    background-size: 800px 100%;
+    animation: skeleton-shimmer 1.4s ease infinite;
+    contain: layout style;
+}
+
+/* ── Log placeholder ──────────────────────────────────────────── */
+#log-component:empty {
+    display: block;
+    min-height: 220px;
+    border-radius: var(--border-radius);
+    margin-bottom: var(--spacing-xl);
+    /* Log tem fundo escuro, shimmer adaptado */
+    background: linear-gradient(
+        90deg,
+        var(--bg-dark)    25%,
+        #334155           37%,
+        var(--bg-dark)    63%
+    );
+    background-size: 800px 100%;
+    animation: skeleton-shimmer 1.4s ease infinite;
+    contain: layout style;
+}
+
+/* ── Adaptação tema escuro ────────────────────────────────────── */
+[data-theme="dark"] #header-component:empty,
+[data-theme="dark"] #footer-component:empty {
+    background: var(--bg-dark);
+}
+
+[data-theme="dark"] #stats-component:empty::before,
+[data-theme="dark"] #stats-component:empty::after,
+[data-theme="dark"] #import-tabs-component:empty {
+    background: linear-gradient(
+        90deg,
+        var(--bg-dark)   25%,
+        #334155          37%,
+        var(--bg-dark)   63%
+    );
+    background-size: 800px 100%;
+}
+
+/* ── Desativar para prefers-reduced-motion ────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+    #stats-component:empty::before,
+    #stats-component:empty::after,
+    #import-tabs-component:empty,
+    #log-component:empty,
+    .skeleton,
+    [data-skeleton] {
+        animation: none;
+        background: var(--bg-tertiary);
+    }
+}

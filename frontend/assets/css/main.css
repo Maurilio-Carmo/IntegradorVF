@@ -8,6 +8,9 @@
 @import 'base/reset.css';
 @import 'base/typography.css';
 
+/* Skeleton */
+@import 'base/skeleton.css';
+
 /* Layout */
 @import 'layout/container.css';
 @import 'layout/grid.css';
@@ -30,6 +33,7 @@
 @import 'utils/spacing.css';
 @import 'utils/text.css';
 @import 'utils/animations.css';
+@import 'utils/performance.css';
 
 /* Themes */
 @import 'themes/dark.css';
