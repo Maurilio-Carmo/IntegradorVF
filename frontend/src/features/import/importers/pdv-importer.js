@@ -7,50 +7,14 @@
 
 import { ImportBase } from '../import-base.js';
 import API from '../../../services/api/index.js';
-export class PDVImporter extends ImportBase {
-    /**
-     * Importar motivos de cancelamento
-     */
-    async importarMotivosCancelamento(uiElement) {
-        return await this.execute({
-            name: 'motivos de cancelamento',
-            endpoint: 'importar-motivos-cancelamento',
-            apiMethod: API.pdv.buscarMotivosCancelamento.bind(API.pdv),
-            uiElement,
-        });
-    }
-
-    /**
-     * Importar motivos de desconto
-     */
-    async importarMotivosDesconto(uiElement) {
-        return await this.execute({
-            name: 'motivos de desconto',
-            endpoint: 'importar-motivos-desconto',
-            apiMethod: API.pdv.buscarMotivosDesconto.bind(API.pdv),
-            uiElement,
-        });
-    }
-
-    /**
-     * Importar motivos de devolução
-     */
-    async importarMotivosDevolucao(uiElement) {
-        return await this.execute({
-            name: 'motivos de devolução',
-            endpoint: 'importar-motivos-devolucao',
-            apiMethod: API.pdv.buscarMotivosDevolucao.bind(API.pdv),
-            uiElement,
-        });
-    }
-
+export class PDVImporter extends ImportBase {    
     /**
      * Importar formas de pagamento PDV
      */
     async importarPagamentosPDV(uiElement) {
         return await this.execute({
             name: 'formas de pagamento PDV',
-            endpoint: 'importar-pagamentos-pdv',
+            endpoint: 'pagamentosPDV',
             apiMethod: API.pdv.buscarPagamentosPDV.bind(API.pdv),
             transform: (pagamentos) => pagamentos.flatMap(p =>
                 (p.lojas || []).map(l => ({
@@ -71,7 +35,7 @@ export class PDVImporter extends ImportBase {
     async importarRecebimentosPDV(uiElement) {
         return await this.execute({
             name: 'formas de recebimento PDV',
-            endpoint: 'importar-recebimentos-pdv',
+            endpoint: 'recebimentosPDV',
             apiMethod: API.pdv.buscarRecebimentosPDV.bind(API.pdv),
             transform: (recebimentos) => recebimentos.flatMap(r =>
                 (r.lojas || []).map(l => ({
@@ -87,6 +51,42 @@ export class PDVImporter extends ImportBase {
                     valorRecebimento: l.valorRecebimento ?? 0,
                 }))
             ),
+            uiElement,
+        });
+    }
+
+    /**
+     * Importar motivos de desconto
+     */
+    async importarMotivosDesconto(uiElement) {
+        return await this.execute({
+            name: 'motivos de desconto',
+            endpoint: 'motivosDesconto',
+            apiMethod: API.pdv.buscarMotivosDesconto.bind(API.pdv),
+            uiElement,
+        });
+    }
+
+    /**
+     * Importar motivos de devolução
+     */
+    async importarMotivosDevolucao(uiElement) {
+        return await this.execute({
+            name: 'motivos de devolução',
+            endpoint: 'motivosDevolucao',
+            apiMethod: API.pdv.buscarMotivosDevolucao.bind(API.pdv),
+            uiElement,
+        });
+    }
+
+    /**
+     * Importar motivos de cancelamento
+     */
+    async importarMotivosCancelamento(uiElement) {
+        return await this.execute({
+            name: 'motivos de cancelamento',
+            endpoint: 'motivosCancelamento',
+            apiMethod: API.pdv.buscarMotivosCancelamento.bind(API.pdv),
             uiElement,
         });
     }

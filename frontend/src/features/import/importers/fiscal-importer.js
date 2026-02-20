@@ -9,12 +9,48 @@ import { ImportBase } from '../import-base.js';
 import API from '../../../services/api/index.js';
 export class FiscalImporter extends ImportBase {
     /**
+     * Importar regime tributário
+     */
+    async importarRegimeTributario(uiElement) {
+        return await this.execute({
+            name: 'regime tributário',
+            endpoint: 'regimeTributario',
+            apiMethod: API.fiscal.buscarRegimeTributario.bind(API.fiscal),
+            uiElement,
+        });
+    }
+
+    /**
+     * Importar situações fiscais
+     */
+    async importarSituacoesFiscais(uiElement) {
+        return await this.execute({
+            name: 'situações fiscais',
+            endpoint: 'situacoesFiscais',
+            apiMethod: API.fiscal.buscarSituacoesFiscais.bind(API.fiscal),
+            uiElement,
+        });
+    }
+
+    /**
+     * Importar tipos de operações
+     */
+    async importarTiposOperacoes(uiElement) {
+        return await this.execute({
+            name: 'tipos de operações',
+            endpoint: 'tiposOperacoes',
+            apiMethod: API.fiscal.buscarTiposOperacoes.bind(API.fiscal),
+            uiElement,
+        });
+    }
+
+    /**
      * Importar impostos federais
      */
     async importarImpostosFederais(uiElement) {
         return await this.execute({
             name: 'impostos federais',
-            endpoint: 'importar-impostos-federais',
+            endpoint: 'impostosFederais',
             apiMethod: API.fiscal.buscarImpostosFederais.bind(API.fiscal),
             transform: (itens) => itens.map(i => {
                 const g = i.impostoFederalGeral || {};
@@ -40,48 +76,12 @@ export class FiscalImporter extends ImportBase {
     }
 
     /**
-     * Importar regime tributário
-     */
-    async importarRegimeTributario(uiElement) {
-        return await this.execute({
-            name: 'regime tributário',
-            endpoint: 'importar-regime-tributario',
-            apiMethod: API.fiscal.buscarRegimeTributario.bind(API.fiscal),
-            uiElement,
-        });
-    }
-
-    /**
-     * Importar situações fiscais
-     */
-    async importarSituacoesFiscais(uiElement) {
-        return await this.execute({
-            name: 'situações fiscais',
-            endpoint: 'importar-situacoes-fiscais',
-            apiMethod: API.fiscal.buscarSituacoesFiscais.bind(API.fiscal),
-            uiElement,
-        });
-    }
-
-    /**
-     * Importar tipos de operações
-     */
-    async importarTiposOperacoes(uiElement) {
-        return await this.execute({
-            name: 'tipos de operações',
-            endpoint: 'importar-tipos-operacoes',
-            apiMethod: API.fiscal.buscarTiposOperacoes.bind(API.fiscal),
-            uiElement,
-        });
-    }
-
-    /**
      * Importar tabelas tributárias
      */
     async importarTabelasTributarias(uiElement) {
         return await this.execute({
             name: 'tabelas tributárias',
-            endpoint: 'importar-tabelas-tributarias',
+            endpoint: 'tabelasTributarias',
             apiMethod: API.fiscal.buscarTabelasTributarias.bind(API.fiscal),
             uiElement,
         });
@@ -107,7 +107,7 @@ export class FiscalImporter extends ImportBase {
     async importarTabelasTributariasEntrada(uiElement) {
         return await this.execute({
             name: 'tabelas tributárias de entrada',
-            endpoint: 'importar-tabelas-tributarias-entrada',
+            endpoint: 'tabelas-tributarias-entrada',
             apiMethod: API.fiscal.buscarTabelasTributarias.bind(API.fiscal),
             transform: (tabelas) => tabelas
                 .filter(t => t.tipoDeOperacao === 'ENTRADA')
@@ -151,7 +151,7 @@ export class FiscalImporter extends ImportBase {
     async importarTabelasTributariasSaida(uiElement) {
         return await this.execute({
             name: 'tabelas tributárias de saída',
-            endpoint: 'importar-tabelas-tributarias-saida',
+            endpoint: 'tabelas-tributarias-saida',
             apiMethod: API.fiscal.buscarTabelasTributarias.bind(API.fiscal),
             transform: (tabelas) => tabelas
                 .filter(t => t.tipoDeOperacao === 'SAIDA')

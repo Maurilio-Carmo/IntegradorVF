@@ -38,7 +38,7 @@ export class FinanceiroImporter extends ImportBase {
     async importarContasCorrentes(uiElement) {
         return await this.execute({
             name: 'contas correntes',
-            endpoint: 'contas-correntes',
+            endpoint: 'contasCorrentes',
             apiMethod: API.financeiro.buscarContasCorrentes.bind(API.financeiro),
             uiElement,
         });
@@ -50,7 +50,7 @@ export class FinanceiroImporter extends ImportBase {
     async importarEspeciesDocumento(uiElement) {
         return await this.execute({
             name: 'espécies de documento',
-            endpoint: 'especies-documento',
+            endpoint: 'especiesDocumento',
             apiMethod: API.financeiro.buscarEspeciesDocumento.bind(API.financeiro),
             uiElement,
         });
@@ -62,7 +62,7 @@ export class FinanceiroImporter extends ImportBase {
     async importarHistoricoPadrao(uiElement) {
         return await this.execute({
             name: 'histórico padrão',
-            endpoint: 'historico-padrao',
+            endpoint: 'historicoPadrao',
             apiMethod: API.financeiro.buscarHistoricoPadrao.bind(API.financeiro),
             uiElement,
         });
@@ -74,7 +74,7 @@ export class FinanceiroImporter extends ImportBase {
     async importarFormasPagamento(uiElement) {
         return await this.execute({
             name: 'formas de pagamento',
-            endpoint: 'formas-pagamento',
+            endpoint: 'formasPagamento',
             apiMethod: API.financeiro.buscarFormasPagamento.bind(API.financeiro),
             uiElement,
         });

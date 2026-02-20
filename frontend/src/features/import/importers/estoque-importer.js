@@ -14,7 +14,7 @@ export class EstoqueImporter extends ImportBase {
     async importarLocalEstoque(uiElement) {
         return await this.execute({
             name: 'locais de estoque',
-            endpoint: 'local-estoque',
+            endpoint: 'localEstoque',
             apiMethod: API.estoque.buscarLocalEstoque.bind(API.estoque),
             uiElement,
         });
@@ -26,7 +26,7 @@ export class EstoqueImporter extends ImportBase {
     async importarTiposAjustes(uiElement) {
         return await this.execute({
             name: 'tipos de ajustes',
-            endpoint: 'tipos-ajustes',
+            endpoint: 'tiposAjustes',
             apiMethod: API.estoque.buscarTiposAjustes.bind(API.estoque),
             uiElement,
         });
