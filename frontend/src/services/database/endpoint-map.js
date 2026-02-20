@@ -11,9 +11,9 @@ export const ENDPOINT_MAP = {
 
     // Produto
     mercadologia:                      'importar-mercadologia',
-    secoes:                            'importar-mercadologia',
-    grupos:                            'importar-mercadologia',
-    subgrupos:                         'importar-mercadologia',
+    secoes:                            'secoes',
+    grupos:                            'grupos',
+    subgrupos:                         'subgrupos',
     marcas:                            'importar-marcas',
     familias:                          'importar-familias',
     produtos:                          'importar-produtos',

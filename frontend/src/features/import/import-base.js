@@ -49,33 +49,26 @@ export class ImportBase {
             // Callback executado a cada página recebida da API
             const onPageFetched = async (items, _offset, totalReal) => {
                 const data = transform ? transform(items) : items;
-
                 await this.db.save(endpoint, data);
-
                 totalSalvos += data.length;
 
                 const pct = totalReal
                     ? Math.min(Math.floor((totalSalvos / totalReal) * 100), 99)
                     : null;
 
-                UI.log(
-                    `💾 ${name}: ${totalSalvos}${totalReal ? ' / ' + totalReal : ''} gravados`,
-                    'info'
+                UI.status.updateImport(uiElement, 'loading', 
+                    totalReal ? `${totalSalvos} / ${totalReal} (${pct}%)` : `${totalSalvos} carregados...`
                 );
 
                 if (pct !== null) {
                     UI.status.updateImport(uiElement, 'progress', pct);
                     Events.import.progress(name, totalSalvos, totalReal);
                 }
+
+                UI.log(`💾 ${name}: ${totalSalvos}${totalReal ? ' / ' + totalReal : ''} gravados`, 'info');
             };
 
-            // Busca paginada — callback de progresso + callback por página
-            await apiMethod(
-                (atual, _itens, totalReal) => {
-                    UI.log(`📄 ${name}: ${atual} buscados`, 'info');
-                },
-                onPageFetched
-            );
+            await apiMethod(null, onPageFetched);
 
             UI.log(`✅ ${name}: ${totalSalvos} registros importados com sucesso`, 'success');
             UI.status.updateImport(uiElement, 'success', `${totalSalvos} registros`);
