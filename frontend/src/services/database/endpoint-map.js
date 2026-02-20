@@ -31,7 +31,6 @@ export const ENDPOINT_MAP = {
     motivosDesconto:                   'importar-motivos-desconto',
     motivosDevolucao:                  'importar-motivos-devolucao',
     motivosCancelamento:               'importar-motivos-cancelamento',
-    caixas:                            'importar-caixas',
 
     // Estoque
     localEstoque:                      'importar-local-estoque',

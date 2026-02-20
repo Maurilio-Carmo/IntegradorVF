@@ -743,13 +743,6 @@ BEGIN
     UPDATE fornecedores SET updated_at = CURRENT_TIMESTAMP WHERE fornecedor_id = NEW.fornecedor_id;
 END;
 
-DROP TRIGGER IF EXISTS trg_caixas_updated_at;
-CREATE TRIGGER trg_caixas_updated_at
-AFTER UPDATE ON caixas
-BEGIN
-    UPDATE caixas SET updated_at = CURRENT_TIMESTAMP WHERE caixa_id = NEW.caixa_id;
-END;
-
 DROP TRIGGER IF EXISTS trg_local_estoque_updated_at;
 CREATE TRIGGER trg_local_estoque_updated_at
 AFTER UPDATE ON local_estoque

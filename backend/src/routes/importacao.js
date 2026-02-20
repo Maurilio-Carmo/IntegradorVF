@@ -220,21 +220,6 @@ router.post('/importar-historico-padrao', async (req, res) => {
 // ===========================================================================
 
 /**
- * POST /api/importacao/importar-caixas
- * Body: { data: [ ...caixas ] }
- */
-router.post('/importar-caixas', async (req, res) => {
-    try {
-        const data = extrairData(req, res);
-        if (!data) return;
-        res.json(await ImportacaoService.importarCaixas(data));
-    } catch (error) {
-        console.error('[importar-caixas]', error.message);
-        res.status(500).json({ error: error.message });
-    }
-});
-
-/**
  * POST /api/importacao/importar-pagamentos-pdv
  * Body: { data: [ ...pagamentos ] }
  */

@@ -4,55 +4,11 @@ const BaseRepository = require('../base-repository');
 
 /**
  * FrenteLojaRepository
- * Gerencia: caixas, pagamentos PDV, recebimentos PDV,
+ * Gerencia: formas de pagamento, pagamentos PDV, recebimentos PDV,
  * motivos (desconto/cancelamento/devolução).
  */
 
 class FrenteLojaRepository extends BaseRepository {
-
-    // ─── CAIXAS ───────────────────────────────────────────────────────────────
-
-    static importarCaixas(caixas) {
-        return BaseRepository._executarTransacao(
-            'caixas',
-            caixas,
-            (db) => db.prepare(`
-                INSERT INTO caixas (
-                    caixa_id, loja_id, numero, serie_do_equipamento,
-                    versao, data_ultima_venda, hora,
-                    visivel_monitoramento, tipo_frente_loja, status
-                ) VALUES (
-                    @caixa_id, @loja_id, @numero, @serie_do_equipamento,
-                    @versao, @data_ultima_venda, @hora,
-                    @visivel_monitoramento, @tipo_frente_loja, @status
-                )
-                ON CONFLICT(caixa_id) DO UPDATE SET
-                    loja_id         = excluded.loja_id,
-                    numero          = excluded.numero,
-                    serie_do_equipamento = excluded.serie_do_equipamento,
-                    versao          = excluded.versao,
-                    data_ultima_venda = excluded.data_ultima_venda,
-                    hora            = excluded.hora,
-                    visivel_monitoramento = excluded.visivel_monitoramento,
-                    tipo_frente_loja = excluded.tipo_frente_loja,
-                    updated_at      = CURRENT_TIMESTAMP
-                WHERE status NOT IN ('C', 'D')
-            `),
-            (c) => [{
-                caixa_id:             c.id                    ?? null,
-                loja_id:              c.lojaId                ?? null,
-                numero:               c.numero                ?? null,
-                serie_do_equipamento: c.serieDoEquipamento    ?? null,
-                versao:               c.versao                ?? null,
-                data_ultima_venda:    c.dataUltimaVenda       ?? null,
-                hora:                 c.hora                  ?? null,
-                visivel_monitoramento:BaseRepository._bool(c.visivelMonitoramento !== false),
-                tipo_frente_loja:     c.tipoDeFrenteLoja      ?? null,
-                status: 'U'
-            }]
-        );
-    }
-
     // ─── FORMAS DE PAGAMENTO ──────────────────────────────────────────────────
 
 

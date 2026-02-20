@@ -29,7 +29,6 @@ export const STATS_MAPPING = {
     limites_credito:              'statLimitesCredito',
 
     // ── Frente de Loja ───────────────────────────────────────────────────────
-    caixas:                       'statCaixas',
     formas_pagamento:             'statFormasPagamento',
     pagamentos_pdv:               'statPagamentosPDV',
     recebimentos_pdv:             'statRecebimentosPDV',
