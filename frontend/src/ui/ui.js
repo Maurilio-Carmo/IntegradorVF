@@ -8,9 +8,9 @@
 import { Alerts } from './modules/alerts.js';
 import { Modals } from './modules/modals.js';
 import { Status } from './modules/status.js';
-import { Log } from './modules/log.js';
-import { Statistics } from './modules/statistics.js';
 import { Buttons } from './modules/buttons.js';
+import { Statistics } from './modules/statistics/index.js';
+import { Log } from './modules/log.js';
 
 /**
  * Interface de Usuário Modularizada
@@ -81,10 +81,6 @@ const UI = {
     desabilitarBotoesImportacao(desabilitar) {
         return Buttons.disableImportButtons(desabilitar);
     },
-
-    // ========================================
-    // NOVOS MÉTODOS (modular API)
-    // ========================================
 
     /**
      * Exibir notificação temporária

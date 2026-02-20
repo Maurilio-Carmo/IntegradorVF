@@ -32,7 +32,6 @@ export const Statistics = {
         'historico_padrao':             'statHistoricoPadrao',
         'limites_credito':              'statLimitesCredito',
         // Frente de Loja
-        'caixas':                       'statCaixas',
         'formas_pagamento':             'statFormasPagamento',
         'motivos_cancelamento':         'statMotivosCancelamento',
         'motivos_desconto':             'statMotivosDesconto',

@@ -2,46 +2,52 @@
 
 /**
  * Classe Base de Importação
- * Define o fluxo padrão de importação: buscar da API → salvar no banco → atualizar UI
+ * Define o fluxo padrão: buscar da API → salvar no banco → atualizar UI → emitir eventos
  */
 
 import DatabaseClient from '../../services/database/db-client.js';
-import UI from '../../ui/ui.js';
+import UI             from '../../ui/ui.js';
+import Events         from '../../utils/events.js';
 
 export class ImportBase {
+
     constructor() {
         this.db = new DatabaseClient();
     }
 
     /**
-     * Executar importação genérica.
+     * Executa o fluxo completo de importação de uma entidade.
      *
-     * @param {object} config
-     * @param {string}    config.name       - Nome amigável da entidade (para logs/UI)
-     * @param {string}    config.endpoint   - Endpoint do backend  POST /api/importacao/<endpoint>
-     * @param {Function}  config.apiMethod  - Função que busca dados da API (retorna Array)
-     * @param {Function}  [config.transform]- Transformação opcional aplicada ANTES de salvar (data: Array) => Array
-     * @param {*}         config.uiElement  - Elemento de UI para feedback visual
+     * @param {object}    config
+     * @param {string}    config.name        - Nome amigável (logs/UI)
+     * @param {string}    config.endpoint    - Chave do endpoint no backend
+     * @param {Function}  config.apiMethod   - Função que busca dados da API
+     * @param {Function}  [config.transform] - Transformação opcional antes de salvar
+     * @param {*}         config.uiElement   - Elemento de UI para feedback visual
+     * @param {boolean}   [config.updateStats=true] - Atualizar estatísticas após importar
+     *
+     * @returns {{ success: boolean, total: number, error?: string }}
      */
-
     async execute(config) {
         const {
             name,
             endpoint,
             apiMethod,
-            transform = null,
-            uiElement
+            transform      = null,
+            uiElement,
+            updateStats    = true,
         } = config;
 
         try {
             // 1. Feedback inicial
             UI.log(`📥 Iniciando importação de ${name}...`, 'info');
             UI.status.updateImport(uiElement, 'loading', `Buscando ${name}...`);
+            Events.import.started(name);
 
             let totalSalvos = 0;
 
             // Callback executado a cada página recebida da API
-            const onPageFetched = async (items, offset, totalReal) => {
+            const onPageFetched = async (items, _offset, totalReal) => {
                 const data = transform ? transform(items) : items;
 
                 await this.db.save(endpoint, data);
@@ -59,10 +65,12 @@ export class ImportBase {
 
                 if (pct !== null) {
                     UI.status.updateImport(uiElement, 'progress', pct);
+                    Events.import.progress(name, totalSalvos, totalReal);
                 }
             };
 
-            const rawData = await apiMethod(
+            // Busca paginada — callback de progresso + callback por página
+            await apiMethod(
                 (atual, _itens, totalReal) => {
                     UI.log(`📄 ${name}: ${atual} buscados`, 'info');
                 },
@@ -71,55 +79,68 @@ export class ImportBase {
 
             UI.log(`✅ ${name}: ${totalSalvos} registros importados com sucesso`, 'success');
             UI.status.updateImport(uiElement, 'success', `${totalSalvos} registros`);
+            Events.import.completed(name, totalSalvos);
 
-            return { total: totalSalvos };
+            // Atualiza estatísticas no final (pode ser desativado via config)
+            if (updateStats) {
+                await this._refreshStatistics();
+            }
+
+            return { success: true, total: totalSalvos };
 
         } catch (error) {
             UI.log(`❌ Erro ao importar ${name}: ${error.message}`, 'error');
             UI.status.updateImport(uiElement, 'error', error.message);
-            throw error;
+            Events.import.failed(name, error);
+
+            return { success: false, total: 0, error: error.message };
         }
     }
 
     /**
-     * Executar múltiplas importações em sequência.
+     * Executa múltiplas importações em sequência.
+     * As estatísticas são atualizadas UMA vez ao final do lote,
+     * em vez de após cada item individualmente.
+     *
+     * @param {Array<object>} imports - Array de configs (mesmo formato de execute())
+     * @returns {{ success: Array, failed: Array, total: number }}
      */
     async executeBatch(imports) {
         const results = {
             success: [],
-            failed: [],
-            total: imports.length
+            failed:  [],
+            total:   imports.length,
         };
 
         for (const importConfig of imports) {
-            try {
-                const result = await this.execute(importConfig);
+            const result = await this.execute({ ...importConfig, updateStats: false });
 
-                if (result.success) {
-                    results.success.push({ name: importConfig.name, count: result.count });
-                } else {
-                    results.failed.push({ name: importConfig.name, error: result.error });
-                }
-            } catch (error) {
-                results.failed.push({ name: importConfig.name, error: error.message });
+            if (result.success) {
+                results.success.push({ name: importConfig.name, count: result.total });
+            } else {
+                results.failed.push({ name: importConfig.name, error: result.error });
             }
         }
+
+        // Atualiza estatísticas uma única vez após todo o lote
+        await this._refreshStatistics();
 
         return results;
     }
 
     /**
-     * Atualizar estatísticas do banco na UI.
+     * Busca as estatísticas do banco e atualiza a UI.
+     * Privado — use updateStats: true/false na config do execute().
      */
-    async updateStatistics() {
+    async _refreshStatistics() {
         try {
             const stats = await this.db.getStatistics();
             if (stats) {
                 UI.statistics.update(stats);
-                UI.log('📊 Estatísticas atualizadas', 'info');
+                Events.stats.updated(stats);
             }
         } catch (error) {
-            console.error('Erro ao atualizar estatísticas:', error);
+            console.error('❌ Erro ao atualizar estatísticas:', error);
         }
     }
 }

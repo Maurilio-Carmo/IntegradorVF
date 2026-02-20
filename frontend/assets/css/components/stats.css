@@ -50,6 +50,21 @@
     font-weight: var(--font-weight-bold);
     color: var(--primary-color);
     line-height: 1;
+    display: inline-block;
+    min-width: 2ch;
+    transition: color 0.3s ease, opacity 0.2s ease;
+}
+
+/* Estado: contando (0 → N) */
+.stat-value--counting {
+    color: var(--warning-color, #f59e0b);
+    opacity: 0.85;
+    animation: statCountingPulse 0.6s ease-in-out infinite alternate;
+}
+
+/* Estado: concluído */
+.stat-value--done {
+    animation: statDoneFlash 0.5s ease-out forwards;
 }
 
 /* Container de seção */
@@ -98,6 +113,23 @@
     }
 }
 
+@keyframes statCountingPulse {
+    from {
+        opacity: 0.75;
+        color: var(--warning-color, #f59e0b);
+    }
+    to {
+        opacity: 1;
+        color: color-mix(in srgb, var(--warning-color, #f59e0b) 80%, #fff);
+    }
+}
+
+@keyframes statDoneFlash {
+    0%   { color: var(--success-color, #10b981); }
+    60%  { color: var(--success-color, #10b981); }
+    100% { color: var(--primary-color); }
+}
+
 /* Modo escuro */
 
 [data-theme="dark"] .stat-icon,
@@ -112,4 +144,14 @@
 [data-theme="dark"] .stats-section-title {
     border-bottom-color: var(--border-color-dark);
     color: var(--text-tertiary);
+}
+
+[data-theme="dark"] .stat-value--done {
+    animation: statDoneFlashDark 0.5s ease-out forwards;
+}
+
+@keyframes statDoneFlashDark {
+    0%   { color: #34d399; }
+    60%  { color: #34d399; }
+    100% { color: var(--primary-color); }
 }
