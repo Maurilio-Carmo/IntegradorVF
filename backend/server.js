@@ -11,7 +11,7 @@ require('dotenv').config();
 const os = require('os');
 
 // Importar rotas
-const importacaoRoutes = require('./src/routes/importacao');
+const importacaoRoutes = require('./src/routes/importacao/index');
 const apiProxyRoutes   = require('./src/routes/api-proxy');
 const app  = express();
 const PORT = process.env.PORT || 3000;
