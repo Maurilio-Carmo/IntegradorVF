@@ -6,19 +6,6 @@ const express = require('express');
 const router  = express.Router();
 const ImportacaoService = require('../services/importacao-service.js');
 
-// ===========================================================================
-// CONTRATO COM O FRONTEND
-//
-// O frontend (db-client.js) chama:
-//   POST /api/importacao/<endpoint>  com body { data: [...] }
-//
-// O ImportacaoService recebe o array 'data' e persiste via repositórios SQLite.
-// A busca na API externa é responsabilidade do frontend (via /api/vf/* proxy).
-//
-// ENDPOINTS seguem a ordem do actionMap do button-manager.js:
-//   PRODUTO → FINANCEIRO → PDV/FRENTE DE LOJA → ESTOQUE → FISCAL → PESSOA
-// ===========================================================================
-
 // ---------------------------------------------------------------------------
 // Helper: extrai e valida o array 'data' do body
 // ---------------------------------------------------------------------------
@@ -40,22 +27,6 @@ function extrairData(req, res) {
 // PRODUTO
 // ===========================================================================
 
-/**
- * POST /api/importacao/importar-mercadologia
- *
- * Persiste seções, grupos e subgrupos em uma única chamada.
- * O frontend (arvore-importer.js) já busca as 3 entidades hierarquicamente
- * e as envia juntas.
- *
- * Body esperado:
- * {
- *   data: {
- *     secoes:    [...],   // itens de GET /produto/secoes
- *     grupos:    [...],   // itens de GET /produto/secoes/:id/grupos  (com secaoId injetado)
- *     subgrupos: [...]    // itens de GET /produto/secoes/:id/grupos/:id/subgrupos (com secaoId + grupoId)
- *   }
- * }
- */
 router.post('/importar-mercadologia', async (req, res) => {
     try {
         const { data } = req.body;

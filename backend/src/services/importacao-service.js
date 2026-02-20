@@ -13,9 +13,9 @@ const {
     Estoque,
     Fiscal,
     Pessoa,
-} = require('../modules/sqlite-repository/index.js');
+} = require('../modules/repositories/index');
 
-const dbSQLite = require('../config/database-sqlite.js');
+const dbSQLite = require('../config/database-sqlite');
 class ImportacaoService {
 
     // MERCADOLÓGICA
