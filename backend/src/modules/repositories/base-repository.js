@@ -53,6 +53,8 @@ class BaseRepository {
     static _num(val)   { return val != null ? Number(val)  : null; }
     static _date(val)  { return val ? val.split('T')[0] : null; }
     static _ids(arr)   { return Array.isArray(arr) ? arr.map(i => i.id ?? i).join(';') : null; }
+    static _cep(val)   { return val ? String(val).replace(/\D/g, '') : null;}
+    static _int(val)   { const n = parseInt(val, 10); return n > 0 ? n : null; }
 }
 
 module.exports = BaseRepository;

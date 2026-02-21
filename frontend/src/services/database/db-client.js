@@ -26,8 +26,8 @@ export class DatabaseClient {
      * Persiste um array de registros no backend.
      * Conjuntos grandes são enviados automaticamente em lotes de BATCH_SIZE.
      *
-     * @param {string} endpoint - Chave do ENDPOINT_MAP (ex: 'produtos', 'lojas')
-     * @param {Array}  data     - Registros a salvar
+     * @param {string} endpoint
+     * @param {Array}  data
      * @returns {Promise<{ salvos: number }>}
      */
     async save(endpoint, data) {
@@ -77,14 +77,8 @@ export class DatabaseClient {
         }
     }
 
-    // PRIVADO
-
-    /**
-     * Envia um chunk para o backend.
-     * Usa _resolveEndpoint para garantir que a rota sempre seja encontrada.
-     */
     async _saveChunk(endpoint, data) {
-        const rota = this._resolveEndpoint(endpoint);   // ← corrigido: era ENDPOINT_MAP[endpoint] direto
+        const rota = this._resolveEndpoint(endpoint);
 
         try {
             const response = await fetch(`${this.baseURL}/${rota}`, {
