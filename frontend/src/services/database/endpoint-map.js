@@ -10,10 +10,9 @@
 export const ENDPOINT_MAP = {
 
     // Produto
-    mercadologia:                      'importar-mercadologia',
-    secoes:                            'secoes',
-    grupos:                            'grupos',
-    subgrupos:                         'subgrupos',
+    secoes:                            'importar-secoes',
+    grupos:                            'importar-grupos',
+    subgrupos:                         'importar-subgrupos',
     marcas:                            'importar-marcas',
     familias:                          'importar-familias',
     produtos:                          'importar-produtos',
@@ -26,6 +25,7 @@ export const ENDPOINT_MAP = {
     historicoPadrao:                   'importar-historico-padrao',
 
     // PDV / Frente de Loja
+    formasPagamento:                   'importar-formas-pagamento',
     pagamentosPDV:                     'importar-pagamentos-pdv',
     recebimentosPDV:                   'importar-recebimentos-pdv',
     motivosDesconto:                   'importar-motivos-desconto',

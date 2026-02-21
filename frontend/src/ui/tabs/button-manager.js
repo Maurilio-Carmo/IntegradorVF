@@ -42,6 +42,7 @@ export class ImportButtonManager {
             'importar-historico-padrao':     'importarHistoricoPadrao',
 
             // PDV / FRENTE DE LOJA
+            'importar-formas-pagamento':     'importarFormasPagamento',
             'importar-pagamentos-pdv':       'importarPagamentosPDV',
             'importar-recebimentos-pdv':     'importarRecebimentosPDV',
             'importar-motivos-desconto':     'importarMotivosDesconto',
@@ -82,6 +83,7 @@ export class ImportButtonManager {
                 'importarHistoricoPadrao'
             ],
             'btnImportarTudoFrenteLoja': [
+                'importarFormasPagamento',
                 'importarPagamentosPDV',
                 'importarRecebimentosPDV',
                 'importarMotivosDesconto',

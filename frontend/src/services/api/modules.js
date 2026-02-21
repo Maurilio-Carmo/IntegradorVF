@@ -119,6 +119,10 @@ export class FinanceiroAPI extends APIBase {
 
 // PDV API
 export class PDVAPI extends APIBase {
+    async buscarFormasPagamento(onProgress, onPageFetched) {
+        return await this.fetchAll('financeiro/formas-pagamento', onProgress, onPageFetched);
+    }
+
     async buscarPagamentosPDV(onProgress, onPageFetched) {
         return await this.fetchAll('financeiro/pagamentos-pdv', onProgress, onPageFetched);
     }

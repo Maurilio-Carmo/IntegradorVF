@@ -7,7 +7,33 @@
 
 import { ImportBase } from '../import-base.js';
 import API from '../../../services/api/index.js';
-export class PDVImporter extends ImportBase {    
+export class PDVImporter extends ImportBase {
+    /**
+     * Importar formas de pagamento.
+     */
+    async importarFormasPagamento(uiElement) {
+        return await this.execute({
+            name:      'formas de pagamento',
+            endpoint:  'formasPagamento',
+            apiMethod: API.financeiro.buscarFormasPagamento.bind(API.financeiro),
+            transform: (formas) => formas.flatMap(f =>
+                (f.lojas || []).map(l => ({
+                    formaPagamentoId:       f.id,
+                    lojaId:                 l.lojaId                ?? null,
+                    descricao:              f.descricao             ?? null,
+                    especieDeDocumentoId:   f.especieDeDocumentoId  ?? null,
+                    categoriaFinanceiraId:  f.categoriaFinanceiraId ?? null,
+                    agenteFinanceiroId:     f.agenteFinanceiroId    ?? null,
+                    controleDeCartao:       f.controleDeCartao      ?? false,
+                    movimentaContaCorrente: f.movimentaContaCorrente?? false,
+                    ativa:                  f.ativa                 ?? true,
+                    contaCorrenteId:        l.contaCorrenteId       ?? null,
+                }))
+            ),
+            uiElement,
+        });
+    }
+
     /**
      * Importar formas de pagamento PDV
      */

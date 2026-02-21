@@ -70,6 +70,10 @@ class ImportacaoService {
 
     // FRENTE DE LOJA  (PDV, TIPOS, MOTIVOS)
 
+    static async importarFormasPagamento(formasPagamento) {
+        return Financeiro.importarFormasPagamento(formasPagamento);
+    }
+
     static async importarPagamentosPDV(pagamentos) {
         return FrenteLoja.importarPagamentosPDV(pagamentos);
     }
@@ -147,7 +151,7 @@ class ImportacaoService {
             const tabelas = [
                 'secoes', 'grupos', 'subgrupos', 'marcas', 'familias', 'produtos',
                 'categorias', 'agentes', 'contas_correntes', 'especies_documentos', 'historico_padrao', 
-                'pagamentos_pdv', 'recebimentos_pdv', 'motivos_desconto', 'motivos_devolucao', 'motivos_cancelamento',
+                'formas_pagamento', 'pagamentos_pdv', 'recebimentos_pdv', 'motivos_desconto', 'motivos_devolucao', 'motivos_cancelamento',
                 'regime_tributario', 'situacoes_fiscais', 'tipos_operacoes', 'impostos_federais',
                 'tabelas_tributarias_entrada', 'tabelas_tributarias_saida',
                 'local_estoque', 'tipos_ajustes',

@@ -11,6 +11,49 @@ const BaseRepository = require('../base-repository');
 class FrenteLojaRepository extends BaseRepository {
     // ─── FORMAS DE PAGAMENTO ──────────────────────────────────────────────────
 
+    static importarFormasPagamento(formasPagamento) {
+        return BaseRepository._executarTransacao(
+            'formas de pagamento',
+            formasPagamento,
+            (db) => db.prepare(`
+                INSERT INTO formas_pagamento (
+                    forma_pagamento_id, descricao,
+                    especie_de_documento_id, categoria_financeira_id, agente_financeiro_id,
+                    controle_de_cartao, movimenta_conta_corrente, ativa,
+                    conta_corrente_id,
+                    status
+                ) VALUES (
+                    @forma_pagamento_id, @descricao,
+                    @especie_de_documento_id, @categoria_financeira_id, @agente_financeiro_id,
+                    @controle_de_cartao, @movimenta_conta_corrente, @ativa,
+                    @conta_corrente_id,
+                    'U'
+                )
+                ON CONFLICT(forma_pagamento_id, loja_id) DO UPDATE SET
+                    descricao                = excluded.descricao,
+                    especie_de_documento_id  = excluded.especie_de_documento_id,
+                    categoria_financeira_id  = excluded.categoria_financeira_id,
+                    agente_financeiro_id     = excluded.agente_financeiro_id,
+                    controle_de_cartao       = excluded.controle_de_cartao,
+                    movimenta_conta_corrente = excluded.movimenta_conta_corrente,
+                    ativa                    = excluded.ativa,
+                    conta_corrente_id        = excluded.conta_corrente_id,
+                    updated_at               = CURRENT_TIMESTAMP
+                WHERE status NOT IN ('C', 'D')
+            `),
+            (f) => [{
+                forma_pagamento_id:       f.formaPagamentoId          ?? null,
+                descricao:                f.descricao                 ?? null,
+                especie_de_documento_id:  f.especieDeDocumentoId      ?? null,
+                categoria_financeira_id:  f.categoriaFinanceiraId     ?? null,
+                agente_financeiro_id:     f.agenteFinanceiroId        ?? null,
+                controle_de_cartao:       BaseRepository._bool(f.controleDeCartao),
+                movimenta_conta_corrente: BaseRepository._bool(f.movimentaContaCorrente),
+                ativa:                    BaseRepository._bool(f.ativa),
+                conta_corrente_id:        f.contaCorrenteId           ?? null,
+            }]
+        );
+    }
 
     // ─── PAGAMENTOS PDV ───────────────────────────────────────────────────────
 

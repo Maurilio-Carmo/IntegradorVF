@@ -162,133 +162,6 @@ CREATE INDEX idx_produtos_subgrupo ON produtos(subgrupo_id);
 CREATE INDEX idx_produtos_familia ON produtos(familia_id);
 CREATE INDEX idx_produtos_marca ON produtos(marca_id);
 
--- LOJAS
-
-DROP TABLE IF EXISTS lojas;
-CREATE TABLE lojas (
-	loja_id INTEGER PRIMARY KEY,
-	nome TEXT,
-	fantasia TEXT,
-	perfil_fiscal TEXT,
-	atividade_economica TEXT,
-	ramo_atuacao_id TEXT,
-	agente_validacao TEXT,
-	crt TEXT,
-	matriz INTEGER DEFAULT 0,
-	sigla TEXT,
-	mail TEXT,
-	telefone TEXT,
-	cep TEXT,
-	uf TEXT,
-	cidade TEXT,
-	logradouro TEXT,
-	numero INTEGER,
-	bairro TEXT,
-	tipo TEXT,
-	tipo_contribuinte TEXT,
-	ativo INTEGER DEFAULT 1,
-	ecommerce INTEGER DEFAULT 0,
-	locais_da_loja_ids TEXT,
-	status TEXT CHECK(status IN ('C','U','D','E','S')) DEFAULT 'U',
-    retorno TEXT,
-	created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-	updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-
--- CLIENTES
-
-DROP TABLE IF EXISTS clientes;
-CREATE TABLE clientes (
-    cliente_id INTEGER PRIMARY KEY,
-    tipo_de_pessoa TEXT CHECK(tipo_de_pessoa IN ('FISICA','JURIDICA','ESTRANGEIRO')),
-    documento TEXT,
-    nome TEXT,
-    fantasia TEXT,
-    holding_id INTEGER DEFAULT 1,
-    tipo_contribuinte TEXT CHECK(tipo_contribuinte IN ('CONTRIBUINTE','NAO_CONTRIBUINTE','ISENTO')) DEFAULT 'ISENTO',
-    inscricao_estadual TEXT DEFAULT 'ISENTO',
-    telefone1 TEXT,
-    telefone2 TEXT,
-    email TEXT,
-    data_nascimento DATETIME,
-    estado_civil TEXT CHECK(estado_civil IN ('SOLTEIRO','CASADO','DIVORCIADO','VIUVO','OUTROS')),
-    sexo TEXT CHECK(sexo IN ('MASCULINO','FEMININO')),
-    orgao_publico INTEGER DEFAULT 0,
-    retem_iss INTEGER DEFAULT 0,
-    ramo INTEGER DEFAULT 0,
-    observacao TEXT,
-    tipo_preco INTEGER DEFAULT 1,
-    tipo_bloqueio INTEGER DEFAULT 0,
-    desconto INTEGER DEFAULT 0,
-    tabela_prazo TEXT CHECK(tabela_prazo IN ('DF','PRZ','DFM','DFD','DFS','DFQ')) DEFAULT 'PRZ',
-    prazo INTEGER DEFAULT 30,
-    corte INTEGER,
-    vendedor_id INTEGER,
-    cep TEXT,
-    logradouro TEXT,
-    numero INTEGER,
-    complemento TEXT,
-    referencia TEXT,
-    bairro TEXT,
-    municipio TEXT,
-    ibge INTEGER,
-    uf TEXT,
-    pais INTEGER,
-    data_cadastro DATETIME,
-    status TEXT CHECK(status IN ('C','U','D','E','S')) DEFAULT 'U',
-    retorno TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-
--- FORNECEDORES
-
-DROP TABLE IF EXISTS fornecedores;
-CREATE TABLE fornecedores (
-    fornecedor_id INTEGER PRIMARY KEY,
-    tipo_pessoa TEXT CHECK(tipo_pessoa IN ('FISICA','JURIDICA','ESTRANGEIRO')),
-    documento TEXT,
-    nome TEXT,
-    fantasia TEXT,
-    holding_id INTEGER,
-    tipo_contribuinte TEXT CHECK(tipo_contribuinte IN ('CONTRIBUINTE','NAO_CONTRIBUINTE','ISENTO')),
-    inscricao_estadual TEXT,
-    telefone1 TEXT,
-    telefone2 TEXT,
-    email TEXT,
-    tipo_fornecedor TEXT CHECK(tipo_fornecedor IN ('INDUSTRIA','DISTRIBUIDORA','VAREJO','SIMPLES_NACIONAL','OUTROS')),
-    servico INTEGER DEFAULT 0,
-    transportadora INTEGER DEFAULT 0,
-    produtor_rural INTEGER DEFAULT 0,
-    inscricao_municipal TEXT,
-    tabela_prazo TEXT CHECK(tabela_prazo IN ('DF','PRZ','DFM','DFD','DFS','DFQ')),
-    prazo INTEGER,
-    prazo_entrega INTEGER,
-    tipo_frete TEXT CHECK(tipo_frete IN ('SEM_FRETE','EMITENTE','DESTINATARIO','TERCEIRO','EMITENTE_PROPRIO','DESTINATARIO_PROPRIO')),
-    observacao TEXT,
-    desativa_pedido INTEGER DEFAULT 0,
-    tipo_pedido TEXT CHECK(tipo_pedido IN ('NAO_GERENCIADO','GERENCIADO_MAESTRO')),
-    regime_estadual INTEGER,
-    destaca_substituicao TEXT CHECK(destaca_substituicao IN ('DESPESAS_ACESSORIAS','CAMPO_PROPRIO','DADOS_COMPLEMENTARES')),
-    considera_desoneracao INTEGER DEFAULT 0,
-    cep TEXT,
-    logradouro TEXT,
-    numero INTEGER,
-    complemento TEXT,
-    referencia TEXT,
-    bairro TEXT,
-    municipio TEXT,
-    ibge INTEGER,
-    uf TEXT,
-    pais INTEGER,
-    criado_em DATETIME,
-    atualizado_em DATETIME,
-    status TEXT CHECK(status IN ('C','U','D','E','S')) DEFAULT 'U',
-    retorno TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-
 -- LOCAL DE ESTOQUE
 
 DROP TABLE IF EXISTS local_estoque;
@@ -459,6 +332,28 @@ CREATE TABLE motivos_devolucao (
     retorno TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- FORMAS DE PAGAMENTO
+
+DROP TABLE IF EXISTS formas_pagamento;
+CREATE TABLE formas_pagamento (
+    forma_pagamento_id          INTEGER PRIMARY KEY,
+    descricao                   TEXT,
+    especie_de_documento_id     INTEGER,
+    categoria_financeira_id     INTEGER,
+    agente_financeiro_id        INTEGER,
+    controle_de_cartao          INTEGER DEFAULT 0,
+    movimenta_conta_corrente    INTEGER DEFAULT 0,
+    ativa                       INTEGER DEFAULT 1,
+    conta_corrente_id           INTEGER,
+    status                      TEXT CHECK(status IN ('C','U','D','E','S')) DEFAULT 'U',
+    retorno                     TEXT,
+    created_at                  DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at                  DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (categoria_financeira_id) REFERENCES categorias(categoria_id)  ON DELETE SET NULL,
+    FOREIGN KEY (agente_financeiro_id)    REFERENCES agentes(agente_id)        ON DELETE SET NULL
 );
 
 -- PAGAMENTOS PDV
@@ -688,6 +583,133 @@ CREATE TABLE tipos_ajustes (
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
+-- LOJAS
+
+DROP TABLE IF EXISTS lojas;
+CREATE TABLE lojas (
+	loja_id INTEGER PRIMARY KEY,
+	nome TEXT,
+	fantasia TEXT,
+	perfil_fiscal TEXT,
+	atividade_economica TEXT,
+	ramo_atuacao_id TEXT,
+	agente_validacao TEXT,
+	crt TEXT,
+	matriz INTEGER DEFAULT 0,
+	sigla TEXT,
+	mail TEXT,
+	telefone TEXT,
+	cep TEXT,
+	uf TEXT,
+	cidade TEXT,
+	logradouro TEXT,
+	numero INTEGER,
+	bairro TEXT,
+	tipo TEXT,
+	tipo_contribuinte TEXT,
+	ativo INTEGER DEFAULT 1,
+	ecommerce INTEGER DEFAULT 0,
+	locais_da_loja_ids TEXT,
+	status TEXT CHECK(status IN ('C','U','D','E','S')) DEFAULT 'U',
+    retorno TEXT,
+	created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+	updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- CLIENTES
+
+DROP TABLE IF EXISTS clientes;
+CREATE TABLE clientes (
+    cliente_id INTEGER PRIMARY KEY,
+    tipo_de_pessoa TEXT CHECK(tipo_de_pessoa IN ('FISICA','JURIDICA','ESTRANGEIRO')),
+    documento TEXT,
+    nome TEXT,
+    fantasia TEXT,
+    holding_id INTEGER DEFAULT 1,
+    tipo_contribuinte TEXT CHECK(tipo_contribuinte IN ('CONTRIBUINTE','NAO_CONTRIBUINTE','ISENTO')) DEFAULT 'ISENTO',
+    inscricao_estadual TEXT DEFAULT 'ISENTO',
+    telefone1 TEXT,
+    telefone2 TEXT,
+    email TEXT,
+    data_nascimento DATETIME,
+    estado_civil TEXT CHECK(estado_civil IN ('SOLTEIRO','CASADO','DIVORCIADO','VIUVO','OUTROS')),
+    sexo TEXT CHECK(sexo IN ('MASCULINO','FEMININO')),
+    orgao_publico INTEGER DEFAULT 0,
+    retem_iss INTEGER DEFAULT 0,
+    ramo INTEGER DEFAULT 0,
+    observacao TEXT,
+    tipo_preco INTEGER DEFAULT 1,
+    tipo_bloqueio INTEGER DEFAULT 0,
+    desconto INTEGER DEFAULT 0,
+    tabela_prazo TEXT CHECK(tabela_prazo IN ('DF','PRZ','DFM','DFD','DFS','DFQ')) DEFAULT 'PRZ',
+    prazo INTEGER DEFAULT 30,
+    corte INTEGER,
+    vendedor_id INTEGER,
+    cep TEXT,
+    logradouro TEXT,
+    numero INTEGER,
+    complemento TEXT,
+    referencia TEXT,
+    bairro TEXT,
+    municipio TEXT,
+    ibge INTEGER,
+    uf TEXT,
+    pais INTEGER,
+    data_cadastro DATETIME,
+    status TEXT CHECK(status IN ('C','U','D','E','S')) DEFAULT 'U',
+    retorno TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- FORNECEDORES
+
+DROP TABLE IF EXISTS fornecedores;
+CREATE TABLE fornecedores (
+    fornecedor_id INTEGER PRIMARY KEY,
+    tipo_pessoa TEXT CHECK(tipo_pessoa IN ('FISICA','JURIDICA','ESTRANGEIRO')),
+    documento TEXT,
+    nome TEXT,
+    fantasia TEXT,
+    holding_id INTEGER,
+    tipo_contribuinte TEXT CHECK(tipo_contribuinte IN ('CONTRIBUINTE','NAO_CONTRIBUINTE','ISENTO')),
+    inscricao_estadual TEXT,
+    telefone1 TEXT,
+    telefone2 TEXT,
+    email TEXT,
+    tipo_fornecedor TEXT CHECK(tipo_fornecedor IN ('INDUSTRIA','DISTRIBUIDORA','VAREJO','SIMPLES_NACIONAL','OUTROS')),
+    servico INTEGER DEFAULT 0,
+    transportadora INTEGER DEFAULT 0,
+    produtor_rural INTEGER DEFAULT 0,
+    inscricao_municipal TEXT,
+    tabela_prazo TEXT CHECK(tabela_prazo IN ('DF','PRZ','DFM','DFD','DFS','DFQ')),
+    prazo INTEGER,
+    prazo_entrega INTEGER,
+    tipo_frete TEXT CHECK(tipo_frete IN ('SEM_FRETE','EMITENTE','DESTINATARIO','TERCEIRO','EMITENTE_PROPRIO','DESTINATARIO_PROPRIO')),
+    observacao TEXT,
+    desativa_pedido INTEGER DEFAULT 0,
+    tipo_pedido TEXT CHECK(tipo_pedido IN ('NAO_GERENCIADO','GERENCIADO_MAESTRO')),
+    regime_estadual INTEGER,
+    destaca_substituicao TEXT CHECK(destaca_substituicao IN ('DESPESAS_ACESSORIAS','CAMPO_PROPRIO','DADOS_COMPLEMENTARES')),
+    considera_desoneracao INTEGER DEFAULT 0,
+    cep TEXT,
+    logradouro TEXT,
+    numero INTEGER,
+    complemento TEXT,
+    referencia TEXT,
+    bairro TEXT,
+    municipio TEXT,
+    ibge INTEGER,
+    uf TEXT,
+    pais INTEGER,
+    criado_em DATETIME,
+    atualizado_em DATETIME,
+    status TEXT CHECK(status IN ('C','U','D','E','S')) DEFAULT 'U',
+    retorno TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
 -- LOG DE SINCRONIZAÇÃO
 
 DROP TABLE IF EXISTS log_sincronizacao;
@@ -811,6 +833,13 @@ CREATE TRIGGER trg_historico_padrao_updated_at
 AFTER UPDATE ON historico_padrao
 BEGIN
     UPDATE historico_padrao SET updated_at = CURRENT_TIMESTAMP WHERE historico_id = NEW.historico_id;
+END;
+
+DROP TRIGGER IF EXISTS trg_formas_pagamento_updated_at;
+CREATE TRIGGER trg_formas_pagamento_updated_at
+AFTER UPDATE ON formas_pagamento
+BEGIN
+    UPDATE formas_pagamento SET updated_at = CURRENT_TIMESTAMP WHERE forma_pagamento_id = NEW.forma_pagamento_id;
 END;
 
 DROP TRIGGER IF EXISTS trg_motivos_cancelamento_updated_at;
@@ -948,6 +977,7 @@ SELECT 'Agentes'                  AS entidade, COUNT(*) AS total, SUM(status='U'
 SELECT 'Contas Correntes'         AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM contas_correntes UNION ALL
 SELECT 'Espécies Documentos'      AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM especies_documentos UNION ALL
 SELECT 'Histórico Padrão'         AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM historico_padrao UNION ALL
+SELECT 'Formas de Pagamento'      AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM formas_pagamento UNION ALL
 SELECT 'Pagamentos PDV'           AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM pagamentos_pdv UNION ALL
 SELECT 'Recebimentos PDV'         AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM recebimentos_pdv UNION ALL
 SELECT 'Motivos Desconto'         AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM motivos_desconto UNION ALL
