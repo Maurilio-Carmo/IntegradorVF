@@ -179,6 +179,26 @@ CREATE TABLE codigos_auxiliares (
     FOREIGN KEY (produto_id) REFERENCES produtos(produto_id) ON DELETE CASCADE
 );
 
+-- PRODUTOS FORNECEDORES
+
+DROP TABLE IF EXISTS produto_fornecedores;
+CREATE TABLE produto_fornecedores (
+    id INTEGER PRIMARY KEY,
+    produto_id INTEGER NOT NULL,
+    fornecedor_id INTEGER NOT NULL,
+    referencia TEXT NOT NULL,
+    unidade TEXT NOT NULL,
+    fator REAL NOT NULL DEFAULT 1,
+    nivel TEXT CHECK(nivel IN ('PRINCIPAL','SECUNDARIO')),
+    status TEXT CHECK(status IN ('C','U','D','E','S')) DEFAULT 'U',
+    retorno TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (produto_id) REFERENCES produtos(produto_id) ON DELETE CASCADE,
+    FOREIGN KEY (fornecedor_id) REFERENCES fornecedores(fornecedor_id) ON DELETE CASCADE
+);
+
 -- LOCAL DE ESTOQUE
 
 DROP TABLE IF EXISTS local_estoque;
@@ -796,6 +816,13 @@ BEGIN
     UPDATE codigos_auxiliares SET updated_at = CURRENT_TIMESTAMP WHERE codigo_id = NEW.codigo_id;
 END;
 
+DROP TRIGGER IF EXISTS trg_produto_fornecedores_updated_at;
+CREATE TRIGGER trg_produto_fornecedores_updated_at
+AFTER UPDATE ON produto_fornecedores
+BEGIN
+    UPDATE produto_fornecedores SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+END;
+
 DROP TRIGGER IF EXISTS trg_lojas_updated_at;
 CREATE TRIGGER trg_lojas_updated_at
 AFTER UPDATE ON lojas
@@ -997,6 +1024,7 @@ SELECT 'Marcas'                   AS entidade, COUNT(*) AS total, SUM(status='U'
 SELECT 'Famílias'                 AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM familias UNION ALL
 SELECT 'Produtos'                 AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM produtos UNION ALL
 SELECT 'Codigos Auxiliares'       AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM codigos_auxiliares UNION ALL
+SELECT 'Produto Fornecedores'     AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM produto_fornecedores UNION ALL
 SELECT 'Categorias'               AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM categorias UNION ALL
 SELECT 'Agentes'                  AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM agentes UNION ALL
 SELECT 'Contas Correntes'         AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM contas_correntes UNION ALL

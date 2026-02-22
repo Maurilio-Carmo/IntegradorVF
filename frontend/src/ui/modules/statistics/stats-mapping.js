@@ -14,7 +14,8 @@ export const STATS_MAPPING = {
     marcas:                       'statMarcas',
     familias:                     'statFamilias',
     produtos:                     'statProdutos',
-    codigos_auxiliares:            'statCodigosAuxiliares',
+    codigos_auxiliares:           'statCodigosAuxiliares',
+    produto_fornecedores:         'statProdutoFornecedores',
 
     // ── Pessoa ───────────────────────────────────────────────────────────────
     clientes:                     'statClientes',

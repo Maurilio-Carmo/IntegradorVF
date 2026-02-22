@@ -25,4 +25,18 @@ router.post('/importar-produtos', async (req, res) => {
     }
 });
 
+router.get('/produto-ids', (req, res) => {
+    try {
+        const dbSQLite = require('../../config/database-sqlite');
+        const rows = dbSQLite.query(
+            `SELECT produto_id FROM produtos WHERE status NOT IN ('C') ORDER BY produto_id`
+        );
+        const ids = rows.map(r => r.produto_id);
+        res.json({ ids, total: ids.length });
+    } catch (error) {
+        console.error('[produto-ids]', error.message);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 module.exports = router;

@@ -235,6 +235,41 @@ class ProdutoRepository extends BaseRepository {
         );
     }
 
+    // ─── PRODUTO FORNECEDORES ───────────────────────────────────────────────────────────
+
+    static importarProdutoFornecedores(produtoFornecedores) {
+        return BaseRepository._executarTransacao(
+            'fornecedores do produto',
+            produtoFornecedores,
+            (db) => db.prepare(`
+                INSERT INTO produto_fornecedores (
+                    id, produto_id, fornecedor_id,
+                    referencia, unidade, fator, nivel, status
+                ) VALUES (
+                    @id, @produto_id, @fornecedor_id,
+                    @referencia, @unidade, @fator, @nivel, 'U'
+                )
+                ON CONFLICT(id) DO UPDATE SET
+                    produto_id    = excluded.produto_id,
+                    fornecedor_id = excluded.fornecedor_id,
+                    referencia    = excluded.referencia,
+                    unidade       = excluded.unidade,
+                    fator         = excluded.fator,
+                    nivel         = excluded.nivel,
+                    updated_at    = CURRENT_TIMESTAMP
+                WHERE status NOT IN ('C', 'D')
+            `),
+            (f) => [{
+                id:            f.id            ?? null,
+                produto_id:    f.produtoId     ?? null,
+                fornecedor_id: f.fornecedorId  ?? null,
+                referencia:    f.referencia    ?? null,
+                unidade:       f.unidade       ?? null,
+                fator:         f.quantidade    ?? 1,
+                nivel:         f.nivel         ?? null,
+            }]
+        );
+    }
 }
 
 module.exports = ProdutoRepository;

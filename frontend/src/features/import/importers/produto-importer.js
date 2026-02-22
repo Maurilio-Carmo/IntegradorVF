@@ -57,6 +57,71 @@ export class ProdutoImporter extends ImportBase {
             uiElement,
         });
     }
-}
+
+    /**
+     * Importar fornecedores do produto
+     */
+    async importarProdutoFornecedores(uiElement) {
+        try {
+            UI.log('📥 Iniciando importação de fornecedores do produto...', 'info');
+            UI.status.updateImport(uiElement, 'loading', 'Buscando IDs do banco local...');
+
+            const response = await fetch('/api/importacao/produto-ids');
+            if (!response.ok) throw new Error('Falha ao buscar IDs de produtos');
+            const { ids: produtoIds, total: totalProdutos } = await response.json();
+
+            if (!produtoIds || produtoIds.length === 0) {
+                UI.status.updateImport(uiElement, 'success', 'Nenhum produto no banco');
+                UI.log('⚠️ Nenhum produto encontrado no banco local. Importe os produtos primeiro.', 'warning');
+                return { success: true, total: 0 };
+            }
+
+            UI.log(`📦 ${totalProdutos} produtos encontrados. Consultando fornecedores...`, 'info');
+
+            let consultados  = 0;
+            let totalSalvos  = 0;
+
+            for (const produtoId of produtoIds) {
+                try {
+                    const fornecedores = await API.produto.buscarProdutoFornecedores(produtoId);
+
+                    consultados++;
+
+                    if (fornecedores.length > 0) {
+                        await this.db.save('fornecedoresProduto', fornecedores);
+                        totalSalvos += fornecedores.length;
+                    }
+
+                    const pct = Math.min(Math.floor((consultados / totalProdutos) * 100), 99);
+
+                    UI.status.updateImport(
+                        uiElement,
+                        'loading',
+                        `${consultados} / ${totalProdutos} produtos (${pct}%) — ${totalSalvos} fornecedores`
+                    );
+                    UI.status.updateImport(uiElement, 'progress', pct);
+
+                    if (consultados % 50 === 0) {
+                        UI.log(`⏳ ${consultados}/${totalProdutos} produtos consultados — ${totalSalvos} fornecedores salvos`, 'info');
+                    }
+
+                } catch (error) {
+                    console.error(`❌ Fornecedores do produto ${produtoId}:`, error.message);
+                    consultados++;
+                }
+            }
+
+            UI.log(`✅ Fornecedores do produto: ${totalSalvos} registros importados (${consultados} produtos consultados)`, 'success');
+            UI.status.updateImport(uiElement, 'success', `${totalSalvos} fornecedores de ${consultados} produtos`);
+
+            return { success: true, total: totalSalvos };
+
+        } catch (error) {
+            UI.log(`❌ Erro ao importar fornecedores do produto: ${error.message}`, 'error');
+            UI.status.updateImport(uiElement, 'error', error.message);
+            return { success: false, total: 0, error: error.message };
+        }
+    }
+    }
 
 export default ProdutoImporter;

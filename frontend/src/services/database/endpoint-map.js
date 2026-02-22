@@ -17,6 +17,7 @@ export const ENDPOINT_MAP = {
     familias:                          'importar-familias',
     produtos:                          'importar-produtos',
     codigosAuxiliares:                 'importar-codigos-auxiliares',
+    produtoFornecedores:               'importar-produto-fornecedores',
 
     // Financeiro
     categorias:                        'importar-categorias',

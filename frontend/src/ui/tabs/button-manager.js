@@ -34,6 +34,7 @@ export class ImportButtonManager {
             'importar-familias':             'importarFamilias',
             'importar-produtos':             'importarProdutos',
             'importar-codigos-auxiliares':   'importarCodigosAuxiliares',
+            'importar-produto-fornecedores': 'importarProdutoFornecedores',
 
             // FINANCEIRO
             'importar-categorias':           'importarCategorias',
@@ -75,7 +76,8 @@ export class ImportButtonManager {
                 'importarMarcas',
                 'importarFamilias',
                 'importarProdutos',
-                'importarCodigosAuxiliares'
+                'importarCodigosAuxiliares',
+                'importarProdutoFornecedores'
             ],
             'btnImportarTudoFinanceiro': [
                 'importarCategorias',

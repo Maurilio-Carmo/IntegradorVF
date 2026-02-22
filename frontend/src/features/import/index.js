@@ -70,6 +70,12 @@ const Importacao = {
         return result;
     },
 
+    async importarProdutoFornecedores(uiElement) {
+        const result = await produtoImporter.importarProdutoFornecedores(uiElement);
+        await this.atualizarEstatisticas();
+        return result;
+    },
+
     // FINANCEIRO
 
     async importarCategorias(uiElement) {

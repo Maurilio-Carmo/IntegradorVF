@@ -97,6 +97,9 @@ export class ProdutoAPI extends APIBase {
         return await this.fetchAll('produto/codigos-auxiliares', onProgress, onPageFetched, 'produtoId');
     }
 
+    async buscarProdutoFornecedores(produtoId) {
+        return await this.fetchAll(`produto/produtos/${produtoId}/fornecedores`);
+    }
 }
 
 // FINANCEIRO API
