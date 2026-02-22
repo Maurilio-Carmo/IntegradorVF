@@ -33,6 +33,7 @@ export class ImportButtonManager {
             'importar-marcas':               'importarMarcas',
             'importar-familias':             'importarFamilias',
             'importar-produtos':             'importarProdutos',
+            'importar-codigos-auxiliares':   'importarCodigosAuxiliares',
 
             // FINANCEIRO
             'importar-categorias':           'importarCategorias',
@@ -73,7 +74,8 @@ export class ImportButtonManager {
                 'importarMercadologia',
                 'importarMarcas',
                 'importarFamilias',
-                'importarProdutos'
+                'importarProdutos',
+                'importarCodigosAuxiliares'
             ],
             'btnImportarTudoFinanceiro': [
                 'importarCategorias',

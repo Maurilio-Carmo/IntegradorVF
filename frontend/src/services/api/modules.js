@@ -9,18 +9,6 @@ export class ProdutoAPI extends APIBase {
         return await this.fetchAll('produto/secoes', onProgress, onPageFetched);
     }
 
-    async buscarMarcas(onProgress, onPageFetched) {
-        return await this.fetchAll('produto/marcas', onProgress, onPageFetched);
-    }
-
-    async buscarFamilias(onProgress, onPageFetched) {
-        return await this.fetchAll('produto/familias', onProgress, onPageFetched);
-    }
-
-    async buscarProdutos(onProgress, onPageFetched) {
-        return await this.fetchAll('produto/produtos', onProgress, onPageFetched);
-    }
-
     /**
      * Busca hierárquica — grupos dependem de seções
      * onPageFetched não se aplica: loop manual, não usa fetchAll paginado
@@ -92,6 +80,23 @@ export class ProdutoAPI extends APIBase {
 
         return todosSubgrupos;
     }
+
+    async buscarMarcas(onProgress, onPageFetched) {
+        return await this.fetchAll('produto/marcas', onProgress, onPageFetched);
+    }
+
+    async buscarFamilias(onProgress, onPageFetched) {
+        return await this.fetchAll('produto/familias', onProgress, onPageFetched);
+    }
+
+    async buscarProdutos(onProgress, onPageFetched) {
+        return await this.fetchAll('produto/produtos', onProgress, onPageFetched);
+    }
+
+    async buscarCodigosAuxiliares(onProgress, onPageFetched) {
+        return await this.fetchAll('produto/codigos-auxiliares', onProgress, onPageFetched, 'produtoId');
+    }
+
 }
 
 // FINANCEIRO API

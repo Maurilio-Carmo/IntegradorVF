@@ -5,11 +5,12 @@ const router  = express.Router();
 const ImportacaoService = require('../../services/importacao-service');
 const { extrairData, wrapRoute } = require('./helpers');
 
-router.post('/importar-secoes',    wrapRoute('importarSecoes'));
-router.post('/importar-grupos',    wrapRoute('importarGrupos'));
-router.post('/importar-subgrupos', wrapRoute('importarSubgrupos'));
-router.post('/importar-marcas',    wrapRoute('importarMarcas'));
-router.post('/importar-familias',  wrapRoute('importarFamilias'));
+router.post('/importar-secoes',                 wrapRoute('importarSecoes'));
+router.post('/importar-grupos',                 wrapRoute('importarGrupos'));
+router.post('/importar-subgrupos',              wrapRoute('importarSubgrupos'));
+router.post('/importar-marcas',                 wrapRoute('importarMarcas'));
+router.post('/importar-familias',               wrapRoute('importarFamilias'));
+router.post('/importar-codigos-auxiliares',     wrapRoute('importarCodigosAuxiliares'));
 
 // POST /api/importacao/importar-produtos
 router.post('/importar-produtos', async (req, res) => {

@@ -46,14 +46,14 @@ export class APIBase {
     /**
      * Buscar dados com paginação
      */
-    async fetchPaginated(endpoint, start = 0, count = 500) {
-        return await this.http.get(endpoint, { start, count, sort: 'id' });
+    async fetchPaginated(endpoint, start = 0, count = 500, sort = 'id') {
+        return await this.http.get(endpoint, { start, count, sort });
     }
 
     /**
      * Buscar todos os dados (paginação automática)
      */
-    async fetchAll(endpoint, onProgress = null, onPageFetched = null) {
+    async fetchAll(endpoint, onProgress = null, onPageFetched = null, sort = 'id') {
         const pageSize = 500;
         let start = 0;
         let allData = [];
@@ -61,7 +61,7 @@ export class APIBase {
         let totalConhecido = null;
 
         while (hasMore) {
-            const response = await this.fetchPaginated(endpoint, start, pageSize);
+            const response = await this.fetchPaginated(endpoint, start, pageSize, sort);
             const items = response.items || response.data || [];
 
             if (response.total !== undefined) totalConhecido = response.total;

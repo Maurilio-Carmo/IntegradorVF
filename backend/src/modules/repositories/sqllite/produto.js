@@ -204,6 +204,37 @@ class ProdutoRepository extends BaseRepository {
             }
         );
     }
+
+    // ─── CÓDIGOS AUXILIARES ───────────────────────────────────────────────────────
+    
+    static importarCodigosAuxiliares(codigosAuxiliares) {
+        return BaseRepository._executarTransacao(
+            'códigos auxiliares',
+            codigosAuxiliares,
+            (db) => db.prepare(`
+                INSERT INTO codigos_auxiliares (
+                    codigo_id, produto_id, fator, ean_tributado, tipo, status
+                ) VALUES (
+                    @codigo_id, @produto_id, @fator, @ean_tributado, @tipo, 'U'
+                )
+                ON CONFLICT(codigo_id) DO UPDATE SET
+                    produto_id      = excluded.produto_id,
+                    fator           = excluded.fator,
+                    ean_tributado   = excluded.ean_tributado,
+                    tipo            = excluded.tipo,
+                    updated_at      = CURRENT_TIMESTAMP
+                WHERE status NOT IN ('C', 'D')
+            `),
+            (c) => [{
+                codigo_id:      c.id                                    ?? null,
+                produto_id:     c.produtoId                             ?? null,
+                fator:          c.fator                                 ?? 1,
+                ean_tributado:  BaseRepository._bool(c.eanTributado),
+                tipo:           c.tipo                                  ?? null,
+            }]
+        );
+    }
+
 }
 
 module.exports = ProdutoRepository;

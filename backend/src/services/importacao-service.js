@@ -46,6 +46,10 @@ class ImportacaoService {
         return Produto.importarProdutos(produtos, lojaId);
     }
 
+    static async importarCodigosAuxiliares(codigosAuxiliares) {
+        return Produto.importarCodigosAuxiliares(codigosAuxiliares);
+    }
+
     // FINANCEIRO
 
     static async importarCategorias(categorias) {
@@ -149,7 +153,7 @@ class ImportacaoService {
     static async obterEstatisticas() {
         try {
             const tabelas = [
-                'secoes', 'grupos', 'subgrupos', 'marcas', 'familias', 'produtos',
+                'secoes', 'grupos', 'subgrupos', 'marcas', 'familias', 'produtos', 'codigos_auxiliares',
                 'categorias', 'agentes', 'contas_correntes', 'especies_documentos', 'historico_padrao', 
                 'formas_pagamento', 'pagamentos_pdv', 'recebimentos_pdv', 'motivos_desconto', 'motivos_devolucao', 'motivos_cancelamento',
                 'regime_tributario', 'situacoes_fiscais', 'tipos_operacoes', 'impostos_federais',

@@ -38,7 +38,7 @@ const Importacao = {
         }
     },
 
-    // PRODUTO — ÁRVORE MERCADOLÓGICA
+    // PRODUTO
 
     async importarMercadologia(uiElement) {
         const result = await mercadologiaImporter.importarMercadologia(uiElement);
@@ -60,6 +60,12 @@ const Importacao = {
 
     async importarProdutos(uiElement) {
         const result = await produtoImporter.importarProdutos(uiElement);
+        await this.atualizarEstatisticas();
+        return result;
+    },
+
+    async importarCodigosAuxiliares(uiElement) {
+        const result = await produtoImporter.importarCodigosAuxiliares(uiElement);
         await this.atualizarEstatisticas();
         return result;
     },

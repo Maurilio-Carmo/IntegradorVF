@@ -45,6 +45,18 @@ export class ProdutoImporter extends ImportBase {
             uiElement
         });
     }
+
+    /**
+     * Importar códigos auxiliares
+     */
+    async importarCodigosAuxiliares(uiElement) {
+        return await this.execute({
+            name:      'códigos auxiliares',
+            endpoint:  'codigosAuxiliares',
+            apiMethod: API.produto.buscarCodigosAuxiliares.bind(API.produto),
+            uiElement,
+        });
+    }
 }
 
 export default ProdutoImporter;
