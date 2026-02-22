@@ -160,6 +160,12 @@ const Importacao = {
         return result;
     },
 
+    async importarSaldoEstoque(uiElement) {
+        const result = await estoqueImporter.importarSaldoEstoque(uiElement);
+        await this.atualizarEstatisticas();
+        return result;
+    },
+
     // FISCAL
 
     async importarImpostosFederais(uiElement) {

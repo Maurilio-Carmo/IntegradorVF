@@ -95,26 +95,24 @@ CREATE TABLE familias (
 
 DROP TABLE IF EXISTS produtos;
 CREATE TABLE produtos (
-	produto_id INTEGER PRIMARY KEY, 
-	descricao TEXT NOT NULL, 
-	descricao_reduzida TEXT NOT NULL, 
-	secao_id INTEGER, 
-	grupo_id INTEGER, 
-	subgrupo_id INTEGER, 
-	familia_id INTEGER, 
-	marca_id INTEGER, 
-	estoque_minimo REAL, 
-	estoque_maximo REAL, 
+	produto_id INTEGER PRIMARY KEY,
+	descricao TEXT NOT NULL,
+	descricao_reduzida TEXT NOT NULL,
+	secao_id INTEGER,
+	grupo_id INTEGER,
+	subgrupo_id INTEGER,
+	familia_id INTEGER,
+	marca_id INTEGER,
 	composicao TEXT CHECK(composicao IN ('NORMAL','COMPOSTO','KIT','RENDIMENTO')),
 	peso_variavel TEXT CHECK(peso_variavel IN ('SIM','PESO','NAO','UNITARIO','PENDENTE')),
-	unidade_compra TEXT NOT NULL, 
-	itens_embalagem REAL DEFAULT 1, 
-	unidade_venda TEXT NOT NULL, 
-	itens_embalagem_venda REAL DEFAULT 1, 
-	unidade_transf TEXT, 
-	itens_embalagem_transf REAL DEFAULT 1, 
-	peso_bruto REAL DEFAULT 0, 
-	peso_liquido REAL DEFAULT 0, 
+	unidade_compra TEXT NOT NULL,
+	itens_embalagem REAL DEFAULT 1,
+	unidade_venda TEXT NOT NULL,
+	itens_embalagem_venda REAL DEFAULT 1,
+	unidade_transf TEXT,
+	itens_embalagem_transf REAL DEFAULT 1,
+	peso_bruto REAL DEFAULT 0,
+	peso_liquido REAL DEFAULT 0,
 	rendimento_unidade REAL DEFAULT 0,
 	rendimento_custo REAL DEFAULT 0,
 	tabela_a TEXT CHECK(tabela_a IN ('NACIONAL','IMPORTACAO_DIRETA','ADQUIRIDO_DO_MERCADO_INTERNO','MERCADORIA_CONTENDO_IMPORTACAO_SUPERIOR_40','CUJO_PRODUCAO_TENHA_SIDO_FEITO','MERCADORIA_COM_CONTEUDO_DE_IMPORTACAO_EM_CONFORMIDADE','IMPORTACAO_DIRETA_SEM_SIMILAR_NACIONAL','ADQUIRIDO_DO_MERCADO_INTERNO_SEM_SIMILAR_NACIONAL','MERCADORIA_COM_CONTEUDO_DE_IMPORTACAO_SUPERIOR_A_70')),
@@ -161,6 +159,24 @@ CREATE INDEX idx_produtos_grupo ON produtos(grupo_id);
 CREATE INDEX idx_produtos_subgrupo ON produtos(subgrupo_id);
 CREATE INDEX idx_produtos_familia ON produtos(familia_id);
 CREATE INDEX idx_produtos_marca ON produtos(marca_id);
+
+-- ESTOQUE MINIMO E MAXIMO
+
+DROP TABLE IF EXISTS estoque_min_max;
+CREATE TABLE estoque_min_max (
+    produto_id INTEGER NOT NULL,
+    loja_id INTEGER NOT NULL,
+    estoque_minimo REAL,
+    estoque_maximo REAL,
+    status TEXT CHECK(status IN ('C','U','D','E','S')) DEFAULT 'U',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (produto_id, loja_id),
+    FOREIGN KEY (produto_id) REFERENCES produtos(produto_id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_produto_estoque_loja ON estoque_min_max(loja_id);
 
 -- CÓDIGOS AUXILIARES
 
@@ -830,11 +846,18 @@ BEGIN
     UPDATE produtos SET updated_at = CURRENT_TIMESTAMP WHERE produto_id = NEW.produto_id;
 END;
 
+DROP TRIGGER IF EXISTS trg_estoque_min_max_updated_at;
+CREATE TRIGGER trg_estoque_min_max_updated_at
+AFTER UPDATE ON estoque_min_max
+BEGIN
+    UPDATE estoque_min_max SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+END;
+
 DROP TRIGGER IF EXISTS trg_codigos_auxiliares_updated_at;
 CREATE TRIGGER trg_codigos_auxiliares_updated_at
 AFTER UPDATE ON codigos_auxiliares
 BEGIN
-    UPDATE codigos_auxiliares SET updated_at = CURRENT_TIMESTAMP WHERE codigo_id = NEW.codigo_id;
+    UPDATE estoque_min_max SET updated_at = CURRENT_TIMESTAMP WHERE produto_id = NEW.produto_id AND loja_id = NEW.loja_id;
 END;
 
 DROP TRIGGER IF EXISTS trg_produto_fornecedores_updated_at;
@@ -1073,6 +1096,7 @@ SELECT 'Subgrupos'                AS entidade, COUNT(*) AS total, SUM(status='U'
 SELECT 'Marcas'                   AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM marcas UNION ALL
 SELECT 'Famílias'                 AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM familias UNION ALL
 SELECT 'Produtos'                 AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM produtos UNION ALL
+SELECT 'Estoque Mín Máx'          AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM estoque_min_max UNION ALL
 SELECT 'Codigos Auxiliares'       AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM codigos_auxiliares UNION ALL
 SELECT 'Produto Fornecedores'     AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM produto_fornecedores UNION ALL
 SELECT 'Categorias'               AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM categorias UNION ALL
