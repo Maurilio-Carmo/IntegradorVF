@@ -3,19 +3,33 @@
   "version": "1.0.0",
   "description": "Sistema de integração com API Varejo Fácil",
   "main": "backend/server.js",
+  "bin": "backend/server.js",
   "scripts": {
+    "prestart": "node scripts/check-dependencies.js",
     "start": "node backend/server.js",
     "dev": "nodemon backend/server.js",
     "frontend": "http-server frontend -p 8000 -c-1",
     "init-db": "node backend/check-database.js",
     "check-db": "node backend/check-database.js",
-    "reset-db": "rm -f backend/database/IntegradorVF.db && node backend/check-database.js"
+    "reset-db": "node scripts/reset-db.js",
+    "build:exe": "pkg . --targets node18-win-x64 --output dist/IntegradorVF.exe"
   },
-  "keywords": [
-    "varejo",
-    "integração",
-    "api"
-  ],
+  "pkg": {
+    "scripts": [
+      "backend/**/*.js",
+      "scripts/**/*.js"
+    ],
+    "assets": [
+      "frontend/**/*",
+      "backend/database/*.sql",
+      "config/.env.example"
+    ],
+    "targets": [
+      "node22-win-x64"
+    ],
+    "outputPath": "dist"
+  },
+  "keywords": ["varejo", "integração", "api"],
   "author": "Maurilio Carmo",
   "license": "MIT",
   "dependencies": {
@@ -26,6 +40,7 @@
     "node-firebird": "^1.1.10"
   },
   "devDependencies": {
-    "nodemon": "^3.0.1"
+    "nodemon": "^3.0.1",
+    "@yao-pkg/pkg": "^5.11.5"
   }
 }

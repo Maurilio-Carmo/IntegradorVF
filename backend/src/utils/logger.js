@@ -1,16 +1,23 @@
 // backend/src/utils/logger.js
-
-const fs = require('fs');
+const fs   = require('fs');
 const path = require('path');
 
-/**
- * Sistema de Logging Estruturado
- * Suporta níveis: info, success, warning, error
- * Logs vão para console E arquivo
- */
+// Detecta se está rodando como .exe empacotado pelo pkg
+const isPackaged = typeof process.pkg !== 'undefined';
+
+// Se for .exe, salva logs na pasta do executável
+// Se for Node normal, salva em backend/logs
+const LOGS_DIR = isPackaged
+    ? path.join(path.dirname(process.execPath), 'logs')
+    : path.join(__dirname, '..', '..', 'logs');
+
+// ✅ Cria a pasta automaticamente se não existir
+if (!fs.existsSync(LOGS_DIR)) {
+    fs.mkdirSync(LOGS_DIR, { recursive: true });
+}
 class Logger {
     constructor() {
-        this.logDir = process.env.LOG_DIR || path.join(__dirname, '../../logs');
+        this.logDir = process.env.LOG_DIR || LOGS_DIR;
         this.logLevel = process.env.LOG_LEVEL || 'info';
         this.retentionDays = parseInt(process.env.LOG_RETENTION_DAYS) || 30;
         
