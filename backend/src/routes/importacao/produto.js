@@ -11,6 +11,7 @@ router.post('/importar-subgrupos',              wrapRoute('importarSubgrupos'));
 router.post('/importar-marcas',                 wrapRoute('importarMarcas'));
 router.post('/importar-familias',               wrapRoute('importarFamilias'));
 router.post('/importar-codigos-auxiliares',     wrapRoute('importarCodigosAuxiliares'));
+router.post('/importar-produto-fornecedores',   wrapRoute('importarProdutoFornecedores'));
 
 // POST /api/importacao/importar-produtos
 router.post('/importar-produtos', async (req, res) => {

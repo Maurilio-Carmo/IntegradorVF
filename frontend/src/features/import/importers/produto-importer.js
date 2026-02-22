@@ -7,6 +7,7 @@
 
 import { ImportBase } from '../import-base.js';
 import API from '../../../services/api/index.js';
+import UI from '../../../ui/ui.js';
 
 export class ProdutoImporter extends ImportBase {
 
@@ -76,10 +77,10 @@ export class ProdutoImporter extends ImportBase {
                 return { success: true, total: 0 };
             }
 
-            UI.log(`📦 ${totalProdutos} produtos encontrados. Consultando fornecedores...`, 'info');
+            UI.log(`📦 Consultando fornecedores de ${totalProdutos} produtos...`, 'info');
 
-            let consultados  = 0;
-            let totalSalvos  = 0;
+            let consultados = 0;
+            let totalSalvos = 0;
 
             for (const produtoId of produtoIds) {
                 try {
@@ -88,22 +89,17 @@ export class ProdutoImporter extends ImportBase {
                     consultados++;
 
                     if (fornecedores.length > 0) {
-                        await this.db.save('fornecedoresProduto', fornecedores);
+                        await this.db.save('produtoFornecedores', fornecedores);
                         totalSalvos += fornecedores.length;
                     }
 
                     const pct = Math.min(Math.floor((consultados / totalProdutos) * 100), 99);
-
                     UI.status.updateImport(
                         uiElement,
                         'loading',
-                        `${consultados} / ${totalProdutos} produtos (${pct}%) — ${totalSalvos} fornecedores`
+                        `${consultados} / ${totalProdutos} (${pct}%)`
                     );
                     UI.status.updateImport(uiElement, 'progress', pct);
-
-                    if (consultados % 50 === 0) {
-                        UI.log(`⏳ ${consultados}/${totalProdutos} produtos consultados — ${totalSalvos} fornecedores salvos`, 'info');
-                    }
 
                 } catch (error) {
                     console.error(`❌ Fornecedores do produto ${produtoId}:`, error.message);
@@ -122,6 +118,6 @@ export class ProdutoImporter extends ImportBase {
             return { success: false, total: 0, error: error.message };
         }
     }
-    }
+}
 
 export default ProdutoImporter;
