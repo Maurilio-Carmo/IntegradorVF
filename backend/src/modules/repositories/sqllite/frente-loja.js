@@ -29,7 +29,7 @@ class FrenteLojaRepository extends BaseRepository {
                     @conta_corrente_id,
                     'U'
                 )
-                ON CONFLICT(forma_pagamento_id, loja_id) DO UPDATE SET
+                ON CONFLICT(forma_pagamento_id) DO UPDATE SET
                     descricao                = excluded.descricao,
                     especie_de_documento_id  = excluded.especie_de_documento_id,
                     categoria_financeira_id  = excluded.categoria_financeira_id,

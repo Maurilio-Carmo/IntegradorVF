@@ -71,7 +71,7 @@ class ImportacaoService {
     // FRENTE DE LOJA  (PDV, TIPOS, MOTIVOS)
 
     static async importarFormasPagamento(formasPagamento) {
-        return Financeiro.importarFormasPagamento(formasPagamento);
+        return FrenteLoja.importarFormasPagamento(formasPagamento);
     }
 
     static async importarPagamentosPDV(pagamentos) {

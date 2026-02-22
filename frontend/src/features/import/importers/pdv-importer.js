@@ -15,11 +15,10 @@ export class PDVImporter extends ImportBase {
         return await this.execute({
             name:      'formas de pagamento',
             endpoint:  'formasPagamento',
-            apiMethod: API.financeiro.buscarFormasPagamento.bind(API.financeiro),
+            apiMethod: API.pdv.buscarFormasPagamento.bind(API.pdv),
             transform: (formas) => formas.flatMap(f =>
                 (f.lojas || []).map(l => ({
                     formaPagamentoId:       f.id,
-                    lojaId:                 l.lojaId                ?? null,
                     descricao:              f.descricao             ?? null,
                     especieDeDocumentoId:   f.especieDeDocumentoId  ?? null,
                     categoriaFinanceiraId:  f.categoriaFinanceiraId ?? null,

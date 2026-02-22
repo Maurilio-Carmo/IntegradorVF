@@ -99,7 +99,7 @@ const Importacao = {
     // PDV / FRENTE DE LOJA
 
     async importarFormasPagamento(uiElement) {
-        const result = await financeiroImporter.importarFormasPagamento(uiElement);
+        const result = await pdvImporter.importarFormasPagamento(uiElement);
         await this.atualizarEstatisticas();
         return result;
     },
