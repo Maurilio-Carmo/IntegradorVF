@@ -74,6 +74,42 @@ class EstoqueRepository extends BaseRepository {
             }]
         );
     }
+
+    // ─── SALDO DE ESTOQUE ─────────────────────────────────────────────────────
+
+    static importarSaldoEstoque(saldos) {
+        return BaseRepository._executarTransacao(
+            'saldo de estoque',
+            saldos,
+            (db) => db.prepare(`
+                INSERT INTO saldo_estoque (
+                    saldo_id, loja_id, produto_id, local_id, saldo,
+                    criado_em, atualizado_em, status
+                ) VALUES (
+                    @saldo_id, @loja_id, @produto_id, @local_id,
+                    @saldo, @criado_em, @atualizado_em, @status
+                )
+                ON CONFLICT(saldo_id) DO UPDATE SET
+                    loja_id       = excluded.loja_id,
+                    produto_id    = excluded.produto_id,
+                    local_id      = excluded.local_id,
+                    saldo         = excluded.saldo,
+                    atualizado_em = excluded.atualizado_em,
+                    updated_at    = CURRENT_TIMESTAMP
+                WHERE status NOT IN ('C', 'D')
+            `),
+            (s) => [{
+                saldo_id:      s.id            ?? null,
+                loja_id:       s.lojaId        ?? null,
+                produto_id:    s.produtoId     ?? null,
+                local_id:      s.localId       ?? null,
+                saldo:         BaseRepository._num(s.saldo),
+                criado_em:     BaseRepository._date(s.criadoEm),
+                atualizado_em: BaseRepository._date(s.atualizadoEm),
+                status: 'U',
+            }]
+        );
+    }
 }
 
 module.exports = EstoqueRepository;

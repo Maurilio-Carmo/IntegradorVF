@@ -37,6 +37,7 @@ export const ENDPOINT_MAP = {
     // Estoque
     localEstoque:                      'importar-local-estoque',
     tiposAjustes:                      'importar-tipos-ajustes',
+    saldoEstoque:                      'importar-saldo-estoque',
 
     // Fiscal
     regimeTributario:                  'importar-regime-tributario',

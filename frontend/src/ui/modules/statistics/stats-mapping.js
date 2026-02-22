@@ -49,4 +49,5 @@ export const STATS_MAPPING = {
     // ── Estoque ──────────────────────────────────────────────────────────────
     tipos_ajustes:                'statTiposAjustes',
     local_estoque:                'statLocalEstoque',
+    saldo_estoque:                'statSaldoEstoque'
 };

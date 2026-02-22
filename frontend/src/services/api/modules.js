@@ -161,6 +161,10 @@ export class EstoqueAPI extends APIBase {
     async buscarTiposAjustes(onProgress, onPageFetched) {
         return await this.fetchAll('estoque/tipos-ajuste', onProgress, onPageFetched);
     }
+
+    async buscarSaldoEstoque(onProgress, onPageFetched) {
+        return await this.fetchAll('estoque/saldos', onProgress, onPageFetched);
+    }
 }
 
 // FISCAL API

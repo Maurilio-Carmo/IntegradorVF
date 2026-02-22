@@ -112,6 +112,10 @@ class ImportacaoService {
         return Estoque.importarTiposAjustes(tipos);
     }
 
+    static async importarSaldoEstoque(saldos) {
+        return Estoque.importarSaldoEstoque(saldos);
+    }
+
     // FISCAL / TRIBUTÁRIO
 
     static async importarRegimeTributario(regimes) {
@@ -162,7 +166,7 @@ class ImportacaoService {
                 'formas_pagamento', 'pagamentos_pdv', 'recebimentos_pdv', 'motivos_desconto', 'motivos_devolucao', 'motivos_cancelamento',
                 'regime_tributario', 'situacoes_fiscais', 'tipos_operacoes', 'impostos_federais',
                 'tabelas_tributarias_entrada', 'tabelas_tributarias_saida',
-                'local_estoque', 'tipos_ajustes',
+                'local_estoque', 'tipos_ajustes', 'saldo_estoque',
                 'lojas', 'clientes', 'fornecedores',
             ];
 

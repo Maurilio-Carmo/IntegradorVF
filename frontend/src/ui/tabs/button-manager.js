@@ -52,8 +52,9 @@ export class ImportButtonManager {
             'importar-motivos-cancelamento': 'importarMotivosCancelamento',
 
             // ESTOQUE
-            'importar-locais-estoque': 'importarLocalEstoque',
-            'importar-tipos-ajustes': 'importarTiposAjustes',
+            'importar-locais-estoque':       'importarLocalEstoque',
+            'importar-tipos-ajustes':        'importarTiposAjustes',
+            'importar-saldo-estoque':        'importarSaldoEstoque',
 
             // FISCAL
             'importar-regime-tributario':            'importarRegimeTributario',
@@ -96,7 +97,8 @@ export class ImportButtonManager {
             ],
             'btnImportarTudoEstoque': [
                 'importarLocalEstoque',
-                'importarTiposAjustes'
+                'importarTiposAjustes',
+                'importarSaldoEstoque'
             ],
             'btnImportarTudoFiscal': [
                 'importarRegimeTributario',

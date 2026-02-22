@@ -31,6 +31,18 @@ export class EstoqueImporter extends ImportBase {
             uiElement,
         });
     }
+
+    /**
+     * Importar saldo de estoque
+     */
+    async importarSaldoEstoque(uiElement) {
+        return await this.execute({
+            name:'saldo de estoque',
+            endpoint: 'saldoEstoque',
+            apiMethod: API.estoque.buscarSaldoEstoque.bind(API.estoque),
+            uiElement,
+        });
+    }
 }
 
 export default EstoqueImporter;

@@ -214,6 +214,27 @@ CREATE TABLE local_estoque (
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
+-- SALDO DE ESTOQUE
+
+DROP TABLE IF EXISTS saldo_estoque;
+CREATE TABLE saldo_estoque (
+    saldo_id INTEGER PRIMARY KEY,
+    loja_id INTEGER NOT NULL,
+    produto_id INTEGER NOT NULL,
+    local_id INTEGER NOT NULL,
+    saldo REAL NOT NULL DEFAULT 0,
+    criado_em DATETIME,
+    atualizado_em DATETIME,
+    status TEXT CHECK(status IN ('C','U','D','E','S')) DEFAULT 'U',
+    retorno TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (loja_id) REFERENCES lojas(loja_id) ON DELETE SET NULL,
+    FOREIGN KEY (produto_id) REFERENCES produtos(produto_id) ON DELETE SET NULL,
+    FOREIGN KEY (local_id) REFERENCES local_estoque(local_id) ON DELETE SET NULL
+);
+
 -- AGENTES
 
 DROP TABLE IF EXISTS agentes;
@@ -851,6 +872,13 @@ BEGIN
     UPDATE local_estoque SET updated_at = CURRENT_TIMESTAMP WHERE local_id = NEW.local_id;
 END;
 
+DROP TRIGGER IF EXISTS trg_saldo_estoque_updated_at;
+CREATE TRIGGER trg_saldo_estoque_updated_at
+AFTER UPDATE ON saldo_estoque
+BEGIN
+    UPDATE saldo_estoque SET updated_at = CURRENT_TIMESTAMP WHERE saldo_id = NEW.saldo_id;
+END;
+
 DROP TRIGGER IF EXISTS trg_agentes_updated_at;
 CREATE TRIGGER trg_agentes_updated_at
 AFTER UPDATE ON agentes
@@ -1014,6 +1042,28 @@ FROM secoes s
 LEFT JOIN grupos g ON s.secao_id = g.secao_id
 LEFT JOIN subgrupos sg ON g.grupo_id = sg.grupo_id;
 
+-- VIEW auxiliar: saldo com descrições
+DROP VIEW IF EXISTS vw_saldo_estoque_completo;
+CREATE VIEW vw_saldo_estoque_completo AS
+SELECT
+    se.saldo_id,
+    se.loja_id,
+    se.produto_id,
+    p.descricao AS produto_descricao,
+    p.codigo_interno AS produto_codigo,
+    se.local_id,
+    le.descricao AS local_descricao,
+    se.saldo,
+    se.criado_em,
+    se.atualizado_em,
+    se.status,
+    se.retorno,
+    se.created_at,
+    se.updated_at
+FROM saldo_estoque se
+LEFT JOIN produtos p ON se.produto_id = p.produto_id
+LEFT JOIN local_estoque le ON se.local_id = le.local_id;
+
 -- View: Relatório geral de sincronização por entidade
 DROP VIEW IF EXISTS vw_relatorio_sincronizacao;
 CREATE VIEW vw_relatorio_sincronizacao AS
@@ -1038,6 +1088,7 @@ SELECT 'Motivos Devolução'        AS entidade, COUNT(*) AS total, SUM(status='
 SELECT 'Motivos Cancelamento'     AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM motivos_cancelamento UNION ALL
 SELECT 'Local Estoque'            AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM local_estoque UNION ALL
 SELECT 'Tipos Ajustes'            AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM tipos_ajustes UNION ALL
+SELECT 'Saldo de Estoque'         AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM saldo_estoque UNION ALL
 SELECT 'Regime Tributário'        AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM regime_tributario UNION ALL
 SELECT 'Situações Fiscais'        AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM situacoes_fiscais UNION ALL
 SELECT 'Tipos Operações'          AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM tipos_operacoes UNION ALL
