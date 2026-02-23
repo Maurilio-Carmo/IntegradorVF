@@ -370,8 +370,8 @@ class ProdutoRepository extends BaseRepository {
                 WHERE status NOT IN ('C', 'D')
             `),
             (c) => [{
-                codigo_id:      c.id                                    ?? null,
-                produto_id:     c.produtoId                             ?? null,
+                codigo_id:      c.id,
+                produto_id:     c.produtoId,
                 fator:          c.fator                                 ?? 1,
                 ean_tributado:  BaseRepository._bool(c.eanTributado),
                 tipo:           c.tipo                                  ?? null,
