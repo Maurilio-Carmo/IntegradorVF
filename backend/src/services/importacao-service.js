@@ -161,11 +161,12 @@ class ImportacaoService {
     static async obterEstatisticas() {
         try {
             const tabelas = [
-                'secoes', 'grupos', 'subgrupos', 'marcas', 'familias', 'produtos', 'codigos_auxiliares', 'produto_fornecedores',
+                'secoes', 'grupos', 'subgrupos', 'marcas', 'familias', 'produtos', 
+                'produto_min_max', 'produto_regimes', 'produto_componentes', 'produto_impostos_federais', 'produto_auxiliares', 'produto_fornecedores',
                 'categorias', 'agentes', 'contas_correntes', 'especies_documentos', 'historico_padrao', 
-                'formas_pagamento', 'pagamentos_pdv', 'recebimentos_pdv', 'motivos_desconto', 'motivos_devolucao', 'motivos_cancelamento',
-                'regime_tributario', 'situacoes_fiscais', 'tipos_operacoes', 'impostos_federais',
-                'tabelas_tributarias_entrada', 'tabelas_tributarias_saida',
+                'formas_pagamento', 'pagamentos_pdv', 'recebimentos_pdv', 
+                'motivos_desconto', 'motivos_devolucao', 'motivos_cancelamento',
+                'regime_tributario', 'situacoes_fiscais', 'tipos_operacoes', 'impostos_federais', 'tabelas_tributarias',
                 'local_estoque', 'tipos_ajustes', 'saldo_estoque',
                 'lojas', 'clientes', 'fornecedores',
             ];

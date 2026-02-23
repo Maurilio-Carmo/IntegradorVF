@@ -51,24 +51,31 @@ class ProdutoRepository extends BaseRepository {
         );
     }
 
-    // ─── PRODUTOS ─────────────────────────────────────────────────────────────
+    // ─── PRODUTOS (+ tabelas relacionais) ────────────────────────────────────
 
     /**
-     * Importa produtos e salva estoque por loja em tabela separada.
+     * Importa produtos e persiste TODAS as sub-entidades em uma única transação:
+     *   produto_min_max          ← estoqueDoProduto[]
+     *   produto_regimes          ← regimesDoProduto[]
+     *   produto_componentes      ← componentes[]
+     *   produto_impostos_federais← itensImpostosFederais[]
+     *
      * @param {Array}  produtos - Lista de produtos vindos da API
-     * @param {number} lojaId   - ID da loja (usado só para filtrar regime tributário)
+     * @returns {{ success: boolean, count: number, counters: object }}
      */
-    static importarProdutos(produtos, lojaId) {
+    static importarProdutos(produtos) {
 
         if (!produtos || produtos.length === 0) {
-            return { success: true, count: 0, countEstoque: 0 };
+            return { success: true, count: 0, counters: {} };
         }
 
         try {
             console.log(`📥 Importando ${produtos.length} produtos...`);
             dbSQLite.getConnection();
 
-            // ── 1. Statement para a tabela principal de produtos ─────────────────
+            // ── 1. Produto principal ─────────────────────────────────────────────
+            // ATENÇÃO: colunas regime_estadual e impostos_federais foram REMOVIDAS
+            //          do DDL — agora vivem em tabelas próprias abaixo.
             const stmtProduto = dbSQLite.db.prepare(`
                 INSERT INTO produtos (
                     produto_id, descricao, descricao_reduzida,
@@ -79,8 +86,7 @@ class ProdutoRepository extends BaseRepository {
                     unidade_transf, itens_embalagem_transf,
                     peso_bruto, peso_liquido, rendimento_unidade, rendimento_custo,
                     tabela_a, genero, ncm, cest,
-                    situacao_fiscal, situacao_fiscal_saida,
-                    regime_estadual, impostos_federais, natureza_imposto,
+                    situacao_fiscal, situacao_fiscal_saida, natureza_imposto,
                     permite_desconto, desconto_maximo,
                     controla_estoque, envia_balanca, descricao_variavel,
                     preco_variavel, ativo_ecommerce, controla_validade, validade_dias,
@@ -96,8 +102,7 @@ class ProdutoRepository extends BaseRepository {
                     @unidade_transf, @itens_embalagem_transf,
                     @peso_bruto, @peso_liquido, @rendimento_unidade, @rendimento_custo,
                     @tabela_a, @genero, @ncm, @cest,
-                    @situacao_fiscal, @situacao_fiscal_saida,
-                    @regime_estadual, @impostos_federais, @natureza_imposto,
+                    @situacao_fiscal, @situacao_fiscal_saida, @natureza_imposto,
                     @permite_desconto, @desconto_maximo,
                     @controla_estoque, @envia_balanca, @descricao_variavel,
                     @preco_variavel, @ativo_ecommerce, @controla_validade, @validade_dias,
@@ -131,8 +136,6 @@ class ProdutoRepository extends BaseRepository {
                     cest                   = excluded.cest,
                     situacao_fiscal        = excluded.situacao_fiscal,
                     situacao_fiscal_saida  = excluded.situacao_fiscal_saida,
-                    regime_estadual        = excluded.regime_estadual,
-                    impostos_federais      = excluded.impostos_federais,
                     natureza_imposto       = excluded.natureza_imposto,
                     permite_desconto       = excluded.permite_desconto,
                     desconto_maximo        = excluded.desconto_maximo,
@@ -154,71 +157,120 @@ class ProdutoRepository extends BaseRepository {
                 WHERE status NOT IN ('C', 'D')
             `);
 
-            // ── 2. Statement para gravar estoque mínimo/máximo por loja ──────────
-            const stmtEstoque = dbSQLite.db.prepare(`
-                INSERT INTO estoque_min_max (
+            // ── 2. Estoque mínimo/máximo por loja ───────────────────────────────
+            // Tabela: produto_min_max  (PK composta: produto_id + loja_id)
+            const stmtMinMax = dbSQLite.db.prepare(`
+                INSERT INTO produto_min_max (
                     produto_id, loja_id, estoque_minimo, estoque_maximo, status
                 ) VALUES (
-                    @produto_id, @loja_id, @estoque_minimo, @estoque_maximo, @status
+                    @produto_id, @loja_id, @estoque_minimo, @estoque_maximo, 'U'
                 )
                 ON CONFLICT(produto_id, loja_id) DO UPDATE SET
                     estoque_minimo = excluded.estoque_minimo,
                     estoque_maximo = excluded.estoque_maximo,
-                    status         = excluded.status,
                     updated_at     = CURRENT_TIMESTAMP
             `);
 
-            let countEstoque = 0;
+            // ── 3. Regime tributário por loja ────────────────────────────────────
+            // Tabela: produto_regimes  (PK composta: produto_id + loja_id)
+            // Substitui a antiga coluna regime_estadual na tabela produtos.
+            const stmtRegime = dbSQLite.db.prepare(`
+                INSERT INTO produto_regimes (
+                    produto_id, loja_id, regime_estadual_id, status
+                ) VALUES (
+                    @produto_id, @loja_id, @regime_estadual_id, 'U'
+                )
+                ON CONFLICT(produto_id, loja_id) DO UPDATE SET
+                    regime_estadual_id = excluded.regime_estadual_id,
+                    updated_at         = CURRENT_TIMESTAMP
+            `);
 
-            // ── 3. Transação única: garante que produto e estoques salvam juntos ─
+            // ── 4. Componentes (composição/kit/rendimento) ───────────────────────
+            // Tabela: produto_componentes  (PK: id vindo da API)
+            const stmtComponente = dbSQLite.db.prepare(`
+                INSERT INTO produto_componentes (
+                    id, produto_id, componente_produto_id,
+                    quantidade, preco1, preco2, preco3, status
+                ) VALUES (
+                    @id, @produto_id, @componente_produto_id,
+                    @quantidade, @preco1, @preco2, @preco3, 'U'
+                )
+                ON CONFLICT(id) DO UPDATE SET
+                    componente_produto_id = excluded.componente_produto_id,
+                    quantidade            = excluded.quantidade,
+                    preco1                = excluded.preco1,
+                    preco2                = excluded.preco2,
+                    preco3                = excluded.preco3,
+                    updated_at            = CURRENT_TIMESTAMP
+                WHERE status NOT IN ('C', 'D')
+            `);
+
+            // ── 5. Impostos federais do produto (relação N:N) ────────────────────
+            // Tabela: produto_impostos_federais  (PK composta: produto_id + imposto_id)
+            // Substitui a antiga coluna impostos_federais TEXT serializada.
+            const stmtImposto = dbSQLite.db.prepare(`
+                INSERT OR IGNORE INTO produto_impostos_federais (
+                    produto_id, imposto_id, status
+                ) VALUES (
+                    @produto_id, @imposto_id, 'U'
+                )
+            `);
+
+            // ── 6. Contadores para relatório ─────────────────────────────────────
+            const counters = {
+                minMax:     0,
+                regimes:    0,
+                componentes:0,
+                impostos:   0,
+            };
+
+            // ── 7. Transação única — atomicidade total ───────────────────────────
             const transaction = dbSQLite.db.transaction(() => {
                 for (const p of produtos) {
-                    const reg = (p.regimesDoProduto || []).find(r => r.lojaId === lojaId) || {};
 
+                    // 7a. Produto principal
                     stmtProduto.run({
-                        produto_id:            p.id                                  ?? null,
-                        descricao:             p.descricao                           ?? null,
-                        descricao_reduzida:    p.descricaoReduzida                   ?? null,
-                        secao_id:              p.secaoId                             ?? null,
-                        grupo_id:              p.grupoId                             ?? null,
-                        subgrupo_id:           p.subgrupoId                          ?? null,
-                        familia_id:            p.familiaId                           ?? null,
-                        marca_id:              p.marcaId                             ?? null,
-                        composicao:            p.composicao                          ?? null,
-                        peso_variavel:         p.pesoVariavel                        ?? null,
-                        unidade_compra:        p.unidadeDeCompra                     ?? null,
-                        itens_embalagem:       p.itensEmbalagem                      ?? 1,
-                        unidade_venda:         p.unidadeDeVenda                      ?? null,
-                        itens_embalagem_venda: p.itensEmbalagemVenda                 ?? 1,
-                        unidade_transf:        p.unidadeDeTransferencia              ?? null,
-                        itens_embalagem_transf:p.itensEmbalagemTransferencia         ?? 1,
-                        peso_bruto:            p.pesoBruto                           ?? 0,
-                        peso_liquido:          p.pesoLiquido                         ?? 0,
-                        rendimento_unidade:    p.fatorRendimentoUnidade              ?? 0,
-                        rendimento_custo:      p.fatorRendimentoCusto                ?? 0,
-                        tabela_a:              p.tabelaA                             ?? null,
-                        genero:                BaseRepository._str(p.generoId)       ?? null,
-                        ncm:                   p.nomeclaturaMercosulId               ?? null,
-                        cest:                  BaseRepository._str(p.cest)           ?? null,
-                        situacao_fiscal:       p.situacaoFiscalId                    ?? null,
-                        situacao_fiscal_saida: p.situacaoFiscalSaidaId               ?? null,
-                        regime_estadual:       reg.regimeEstadualId                  ?? null,
-                        impostos_federais:     BaseRepository._ids(p.itensImpostosFederais),
-                        natureza_imposto:      p.naturezaDeImpostoFederalId          ?? null,
+                        produto_id:            p.id                                   ?? null,
+                        descricao:             p.descricao                            ?? null,
+                        descricao_reduzida:    p.descricaoReduzida                    ?? null,
+                        secao_id:              p.secaoId                              ?? null,
+                        grupo_id:              p.grupoId                              ?? null,
+                        subgrupo_id:           p.subgrupoId                           ?? null,
+                        familia_id:            p.familiaId                            ?? null,
+                        marca_id:              p.marcaId                              ?? null,
+                        composicao:            p.composicao                           ?? null,
+                        peso_variavel:         p.pesoVariavel                         ?? null,
+                        unidade_compra:        p.unidadeDeCompra                      ?? null,
+                        itens_embalagem:       p.itensEmbalagem                       ?? 1,
+                        unidade_venda:         p.unidadeDeVenda                       ?? null,
+                        itens_embalagem_venda: p.itensEmbalagemVenda                  ?? 1,
+                        unidade_transf:        p.unidadeDeTransferencia               ?? null,
+                        itens_embalagem_transf:p.itensEmbalagemTransferencia          ?? 1,
+                        peso_bruto:            p.pesoBruto                            ?? 0,
+                        peso_liquido:          p.pesoLiquido                          ?? 0,
+                        rendimento_unidade:    p.fatorRendimentoUnidade               ?? 0,
+                        rendimento_custo:      p.fatorRendimentoCusto                 ?? 0,
+                        tabela_a:              p.tabelaA                              ?? null,
+                        genero:                BaseRepository._str(p.generoId)        ?? null,
+                        ncm:                   p.nomeclaturaMercosulId                ?? null,
+                        cest:                  BaseRepository._str(p.cest)            ?? null,
+                        situacao_fiscal:       p.situacaoFiscalId                     ?? null,
+                        situacao_fiscal_saida: p.situacaoFiscalSaidaId                ?? null,
+                        natureza_imposto:      p.naturezaDeImpostoFederalId           ?? null,
                         permite_desconto:      BaseRepository._bool(p.permiteDesconto),
-                        desconto_maximo:       p.descontoMaximo1                     ?? 0,
+                        desconto_maximo:       p.descontoMaximo1                      ?? 0,
                         controla_estoque:      BaseRepository._bool(p.controlaEstoque),
                         envia_balanca:         BaseRepository._bool(p.enviaBalanca),
                         descricao_variavel:    BaseRepository._bool(p.descricaoVariavel),
                         preco_variavel:        BaseRepository._bool(p.precoVariavel),
                         ativo_ecommerce:       BaseRepository._bool(p.ativoNoEcommerce),
                         controla_validade:     BaseRepository._bool(p.controlaValidade),
-                        validade_dias:         p.validade                            ?? 0,
-                        finalidade:            p.finalidadeProduto                   ?? null,
-                        producao:              p.producao                            ?? null,
-                        unidade_referencia:    p.unidadeDeReferencia                 ?? null,
-                        medida_referencial:    p.medidaReferencial                   ?? 1,
-                        indice_at:             p.indiceAT                            ?? null,
+                        validade_dias:         p.validade                             ?? 0,
+                        finalidade:            p.finalidadeProduto                    ?? null,
+                        producao:              p.producao                             ?? null,
+                        unidade_referencia:    p.unidadeDeReferencia                  ?? null,
+                        medida_referencial:    p.medidaReferencial                    ?? 1,
+                        indice_at:             p.indiceAT                             ?? null,
                         fora_linha:            p.foraDeLinha === 'S' ? 1 : 0,
                         data_saida:            BaseRepository._date(p.dataSaida),
                         data_inclusao:         BaseRepository._date(p.dataInclusao),
@@ -226,25 +278,66 @@ class ProdutoRepository extends BaseRepository {
                         status:                'U',
                     });
 
-                    // 3b. Salvar estoque de TODAS as lojas do produto
+                    // 7b. Estoque mínimo/máximo — TODAS as lojas do produto
                     for (const est of (p.estoqueDoProduto || [])) {
-                        stmtEstoque.run({
+                        stmtMinMax.run({
                             produto_id:     p.id,
                             loja_id:        est.lojaId        ?? null,
                             estoque_minimo: est.estoqueMinimo ?? null,
                             estoque_maximo: est.estoqueMaximo ?? null,
-                            status:          'U',
                         });
-                        countEstoque++;
+                        counters.minMax++;
+                    }
+
+                    // 7c. Regimes tributários — TODAS as lojas do produto
+                    for (const reg of (p.regimesDoProduto || [])) {
+                        stmtRegime.run({
+                            produto_id:         p.id,
+                            loja_id:            reg.lojaId           ?? null,
+                            regime_estadual_id: reg.regimeEstadualId ?? null,
+                        });
+                        counters.regimes++;
+                    }
+
+                    // 7d. Componentes (kit / composto / rendimento)
+                    for (const comp of (p.componentes || [])) {
+                        stmtComponente.run({
+                            id:                    comp.id        ?? null,
+                            produto_id:            p.id,
+                            componente_produto_id: comp.produtoId ?? null,
+                            quantidade:            comp.quantidade ?? 1,
+                            preco1:                comp.preco1    ?? 0,
+                            preco2:                comp.preco2    ?? 0,
+                            preco3:                comp.preco3    ?? 0,
+                        });
+                        counters.componentes++;
+                    }
+
+                    // 7e. Impostos federais vinculados ao produto
+                    for (const imp of (p.itensImpostosFederais || [])) {
+                        if (imp.id != null) {
+                            stmtImposto.run({
+                                produto_id: p.id,
+                                imposto_id: String(imp.id),
+                            });
+                            counters.impostos++;
+                        }
                     }
                 }
             });
 
-            // ── 4. Executar tudo de uma vez ───────────────────────────────────────
+            // ── 8. Executar transação ────────────────────────────────────────────
             transaction();
 
-            console.log(`✅ ${produtos.length} produtos | ${countEstoque} registros de estoque salvos`);
-            return { success: true, count: produtos.length, countEstoque };
+            console.log(
+                `✅ ${produtos.length} produtos | ` +
+                `${counters.minMax} estoques | ` +
+                `${counters.regimes} regimes | ` +
+                `${counters.componentes} componentes | ` +
+                `${counters.impostos} impostos`
+            );
+
+            return { success: true, count: produtos.length, counters };
 
         } catch (error) {
             console.error('❌ Erro ao importar produtos:', error.message);
@@ -259,7 +352,7 @@ class ProdutoRepository extends BaseRepository {
             'códigos auxiliares',
             codigosAuxiliares,
             (db) => db.prepare(`
-                INSERT INTO codigos_auxiliares (
+                INSERT INTO produto_auxiliares (
                     codigo_id, produto_id, fator, ean_tributado, tipo, status
                 ) VALUES (
                     @codigo_id, @produto_id, @fator, @ean_tributado, @tipo, 'U'

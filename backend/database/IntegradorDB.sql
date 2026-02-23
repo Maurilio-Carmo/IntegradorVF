@@ -15,9 +15,68 @@ PRAGMA foreign_keys = ON;
 -- S = Success/Sucesso  (✅)
 -- =====================================================
 
+-- =====================================================
+-- DROP
+-- =====================================================
+
+-- PRODUTO
+DROP TABLE IF EXISTS secoes;
+DROP TABLE IF EXISTS grupos;
+DROP TABLE IF EXISTS subgrupos;
+DROP TABLE IF EXISTS marcas;
+DROP TABLE IF EXISTS familias;
+DROP TABLE IF EXISTS produtos;
+DROP TABLE IF EXISTS produto_componentes;
+DROP TABLE IF EXISTS produto_min_max;
+DROP TABLE IF EXISTS produto_regimes;
+DROP TABLE IF EXISTS produto_impostos_federais;
+DROP TABLE IF EXISTS produto_auxiliares;
+DROP TABLE IF EXISTS produto_fornecedores;
+
+-- FRENTE DE LOJA
+DROP TABLE IF EXISTS formas_pagamento;
+DROP TABLE IF EXISTS pagamentos_pdv;
+DROP TABLE IF EXISTS recebimentos_pdv;
+DROP TABLE IF EXISTS motivos_desconto;
+DROP TABLE IF EXISTS motivos_devolucao;
+DROP TABLE IF EXISTS motivos_cancelamento;
+
+-- FINANCEIRO
+DROP TABLE IF EXISTS agentes;
+DROP TABLE IF EXISTS categorias;
+DROP TABLE IF EXISTS contas_correntes;
+DROP TABLE IF EXISTS especies_documentos;
+DROP TABLE IF EXISTS historico_padrao;
+DROP TABLE IF EXISTS limites_credito;
+DROP TABLE IF EXISTS contas_pagar;
+DROP TABLE IF EXISTS contas_receber;
+
+-- ESTOQUE
+DROP TABLE IF EXISTS local_estoque;
+DROP TABLE IF EXISTS tipos_ajustes;
+DROP TABLE IF EXISTS saldo_estoque;
+
+-- FISCAL
+DROP TABLE IF EXISTS regime_tributario;
+DROP TABLE IF EXISTS situacoes_fiscais;
+DROP TABLE IF EXISTS impostos_federais;
+DROP TABLE IF EXISTS tipos_operacoes;
+DROP TABLE IF EXISTS tabelas_tributarias;
+
+-- PESSOA
+DROP TABLE IF EXISTS lojas;
+DROP TABLE IF EXISTS clientes;
+DROP TABLE IF EXISTS fornecedores;
+
+-- ADM
+DROP TABLE IF EXISTS log_sincronizacao;
+
+-- =====================================================
+-- TABELAS
+-- =====================================================
+
 -- SEÇÕES
 
-DROP TABLE IF EXISTS secoes;
 CREATE TABLE secoes (
     secao_id INTEGER PRIMARY KEY,
     descricao_old TEXT,
@@ -30,7 +89,6 @@ CREATE TABLE secoes (
 
 -- GRUPOS
 
-DROP TABLE IF EXISTS grupos;
 CREATE TABLE grupos (
     grupo_id INTEGER PRIMARY KEY,
     secao_id INTEGER NOT NULL,
@@ -48,7 +106,6 @@ CREATE INDEX idx_grupos_grupo ON grupos(secao_id, grupo_id);
 
 -- SUBGRUPOS
 
-DROP TABLE IF EXISTS subgrupos;
 CREATE TABLE subgrupos (
     subgrupo_id INTEGER PRIMARY KEY,
     secao_id INTEGER NOT NULL,
@@ -67,7 +124,6 @@ CREATE INDEX idx_subgrupos_subgrupo ON subgrupos(secao_id, grupo_id, subgrupo_id
 
 -- MARCAS
 
-DROP TABLE IF EXISTS marcas;
 CREATE TABLE marcas (
     marca_id INTEGER PRIMARY KEY,
     descricao_old TEXT,
@@ -80,7 +136,6 @@ CREATE TABLE marcas (
 
 -- FAMILIAS
 
-DROP TABLE IF EXISTS familias;
 CREATE TABLE familias (
     familia_id INTEGER PRIMARY KEY,
     descricao_old TEXT,
@@ -93,7 +148,6 @@ CREATE TABLE familias (
 
 -- PRODUTOS
 
-DROP TABLE IF EXISTS produtos;
 CREATE TABLE produtos (
 	produto_id INTEGER PRIMARY KEY,
 	descricao TEXT NOT NULL,
@@ -121,8 +175,6 @@ CREATE TABLE produtos (
 	cest TEXT,
 	situacao_fiscal INTEGER,
 	situacao_fiscal_saida INTEGER,
-	regime_estadual INTEGER,
-	impostos_federais TEXT,
 	natureza_imposto INTEGER,
 	permite_desconto INTEGER DEFAULT 0,
 	desconto_maximo REAL DEFAULT 0,
@@ -160,10 +212,26 @@ CREATE INDEX idx_produtos_subgrupo ON produtos(subgrupo_id);
 CREATE INDEX idx_produtos_familia ON produtos(familia_id);
 CREATE INDEX idx_produtos_marca ON produtos(marca_id);
 
--- ESTOQUE MINIMO E MAXIMO
+-- PRODUTOS COMPONENTES
 
-DROP TABLE IF EXISTS estoque_min_max;
-CREATE TABLE estoque_min_max (
+CREATE TABLE produto_componentes (
+    id INTEGER PRIMARY KEY,
+    produto_id INTEGER NOT NULL,
+    componente_produto_id INTEGER NOT NULL,
+    quantidade REAL DEFAULT 1,
+    preco1 REAL DEFAULT 0,
+    preco2 REAL DEFAULT 0,
+    preco3 REAL DEFAULT 0,
+    status TEXT CHECK(status IN ('C','U','D','E','S')) DEFAULT 'U',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (produto_id) REFERENCES produtos(produto_id) ON DELETE CASCADE
+);
+
+-- PRODUTO MINIMO E MAXIMO
+
+CREATE TABLE produto_min_max (
     produto_id INTEGER NOT NULL,
     loja_id INTEGER NOT NULL,
     estoque_minimo REAL,
@@ -176,12 +244,38 @@ CREATE TABLE estoque_min_max (
     FOREIGN KEY (produto_id) REFERENCES produtos(produto_id) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_produto_estoque_loja ON estoque_min_max(loja_id);
+CREATE INDEX idx_produto_estoque_loja ON produto_min_max(loja_id);
+
+-- REGIME TRIBUTÁRIO DO PRODUTO
+
+CREATE TABLE produto_regimes (
+    produto_id INTEGER NOT NULL,
+    loja_id INTEGER NOT NULL,
+    regime_estadual_id INTEGER,
+    status TEXT CHECK(status IN ('C','U','D','E','S')) DEFAULT 'U',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (produto_id, loja_id),
+    FOREIGN KEY (produto_id) REFERENCES produtos(produto_id) ON DELETE CASCADE
+);
+
+-- IMPOSTOS FEDERAIS DO PRODUTO
+
+CREATE TABLE produto_impostos_federais (
+    produto_id INTEGER NOT NULL,
+    imposto_id TEXT NOT NULL,
+    status TEXT CHECK(status IN ('C','U','D','E','S')) DEFAULT 'U',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (produto_id, imposto_id),
+    FOREIGN KEY (produto_id) REFERENCES produtos(produto_id) ON DELETE CASCADE
+);
 
 -- CÓDIGOS AUXILIARES
 
-DROP TABLE IF EXISTS codigos_auxiliares;
-CREATE TABLE codigos_auxiliares (
+CREATE TABLE produto_auxiliares (
     codigo_id TEXT PRIMARY KEY,
     produto_id INTEGER NOT NULL,
     fator REAL DEFAULT 1,
@@ -197,7 +291,6 @@ CREATE TABLE codigos_auxiliares (
 
 -- PRODUTOS FORNECEDORES
 
-DROP TABLE IF EXISTS produto_fornecedores;
 CREATE TABLE produto_fornecedores (
     id INTEGER PRIMARY KEY,
     produto_id INTEGER NOT NULL,
@@ -215,45 +308,106 @@ CREATE TABLE produto_fornecedores (
     FOREIGN KEY (fornecedor_id) REFERENCES fornecedores(fornecedor_id) ON DELETE CASCADE
 );
 
--- LOCAL DE ESTOQUE
+-- FORMAS DE PAGAMENTO
 
-DROP TABLE IF EXISTS local_estoque;
-CREATE TABLE local_estoque (
-    local_id INTEGER PRIMARY KEY,
+CREATE TABLE formas_pagamento (
+    forma_pagamento_id          INTEGER PRIMARY KEY,
+    descricao                   TEXT,
+    especie_de_documento_id     INTEGER,
+    categoria_financeira_id     INTEGER,
+    agente_financeiro_id        INTEGER,
+    controle_de_cartao          INTEGER DEFAULT 0,
+    movimenta_conta_corrente    INTEGER DEFAULT 0,
+    ativa                       INTEGER DEFAULT 1,
+    conta_corrente_id           INTEGER,
+    status                      TEXT CHECK(status IN ('C','U','D','E','S')) DEFAULT 'U',
+    retorno                     TEXT,
+    created_at                  DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at                  DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (categoria_financeira_id) REFERENCES categorias(categoria_id)  ON DELETE SET NULL,
+    FOREIGN KEY (agente_financeiro_id)    REFERENCES agentes(agente_id)        ON DELETE SET NULL
+);
+
+-- PAGAMENTOS PDV
+
+CREATE TABLE pagamentos_pdv (
+    pagamento_id INTEGER PRIMARY KEY,
     descricao TEXT,
-    tipo_de_estoque TEXT CHECK(tipo_de_estoque IN ('PROPRIO','TERCEIROS')),
-    bloqueio INTEGER DEFAULT 0,
-    avaria INTEGER DEFAULT 0,
+    categoria_id INTEGER,
+    loja_id INTEGER,
+    valor_maximo REAL,
     status TEXT CHECK(status IN ('C','U','D','E','S')) DEFAULT 'U',
     retorno TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (loja_id) REFERENCES lojas(loja_id) ON DELETE SET NULL,
+    FOREIGN KEY (categoria_id) REFERENCES categorias(categoria_id) ON DELETE SET NULL
 );
 
--- SALDO DE ESTOQUE
+-- RECEBIMENTOS PDV
 
-DROP TABLE IF EXISTS saldo_estoque;
-CREATE TABLE saldo_estoque (
-    saldo_id INTEGER PRIMARY KEY,
-    loja_id INTEGER NOT NULL,
-    produto_id INTEGER NOT NULL,
-    local_id INTEGER NOT NULL,
-    saldo REAL NOT NULL DEFAULT 0,
-    criado_em DATETIME,
-    atualizado_em DATETIME,
+CREATE TABLE recebimentos_pdv (
+    recebimento_id INTEGER PRIMARY KEY,
+    descricao TEXT,
+    categoria_id INTEGER,
+    loja_id INTEGER,
+    tipo_recebimento TEXT CHECK(tipo_recebimento IN ('PROPRIO','TERCEIRO','TAXA')),
+    qtd_autenticacoes INTEGER DEFAULT 0,
+    imprime_doc INTEGER DEFAULT 0,
+    qtd_impressoes INTEGER DEFAULT 0,
+    valor_recebimento REAL DEFAULT 0,
     status TEXT CHECK(status IN ('C','U','D','E','S')) DEFAULT 'U',
     retorno TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (loja_id) REFERENCES lojas(loja_id) ON DELETE SET NULL,
-    FOREIGN KEY (produto_id) REFERENCES produtos(produto_id) ON DELETE SET NULL,
-    FOREIGN KEY (local_id) REFERENCES local_estoque(local_id) ON DELETE SET NULL
+    FOREIGN KEY (categoria_id) REFERENCES categorias(categoria_id) ON DELETE SET NULL
+);
+
+-- MOTIVOS DE DESCONTO
+
+CREATE TABLE motivos_desconto (
+	 motivo_id INTEGER PRIMARY KEY,
+	 descricao TEXT,
+	 tipo_aplicacao_desconto TEXT CHECK(tipo_aplicacao_desconto IN ('ITEM','SUB_TOTAL','AMBOS')),
+	 tipo_calculo_aplicacao_desconto TEXT CHECK(tipo_calculo_aplicacao_desconto IN ('PERCENTUAL','VALOR','PERCENTUAL_E_VALOR')),
+	 solicita_justificativa INTEGER DEFAULT 0,
+	 desconto_fidelidade INTEGER DEFAULT 0,
+	 status TEXT CHECK(status IN ('C','U','D','E','S')) DEFAULT 'U',
+     retorno TEXT,
+	 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+	 updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- MOTIVOS DE DEVOLUÇÃO
+
+CREATE TABLE motivos_devolucao (
+    motivo_id INTEGER PRIMARY KEY,
+    descricao TEXT,
+    status TEXT CHECK(status IN ('C','U','D','E','S')) DEFAULT 'U',
+    retorno TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- MOTIVOS DE CANCELAMENTO
+
+CREATE TABLE motivos_cancelamento (
+	 motivo_id INTEGER PRIMARY KEY,
+	 descricao TEXT,
+	 tipo_aplicacao TEXT CHECK(tipo_aplicacao IN ('ITEM','CUPOM','AMBOS')),
+	 solicita_justificativa INTEGER DEFAULT 0,
+	 status TEXT CHECK(status IN ('C','U','D','E','S')) DEFAULT 'U',
+     retorno TEXT,
+	 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+	 updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
 -- AGENTES
 
-DROP TABLE IF EXISTS agentes;
 CREATE TABLE agentes (
 	 agente_id INTEGER PRIMARY KEY,
 	 nome TEXT,
@@ -282,7 +436,6 @@ CREATE TABLE agentes (
 
 -- CATEGORIAS
 
-DROP TABLE IF EXISTS categorias;
 CREATE TABLE categorias (
     categoria_id INTEGER PRIMARY KEY,
     descricao TEXT,
@@ -300,7 +453,6 @@ CREATE TABLE categorias (
 
 -- CONTAS CORRENTES
 
-DROP TABLE IF EXISTS contas_correntes;
 CREATE TABLE contas_correntes (
     conta_id INTEGER PRIMARY KEY,
     descricao TEXT,
@@ -328,7 +480,6 @@ CREATE TABLE contas_correntes (
 
 -- ESPÉCIES DE DOCUMENTO
 
-DROP TABLE IF EXISTS especies_documentos;
 CREATE TABLE especies_documentos (
     especie_id INTEGER PRIMARY KEY,
     descricao TEXT,
@@ -356,7 +507,6 @@ CREATE TABLE especies_documentos (
 
 -- HISTÓRICO PADRÃO
 
-DROP TABLE IF EXISTS historico_padrao;
 CREATE TABLE historico_padrao (
     historico_id INTEGER PRIMARY KEY,
     descricao TEXT,
@@ -366,113 +516,89 @@ CREATE TABLE historico_padrao (
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
--- MOTIVOS DE CANCELAMENTO
+-- LIMITES DE CRÉDITO
 
-DROP TABLE IF EXISTS motivos_cancelamento;
-CREATE TABLE motivos_cancelamento (
-	 motivo_id INTEGER PRIMARY KEY,
-	 descricao TEXT,
-	 tipo_aplicacao TEXT CHECK(tipo_aplicacao IN ('ITEM','CUPOM','AMBOS')),
-	 solicita_justificativa INTEGER DEFAULT 0,
-	 status TEXT CHECK(status IN ('C','U','D','E','S')) DEFAULT 'U',
-     retorno TEXT,
-	 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-	 updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
+-- CONTA A PAGAR
 
--- MOTIVOS DE DESCONTO
+-- CONTA A RECEBER
 
-DROP TABLE IF EXISTS motivos_desconto;
-CREATE TABLE motivos_desconto (
-	 motivo_id INTEGER PRIMARY KEY,
-	 descricao TEXT,
-	 tipo_aplicacao_desconto TEXT CHECK(tipo_aplicacao_desconto IN ('ITEM','SUB_TOTAL','AMBOS')),
-	 tipo_calculo_aplicacao_desconto TEXT CHECK(tipo_calculo_aplicacao_desconto IN ('PERCENTUAL','VALOR','PERCENTUAL_E_VALOR')),
-	 solicita_justificativa INTEGER DEFAULT 0,
-	 desconto_fidelidade INTEGER DEFAULT 0,
-	 status TEXT CHECK(status IN ('C','U','D','E','S')) DEFAULT 'U',
-     retorno TEXT,
-	 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-	 updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
+-- LOCAL DE ESTOQUE
 
--- MOTIVOS DE DEVOLUÇÃO
-
-DROP TABLE IF EXISTS motivos_devolucao;
-CREATE TABLE motivos_devolucao (
-    motivo_id INTEGER PRIMARY KEY,
+CREATE TABLE local_estoque (
+    local_id INTEGER PRIMARY KEY,
     descricao TEXT,
+    tipo_de_estoque TEXT CHECK(tipo_de_estoque IN ('PROPRIO','TERCEIROS')),
+    bloqueio INTEGER DEFAULT 0,
+    avaria INTEGER DEFAULT 0,
     status TEXT CHECK(status IN ('C','U','D','E','S')) DEFAULT 'U',
     retorno TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
--- FORMAS DE PAGAMENTO
+-- TIPOS DE AJUSTES
 
-DROP TABLE IF EXISTS formas_pagamento;
-CREATE TABLE formas_pagamento (
-    forma_pagamento_id          INTEGER PRIMARY KEY,
-    descricao                   TEXT,
-    especie_de_documento_id     INTEGER,
-    categoria_financeira_id     INTEGER,
-    agente_financeiro_id        INTEGER,
-    controle_de_cartao          INTEGER DEFAULT 0,
-    movimenta_conta_corrente    INTEGER DEFAULT 0,
-    ativa                       INTEGER DEFAULT 1,
-    conta_corrente_id           INTEGER,
-    status                      TEXT CHECK(status IN ('C','U','D','E','S')) DEFAULT 'U',
-    retorno                     TEXT,
-    created_at                  DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at                  DATETIME DEFAULT CURRENT_TIMESTAMP,
-
-    FOREIGN KEY (categoria_financeira_id) REFERENCES categorias(categoria_id)  ON DELETE SET NULL,
-    FOREIGN KEY (agente_financeiro_id)    REFERENCES agentes(agente_id)        ON DELETE SET NULL
-);
-
--- PAGAMENTOS PDV
-
-DROP TABLE IF EXISTS pagamentos_pdv;
-CREATE TABLE pagamentos_pdv (
-    pagamento_id INTEGER PRIMARY KEY,
+CREATE TABLE tipos_ajustes (
+    ajuste_id INTEGER PRIMARY KEY,
     descricao TEXT,
-    categoria_id INTEGER,
-    loja_id INTEGER,
-    valor_maximo REAL,
+    tipo TEXT CHECK(tipo IN ('ENTRADA','SAIDA')),
+    tipo_de_operacao TEXT,
+    tipo_reservado TEXT,
     status TEXT CHECK(status IN ('C','U','D','E','S')) DEFAULT 'U',
     retorno TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    
-    FOREIGN KEY (loja_id) REFERENCES lojas(loja_id) ON DELETE SET NULL,
-    FOREIGN KEY (categoria_id) REFERENCES categorias(categoria_id) ON DELETE SET NULL
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
--- RECEBIMENTOS PDV
+-- SALDO DE ESTOQUE
 
-DROP TABLE IF EXISTS recebimentos_pdv;
-CREATE TABLE recebimentos_pdv (
-    recebimento_id INTEGER PRIMARY KEY,
-    descricao TEXT,
-    categoria_id INTEGER,
-    loja_id INTEGER,
-    tipo_recebimento TEXT CHECK(tipo_recebimento IN ('PROPRIO','TERCEIRO','TAXA')),
-    qtd_autenticacoes INTEGER DEFAULT 0,
-    imprime_doc INTEGER DEFAULT 0,
-    qtd_impressoes INTEGER DEFAULT 0,
-    valor_recebimento REAL DEFAULT 0,
+CREATE TABLE saldo_estoque (
+    saldo_id INTEGER PRIMARY KEY,
+    loja_id INTEGER NOT NULL,
+    produto_id INTEGER NOT NULL,
+    local_id INTEGER NOT NULL,
+    saldo REAL NOT NULL DEFAULT 0,
+    criado_em DATETIME,
+    atualizado_em DATETIME,
     status TEXT CHECK(status IN ('C','U','D','E','S')) DEFAULT 'U',
     retorno TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (loja_id) REFERENCES lojas(loja_id) ON DELETE SET NULL,
-    FOREIGN KEY (categoria_id) REFERENCES categorias(categoria_id) ON DELETE SET NULL
+    FOREIGN KEY (produto_id) REFERENCES produtos(produto_id) ON DELETE SET NULL,
+    FOREIGN KEY (local_id) REFERENCES local_estoque(local_id) ON DELETE SET NULL
+);
+
+-- REGIME TRIBUTÁRIO
+
+CREATE TABLE regime_tributario (
+    regime_id INTEGER PRIMARY KEY,
+    descricao TEXT,
+    classificacao TEXT CHECK(classificacao IN ('N','E','A','S')),
+    loja INTEGER DEFAULT 0,
+    fornecedor INTEGER DEFAULT 0,
+    status TEXT CHECK(status IN ('C','U','D','E','S')) DEFAULT 'U',
+    retorno TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- SITUAÇÕES FISCAIS
+
+CREATE TABLE situacoes_fiscais (
+    situacao_id INTEGER PRIMARY KEY,
+    descricao TEXT,
+    descricao_completa TEXT,
+    substituto INTEGER DEFAULT 0,
+    status TEXT CHECK(status IN ('C','U','D','E','S')) DEFAULT 'U',
+    retorno TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
 -- IMPOSTOS FEDERAIS
 
-DROP TABLE IF EXISTS impostos_federais;
 CREATE TABLE impostos_federais (
     imposto_id INTEGER PRIMARY KEY,
     descricao TEXT,
@@ -493,39 +619,44 @@ CREATE TABLE impostos_federais (
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
--- REGIME TRIBUTÁRIO
+-- TIPOS DE OPERAÇÕES
 
-DROP TABLE IF EXISTS regime_tributario;
-CREATE TABLE regime_tributario (
-    regime_id INTEGER PRIMARY KEY,
+CREATE TABLE tipos_operacoes (
+    operacao_id INTEGER PRIMARY KEY,
     descricao TEXT,
-    classificacao TEXT CHECK(classificacao IN ('N','E','A','S')),
-    loja INTEGER DEFAULT 0,
-    fornecedor INTEGER DEFAULT 0,
+    tipo_de_operacao TEXT,
+    tipo_geracao_financeiro TEXT,
+    modalidade TEXT,
+    tipo_documento TEXT,
+    origem_da_nota TEXT,
+    atualiza_custos INTEGER DEFAULT 0,
+    atualiza_estoque INTEGER DEFAULT 0,
+    incide_impostos_federais INTEGER DEFAULT 0,
+    ipi_compoe_base_pis_cofins INTEGER DEFAULT 0,
+    outras_desp_base_pis_cofins INTEGER DEFAULT 0,
+    outras_desp_base_icms INTEGER DEFAULT 0,
+    gera_fiscal INTEGER DEFAULT 0,
+    destaca_ipi INTEGER DEFAULT 0,
+    destaca_icms INTEGER DEFAULT 0,
+    compoe_abc INTEGER DEFAULT 0,
+    imprime_descricao_nfe INTEGER DEFAULT 0,
+    envia_observacao_nfe INTEGER DEFAULT 0,
+    utiliza_conferencia INTEGER DEFAULT 0,
+    cfop_no_estado TEXT,
+    cfop_fora_do_estado TEXT,
+    cfop_exterior TEXT,
+    observacao TEXT,
+    codigo_cst TEXT,
+    cfops_relacionados TEXT,
     status TEXT CHECK(status IN ('C','U','D','E','S')) DEFAULT 'U',
     retorno TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
--- SITUAÇÕES FISCAIS
+-- TABELAS TRIBUTÁRIAS
 
-DROP TABLE IF EXISTS situacoes_fiscais;
-CREATE TABLE situacoes_fiscais (
-    situacao_id INTEGER PRIMARY KEY,
-    descricao TEXT,
-    descricao_completa TEXT,
-    substituto INTEGER DEFAULT 0,
-    status TEXT CHECK(status IN ('C','U','D','E','S')) DEFAULT 'U',
-    retorno TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-
--- TABELAS TRIBUTÁRIAS ENTRADA
-
-DROP TABLE IF EXISTS tabelas_tributarias_entrada;
-CREATE TABLE tabelas_tributarias_entrada (
+CREATE TABLE tabelas_tributarias (
     tabela_id INTEGER,
     regime_estadual_id INTEGER,
     situacao_fiscal_id INTEGER,
@@ -564,102 +695,8 @@ CREATE TABLE tabelas_tributarias_entrada (
     FOREIGN KEY (situacao_fiscal_id) REFERENCES situacoes_fiscais(situacao_id) ON DELETE SET NULL
 );
 
--- TABELAS TRIBUTÁRIAS SAÍDA
-
-DROP TABLE IF EXISTS tabelas_tributarias_saida;
-CREATE TABLE tabelas_tributarias_saida (
-    tabela_id INTEGER,
-    regime_estadual_id INTEGER,
-    situacao_fiscal_id INTEGER,
-    figura_fiscal_id TEXT,
-    uf_origem TEXT,
-    classificacao_pessoa TEXT CHECK(classificacao_pessoa IN ('SAIDA_PARA_CONTRIBUINTE','SAIDA_PARA_NAO_CONTRIBUINTE','SAIDA_PARA_TRANSFERENCIA')),
-    uf_destino TEXT,
-    tributado_nf REAL DEFAULT 0,
-    isento_nf REAL DEFAULT 0,
-    outros_nf REAL DEFAULT 0,
-    aliquota REAL DEFAULT 0,
-    agregado REAL DEFAULT 0,
-    tributado_icms REAL DEFAULT 0,
-    carga_liquida REAL DEFAULT 0,
-    aliquota_interna REAL DEFAULT 0,
-    fecop REAL DEFAULT 0,
-    fecop_st REAL DEFAULT 0,
-    soma_ipi_bc INTEGER DEFAULT 0,
-    soma_ipi_bs INTEGER DEFAULT 0,
-    st_destacado INTEGER DEFAULT 0,
-    cst_id TEXT,
-    csosn TEXT,
-    tributacao TEXT,
-    cfop_id TEXT,
-    icms_desonerado INTEGER DEFAULT 0,
-    icms_origem TEXT,
-    icms_efetivo INTEGER DEFAULT 0,
-    reducao_origem REAL DEFAULT 0,
-    status TEXT CHECK(status IN ('C','U','D','E','S')) DEFAULT 'U',
-    retorno TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    
-    PRIMARY KEY (tabela_id, classificacao_pessoa, uf_destino),
-    FOREIGN KEY (regime_estadual_id) REFERENCES regime_tributario(regime_id) ON DELETE SET NULL,
-    FOREIGN KEY (situacao_fiscal_id) REFERENCES situacoes_fiscais(situacao_id) ON DELETE SET NULL
-);
-
--- TIPOS DE OPERAÇÕES
-
-DROP TABLE IF EXISTS tipos_operacoes;
-CREATE TABLE tipos_operacoes (
-    operacao_id INTEGER PRIMARY KEY,
-    descricao TEXT,
-    tipo_de_operacao TEXT,
-    tipo_geracao_financeiro TEXT,
-    modalidade TEXT,
-    tipo_documento TEXT,
-    origem_da_nota TEXT,
-    atualiza_custos INTEGER DEFAULT 0,
-    atualiza_estoque INTEGER DEFAULT 0,
-    incide_impostos_federais INTEGER DEFAULT 0,
-    ipi_compoe_base_pis_cofins INTEGER DEFAULT 0,
-    outras_desp_base_pis_cofins INTEGER DEFAULT 0,
-    outras_desp_base_icms INTEGER DEFAULT 0,
-    gera_fiscal INTEGER DEFAULT 0,
-    destaca_ipi INTEGER DEFAULT 0,
-    destaca_icms INTEGER DEFAULT 0,
-    compoe_abc INTEGER DEFAULT 0,
-    imprime_descricao_nfe INTEGER DEFAULT 0,
-    envia_observacao_nfe INTEGER DEFAULT 0,
-    utiliza_conferencia INTEGER DEFAULT 0,
-    cfop_no_estado TEXT,
-    cfop_fora_do_estado TEXT,
-    cfop_exterior TEXT,
-    observacao TEXT,
-    codigo_cst TEXT,
-    cfops_relacionados TEXT,
-    status TEXT CHECK(status IN ('C','U','D','E','S')) DEFAULT 'U',
-    retorno TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-
--- TIPOS DE AJUSTES
-
-DROP TABLE IF EXISTS tipos_ajustes;
-CREATE TABLE tipos_ajustes (
-    ajuste_id INTEGER PRIMARY KEY,
-    descricao TEXT,
-    tipo TEXT CHECK(tipo IN ('ENTRADA','SAIDA')),
-    tipo_de_operacao TEXT,
-    tipo_reservado TEXT,
-    status TEXT CHECK(status IN ('C','U','D','E','S')) DEFAULT 'U',
-    retorno TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-
 -- LOJAS
 
-DROP TABLE IF EXISTS lojas;
 CREATE TABLE lojas (
 	loja_id INTEGER PRIMARY KEY,
 	nome TEXT,
@@ -692,7 +729,6 @@ CREATE TABLE lojas (
 
 -- CLIENTES
 
-DROP TABLE IF EXISTS clientes;
 CREATE TABLE clientes (
     cliente_id INTEGER PRIMARY KEY,
     tipo_de_pessoa TEXT CHECK(tipo_de_pessoa IN ('FISICA','JURIDICA','ESTRANGEIRO')),
@@ -738,7 +774,6 @@ CREATE TABLE clientes (
 
 -- FORNECEDORES
 
-DROP TABLE IF EXISTS fornecedores;
 CREATE TABLE fornecedores (
     fornecedor_id INTEGER PRIMARY KEY,
     tipo_pessoa TEXT CHECK(tipo_pessoa IN ('FISICA','JURIDICA','ESTRANGEIRO')),
@@ -786,7 +821,6 @@ CREATE TABLE fornecedores (
 
 -- LOG DE SINCRONIZAÇÃO
 
-DROP TABLE IF EXISTS log_sincronizacao;
 CREATE TABLE log_sincronizacao (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     entidade TEXT NOT NULL,
@@ -802,7 +836,9 @@ CREATE INDEX idx_log_entidade ON log_sincronizacao(entidade);
 CREATE INDEX idx_log_status ON log_sincronizacao(status);
 CREATE INDEX idx_log_data ON log_sincronizacao(data_execucao);
 
+-- =====================================================
 -- TRIGGERS 
+-- =====================================================
 
 DROP TRIGGER IF EXISTS trg_secoes_updated_at;
 CREATE TRIGGER trg_secoes_updated_at
@@ -846,18 +882,39 @@ BEGIN
     UPDATE produtos SET updated_at = CURRENT_TIMESTAMP WHERE produto_id = NEW.produto_id;
 END;
 
-DROP TRIGGER IF EXISTS trg_estoque_min_max_updated_at;
-CREATE TRIGGER trg_estoque_min_max_updated_at
-AFTER UPDATE ON estoque_min_max
+DROP TRIGGER IF EXISTS trg_produto_componentes_updated_at;
+CREATE TRIGGER trg_produto_componentes_updated_at
+AFTER UPDATE ON produto_componentes
 BEGIN
-    UPDATE estoque_min_max SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+    UPDATE produto_componentes SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
 END;
 
-DROP TRIGGER IF EXISTS trg_codigos_auxiliares_updated_at;
-CREATE TRIGGER trg_codigos_auxiliares_updated_at
-AFTER UPDATE ON codigos_auxiliares
+DROP TRIGGER IF EXISTS trg_produto_min_max_updated_at;
+CREATE TRIGGER trg_produto_min_max_updated_at
+AFTER UPDATE ON produto_min_max
 BEGIN
-    UPDATE estoque_min_max SET updated_at = CURRENT_TIMESTAMP WHERE produto_id = NEW.produto_id AND loja_id = NEW.loja_id;
+    UPDATE produto_min_max SET updated_at = CURRENT_TIMESTAMP WHERE produto_id = NEW.produto_id AND loja_id = NEW.loja_id;
+END;
+
+DROP TRIGGER IF EXISTS trg_produto_regimes_updated_at;
+CREATE TRIGGER trg_produto_regimes_updated_at
+AFTER UPDATE ON produto_regimes
+BEGIN
+    UPDATE produto_regimes SET updated_at = CURRENT_TIMESTAMP WHERE produto_id = NEW.produto_id AND loja_id = NEW.loja_id;
+END;
+
+DROP TRIGGER IF EXISTS trg_produto_impostos_federais_updated_at;
+CREATE TRIGGER trg_produto_impostos_federais_updated_at
+AFTER UPDATE ON produto_impostos_federais
+BEGIN
+    UPDATE produto_impostos_federais SET updated_at = CURRENT_TIMESTAMP WHERE produto_id = NEW.produto_id AND imposto_id = NEW.imposto_id;
+END;
+
+DROP TRIGGER IF EXISTS trg_produto_auxiliares_updated_at;
+CREATE TRIGGER trg_produto_auxiliares_updated_at
+AFTER UPDATE ON produto_auxiliares
+BEGIN
+    UPDATE produto_auxiliares SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
 END;
 
 DROP TRIGGER IF EXISTS trg_produto_fornecedores_updated_at;
@@ -867,39 +924,46 @@ BEGIN
     UPDATE produto_fornecedores SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
 END;
 
-DROP TRIGGER IF EXISTS trg_lojas_updated_at;
-CREATE TRIGGER trg_lojas_updated_at
-AFTER UPDATE ON lojas
+DROP TRIGGER IF EXISTS trg_formas_pagamento_updated_at;
+CREATE TRIGGER trg_formas_pagamento_updated_at
+AFTER UPDATE ON formas_pagamento
 BEGIN
-    UPDATE lojas SET updated_at = CURRENT_TIMESTAMP WHERE loja_id = NEW.loja_id;
+    UPDATE formas_pagamento SET updated_at = CURRENT_TIMESTAMP WHERE forma_pagamento_id = NEW.forma_pagamento_id;
 END;
 
-DROP TRIGGER IF EXISTS trg_clientes_updated_at;
-CREATE TRIGGER trg_clientes_updated_at
-AFTER UPDATE ON clientes
+DROP TRIGGER IF EXISTS trg_pagamentos_pdv_updated_at;
+CREATE TRIGGER trg_pagamentos_pdv_updated_at
+AFTER UPDATE ON pagamentos_pdv
 BEGIN
-    UPDATE clientes SET updated_at = CURRENT_TIMESTAMP WHERE cliente_id = NEW.cliente_id;
+    UPDATE pagamentos_pdv SET updated_at = CURRENT_TIMESTAMP WHERE pagamento_id = NEW.pagamento_id;
 END;
 
-DROP TRIGGER IF EXISTS trg_fornecedores_updated_at;
-CREATE TRIGGER trg_fornecedores_updated_at
-AFTER UPDATE ON fornecedores
+DROP TRIGGER IF EXISTS trg_recebimentos_pdv_updated_at;
+CREATE TRIGGER trg_recebimentos_pdv_updated_at
+AFTER UPDATE ON recebimentos_pdv
 BEGIN
-    UPDATE fornecedores SET updated_at = CURRENT_TIMESTAMP WHERE fornecedor_id = NEW.fornecedor_id;
+    UPDATE recebimentos_pdv SET updated_at = CURRENT_TIMESTAMP WHERE recebimento_id = NEW.recebimento_id;
 END;
 
-DROP TRIGGER IF EXISTS trg_local_estoque_updated_at;
-CREATE TRIGGER trg_local_estoque_updated_at
-AFTER UPDATE ON local_estoque
+DROP TRIGGER IF EXISTS trg_motivos_desconto_updated_at;
+CREATE TRIGGER trg_motivos_desconto_updated_at
+AFTER UPDATE ON motivos_desconto
 BEGIN
-    UPDATE local_estoque SET updated_at = CURRENT_TIMESTAMP WHERE local_id = NEW.local_id;
+    UPDATE motivos_desconto SET updated_at = CURRENT_TIMESTAMP WHERE motivo_id = NEW.motivo_id;
 END;
 
-DROP TRIGGER IF EXISTS trg_saldo_estoque_updated_at;
-CREATE TRIGGER trg_saldo_estoque_updated_at
-AFTER UPDATE ON saldo_estoque
+DROP TRIGGER IF EXISTS trg_motivos_devolucao_updated_at;
+CREATE TRIGGER trg_motivos_devolucao_updated_at
+AFTER UPDATE ON motivos_devolucao
 BEGIN
-    UPDATE saldo_estoque SET updated_at = CURRENT_TIMESTAMP WHERE saldo_id = NEW.saldo_id;
+    UPDATE motivos_devolucao SET updated_at = CURRENT_TIMESTAMP WHERE motivo_id = NEW.motivo_id;
+END;
+
+DROP TRIGGER IF EXISTS trg_motivos_cancelamento_updated_at;
+CREATE TRIGGER trg_motivos_cancelamento_updated_at
+AFTER UPDATE ON motivos_cancelamento
+BEGIN
+    UPDATE motivos_cancelamento SET updated_at = CURRENT_TIMESTAMP WHERE motivo_id = NEW.motivo_id;
 END;
 
 DROP TRIGGER IF EXISTS trg_agentes_updated_at;
@@ -937,53 +1001,25 @@ BEGIN
     UPDATE historico_padrao SET updated_at = CURRENT_TIMESTAMP WHERE historico_id = NEW.historico_id;
 END;
 
-DROP TRIGGER IF EXISTS trg_formas_pagamento_updated_at;
-CREATE TRIGGER trg_formas_pagamento_updated_at
-AFTER UPDATE ON formas_pagamento
+DROP TRIGGER IF EXISTS trg_local_estoque_updated_at;
+CREATE TRIGGER trg_local_estoque_updated_at
+AFTER UPDATE ON local_estoque
 BEGIN
-    UPDATE formas_pagamento SET updated_at = CURRENT_TIMESTAMP WHERE forma_pagamento_id = NEW.forma_pagamento_id;
+    UPDATE local_estoque SET updated_at = CURRENT_TIMESTAMP WHERE local_id = NEW.local_id;
 END;
 
-DROP TRIGGER IF EXISTS trg_motivos_cancelamento_updated_at;
-CREATE TRIGGER trg_motivos_cancelamento_updated_at
-AFTER UPDATE ON motivos_cancelamento
+DROP TRIGGER IF EXISTS trg_tipos_ajustes_updated_at;
+CREATE TRIGGER trg_tipos_ajustes_updated_at
+AFTER UPDATE ON tipos_ajustes
 BEGIN
-    UPDATE motivos_cancelamento SET updated_at = CURRENT_TIMESTAMP WHERE motivo_id = NEW.motivo_id;
+    UPDATE tipos_ajustes SET updated_at = CURRENT_TIMESTAMP WHERE ajuste_id = NEW.ajuste_id;
 END;
 
-DROP TRIGGER IF EXISTS trg_motivos_desconto_updated_at;
-CREATE TRIGGER trg_motivos_desconto_updated_at
-AFTER UPDATE ON motivos_desconto
+DROP TRIGGER IF EXISTS trg_saldo_estoque_updated_at;
+CREATE TRIGGER trg_saldo_estoque_updated_at
+AFTER UPDATE ON saldo_estoque
 BEGIN
-    UPDATE motivos_desconto SET updated_at = CURRENT_TIMESTAMP WHERE motivo_id = NEW.motivo_id;
-END;
-
-DROP TRIGGER IF EXISTS trg_motivos_devolucao_updated_at;
-CREATE TRIGGER trg_motivos_devolucao_updated_at
-AFTER UPDATE ON motivos_devolucao
-BEGIN
-    UPDATE motivos_devolucao SET updated_at = CURRENT_TIMESTAMP WHERE motivo_id = NEW.motivo_id;
-END;
-
-DROP TRIGGER IF EXISTS trg_pagamentos_pdv_updated_at;
-CREATE TRIGGER trg_pagamentos_pdv_updated_at
-AFTER UPDATE ON pagamentos_pdv
-BEGIN
-    UPDATE pagamentos_pdv SET updated_at = CURRENT_TIMESTAMP WHERE pagamento_id = NEW.pagamento_id;
-END;
-
-DROP TRIGGER IF EXISTS trg_recebimentos_pdv_updated_at;
-CREATE TRIGGER trg_recebimentos_pdv_updated_at
-AFTER UPDATE ON recebimentos_pdv
-BEGIN
-    UPDATE recebimentos_pdv SET updated_at = CURRENT_TIMESTAMP WHERE recebimento_id = NEW.recebimento_id;
-END;
-
-DROP TRIGGER IF EXISTS trg_impostos_federais_updated_at;
-CREATE TRIGGER trg_impostos_federais_updated_at
-AFTER UPDATE ON impostos_federais
-BEGIN
-    UPDATE impostos_federais SET updated_at = CURRENT_TIMESTAMP WHERE imposto_id = NEW.imposto_id;
+    UPDATE saldo_estoque SET updated_at = CURRENT_TIMESTAMP WHERE saldo_id = NEW.saldo_id;
 END;
 
 DROP TRIGGER IF EXISTS trg_regime_tributario_updated_at;
@@ -1000,6 +1036,13 @@ BEGIN
     UPDATE situacoes_fiscais SET updated_at = CURRENT_TIMESTAMP WHERE situacao_id = NEW.situacao_id;
 END;
 
+DROP TRIGGER IF EXISTS trg_impostos_federais_updated_at;
+CREATE TRIGGER trg_impostos_federais_updated_at
+AFTER UPDATE ON impostos_federais
+BEGIN
+    UPDATE impostos_federais SET updated_at = CURRENT_TIMESTAMP WHERE imposto_id = NEW.imposto_id;
+END;
+
 DROP TRIGGER IF EXISTS trg_tipos_operacoes_updated_at;
 CREATE TRIGGER trg_tipos_operacoes_updated_at
 AFTER UPDATE ON tipos_operacoes
@@ -1007,13 +1050,36 @@ BEGIN
     UPDATE tipos_operacoes SET updated_at = CURRENT_TIMESTAMP WHERE operacao_id = NEW.operacao_id;
 END;
 
-DROP TRIGGER IF EXISTS trg_tipos_ajustes_updated_at;
-CREATE TRIGGER trg_tipos_ajustes_updated_at
-AFTER UPDATE ON tipos_ajustes
+DROP TRIGGER IF EXISTS trg_tabelas_tributarias_updated_at;
+CREATE TRIGGER trg_tabelas_tributarias_updated_at
+AFTER UPDATE ON tabelas_tributarias
 BEGIN
-    UPDATE tipos_ajustes SET updated_at = CURRENT_TIMESTAMP WHERE ajuste_id = NEW.ajuste_id;
+    UPDATE tabelas_tributarias SET updated_at = CURRENT_TIMESTAMP
+    WHERE tabela_id = NEW.tabela_id
+      AND classificacao_pessoa = NEW.classificacao_pessoa
+      AND uf_destino = NEW.uf_destino;
 END;
 
+DROP TRIGGER IF EXISTS trg_lojas_updated_at;
+CREATE TRIGGER trg_lojas_updated_at
+AFTER UPDATE ON lojas
+BEGIN
+    UPDATE lojas SET updated_at = CURRENT_TIMESTAMP WHERE loja_id = NEW.loja_id;
+END;
+
+DROP TRIGGER IF EXISTS trg_clientes_updated_at;
+CREATE TRIGGER trg_clientes_updated_at
+AFTER UPDATE ON clientes
+BEGIN
+    UPDATE clientes SET updated_at = CURRENT_TIMESTAMP WHERE cliente_id = NEW.cliente_id;
+END;
+
+DROP TRIGGER IF EXISTS trg_fornecedores_updated_at;
+CREATE TRIGGER trg_fornecedores_updated_at
+AFTER UPDATE ON fornecedores
+BEGIN
+    UPDATE fornecedores SET updated_at = CURRENT_TIMESTAMP WHERE fornecedor_id = NEW.fornecedor_id;
+END;
 
 -- =====================================================
 -- VIEWS
@@ -1026,18 +1092,16 @@ SELECT
     p.produto_id,
     p.descricao,
     p.descricao_reduzida,
-    p.codigo_interno,
     p.secao_id,
-    s.descricao AS secao_descricao,
+    s.descricao_new AS secao_descricao,
     p.grupo_id,
-    g.descricao AS grupo_descricao,
+    g.descricao_new AS grupo_descricao,
     p.subgrupo_id,
-    sg.descricao AS subgrupo_descricao,
+    sg.descricao_new AS subgrupo_descricao,
     p.familia_id,
-    f.descricao AS familia_descricao,
+    f.descricao_new AS familia_descricao,
     p.marca_id,
-    m.descricao AS marca_descricao,
-    p.fora_de_linha,
+    m.descricao_new AS marca_descricao,
     p.status,
     p.created_at,
     p.updated_at
@@ -1073,7 +1137,6 @@ SELECT
     se.loja_id,
     se.produto_id,
     p.descricao AS produto_descricao,
-    p.codigo_interno AS produto_codigo,
     se.local_id,
     le.descricao AS local_descricao,
     se.saldo,
@@ -1096,8 +1159,11 @@ SELECT 'Subgrupos'                AS entidade, COUNT(*) AS total, SUM(status='U'
 SELECT 'Marcas'                   AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM marcas UNION ALL
 SELECT 'Famílias'                 AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM familias UNION ALL
 SELECT 'Produtos'                 AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM produtos UNION ALL
-SELECT 'Estoque Mín Máx'          AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM estoque_min_max UNION ALL
-SELECT 'Codigos Auxiliares'       AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM codigos_auxiliares UNION ALL
+SELECT 'Produto Componentes'      AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM produto_componentes UNION ALL
+SELECT 'Produto Mín Máx'          AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM produto_min_max UNION ALL
+SELECT 'Produto Regime'           AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM produto_regimes UNION ALL
+SELECT 'Produto Imp. Fed.'        AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM produto_impostos_federais UNION ALL
+SELECT 'Codigos Auxiliares'       AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM produto_auxiliares UNION ALL
 SELECT 'Produto Fornecedores'     AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM produto_fornecedores UNION ALL
 SELECT 'Categorias'               AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM categorias UNION ALL
 SELECT 'Agentes'                  AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM agentes UNION ALL
@@ -1117,8 +1183,7 @@ SELECT 'Regime Tributário'        AS entidade, COUNT(*) AS total, SUM(status='U
 SELECT 'Situações Fiscais'        AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM situacoes_fiscais UNION ALL
 SELECT 'Tipos Operações'          AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM tipos_operacoes UNION ALL
 SELECT 'Impostos Federais'        AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM impostos_federais UNION ALL
-SELECT 'Tab. Tributárias Entrada' AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM tabelas_tributarias_entrada UNION ALL
-SELECT 'Tab. Tributárias Saída'   AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM tabelas_tributarias_saida UNION ALL
+SELECT 'Tab. Tributárias'         AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM tabelas_tributarias UNION ALL
 SELECT 'Lojas'                    AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM lojas UNION ALL
 SELECT 'Clientes'                 AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM clientes UNION ALL
 SELECT 'Fornecedores'             AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM fornecedores;
