@@ -1,6 +1,7 @@
 // backend/src/modules/sqlite-repository/repositories/produto.js
 
 const BaseRepository = require('../base-repository');
+const dbSQLite = require('../../../config/database-sqlite'); 
 
 /**
  * ProdutoRepository
@@ -152,6 +153,8 @@ class ProdutoRepository extends BaseRepository {
                     medida_referencial     = excluded.medida_referencial,
                     indice_at              = excluded.indice_at,
                     fora_linha             = excluded.fora_linha,
+                    data_saida             = excluded.data_saida,
+                    data_inclusao          = excluded.data_inclusao,
                     data_alteracao         = excluded.data_alteracao,
                     updated_at             = CURRENT_TIMESTAMP
                 WHERE status NOT IN ('C', 'D')
@@ -345,23 +348,24 @@ class ProdutoRepository extends BaseRepository {
         }
     }
 
-    // ─── CÓDIGOS AUXILIARES ───────────────────────────────────────────────────────
+    // ─── PRODUTO AUXILIARES ───────────────────────────────────────────────────────
     
-    static importarCodigosAuxiliares(codigosAuxiliares) {
+    static importarProdutoAuxiliares(produtoAuxiliares) {
         return BaseRepository._executarTransacao(
-            'códigos auxiliares',
-            codigosAuxiliares,
+            'produto auxiliares',
+            produtoAuxiliares,
             (db) => db.prepare(`
                 INSERT INTO produto_auxiliares (
                     codigo_id, produto_id, fator, ean_tributado, tipo, status
                 ) VALUES (
-                    @codigo_id, @produto_id, @fator, @ean_tributado, @tipo, 'U'
+                    @codigo_id, @produto_id, @fator, @ean_tributado, @tipo, @status
                 )
                 ON CONFLICT(codigo_id) DO UPDATE SET
                     produto_id      = excluded.produto_id,
                     fator           = excluded.fator,
                     ean_tributado   = excluded.ean_tributado,
                     tipo            = excluded.tipo,
+                    status          = excluded.status,
                     updated_at      = CURRENT_TIMESTAMP
                 WHERE status NOT IN ('C', 'D')
             `),
@@ -371,6 +375,7 @@ class ProdutoRepository extends BaseRepository {
                 fator:          c.fator                                 ?? 1,
                 ean_tributado:  BaseRepository._bool(c.eanTributado),
                 tipo:           c.tipo                                  ?? null,
+                status:         'U',
             }]
         );
     }

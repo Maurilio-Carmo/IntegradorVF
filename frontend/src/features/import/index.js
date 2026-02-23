@@ -64,8 +64,8 @@ const Importacao = {
         return result;
     },
 
-    async importarCodigosAuxiliares(uiElement) {
-        const result = await produtoImporter.importarCodigosAuxiliares(uiElement);
+    async importarProdutoAuxiliares(uiElement) {
+        const result = await produtoImporter.importarProdutoAuxiliares(uiElement);
         await this.atualizarEstatisticas();
         return result;
     },

@@ -93,7 +93,7 @@ export class ProdutoAPI extends APIBase {
         return await this.fetchAll('produto/produtos', onProgress, onPageFetched);
     }
 
-    async buscarCodigosAuxiliares(onProgress, onPageFetched) {
+    async buscarProdutoAuxiliares(onProgress, onPageFetched) {
         return await this.fetchAll('produto/codigos-auxiliares', onProgress, onPageFetched, 'produtoId');
     }
 

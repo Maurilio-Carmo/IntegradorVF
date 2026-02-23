@@ -42,12 +42,12 @@ class ImportacaoService {
         return Produto.importarFamilias(familias);
     }
 
-    static async importarProdutos(produtos, lojaId) {
+    static async importarProdutos(produtos, lojaId = null) {
         return Produto.importarProdutos(produtos, lojaId);
     }
 
-    static async importarCodigosAuxiliares(codigosAuxiliares) {
-        return Produto.importarCodigosAuxiliares(codigosAuxiliares);
+    static async importarProdutoAuxiliares(produtoAuxiliares) {
+        return Produto.importarProdutoAuxiliares(produtoAuxiliares);
     }
 
     static async importarProdutoFornecedores(produtoFornecedores) {

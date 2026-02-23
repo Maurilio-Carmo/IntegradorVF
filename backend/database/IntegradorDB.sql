@@ -914,7 +914,7 @@ DROP TRIGGER IF EXISTS trg_produto_auxiliares_updated_at;
 CREATE TRIGGER trg_produto_auxiliares_updated_at
 AFTER UPDATE ON produto_auxiliares
 BEGIN
-    UPDATE produto_auxiliares SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+    UPDATE produto_auxiliares SET updated_at = CURRENT_TIMESTAMP WHERE codigo_id = NEW.codigo_id;
 END;
 
 DROP TRIGGER IF EXISTS trg_produto_fornecedores_updated_at;

@@ -50,11 +50,11 @@ export class ProdutoImporter extends ImportBase {
     /**
      * Importar códigos auxiliares
      */
-    async importarCodigosAuxiliares(uiElement) {
+    async importarProdutoAuxiliares(uiElement) {
         return await this.execute({
-            name:      'códigos auxiliares',
-            endpoint:  'codigosAuxiliares',
-            apiMethod: API.produto.buscarCodigosAuxiliares.bind(API.produto),
+            name:      'produto auxiliares',
+            endpoint:  'produtoAuxiliares',
+            apiMethod: API.produto.buscarProdutoAuxiliares.bind(API.produto),
             uiElement,
         });
     }
