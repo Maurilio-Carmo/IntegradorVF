@@ -58,7 +58,6 @@ export class FiscalImporter extends ImportBase {
                     id:                          i.id,
                     descricao:                   i.descricao,
                     tipoImposto:                 i.tipoImposto,
-                    // campos que o repositório lê como i.cstEntradaReal etc.
                     cstEntradaReal:              g.cstEntrada               ?? null,
                     cstSaidaReal:                g.cstSaida                 ?? null,
                     aliquotaEntradaReal:         g.aliquotaEntrada          ?? 0,
@@ -78,25 +77,12 @@ export class FiscalImporter extends ImportBase {
     /**
      * Importar tabelas tributárias
      */
-    async importarTabelasTributariasEntrada(uiElement) {
+    async importarTabelasTributarias(uiElement) {
         return await this.execute({
-            name:      'tabelas tributárias — entrada',
-            endpoint:  'tabelasTributariasEntrada',
+            name:      'tabelas tributárias',
+            endpoint:  'tabelasTributarias',
             apiMethod: API.fiscal.buscarTabelasTributarias.bind(API.fiscal),
             transform: (tabelas) => tabelas
-                .filter(t => t.tipoDeOperacao === 'ENTRADA')
-                .flatMap(t => (t.itens || []).map(i => this._flatItem(t, i))),
-            uiElement,
-        });
-    }
-
-    async importarTabelasTributariasSaida(uiElement) {
-        return await this.execute({
-            name:      'tabelas tributárias — saída',
-            endpoint:  'tabelasTributariasSaida',
-            apiMethod: API.fiscal.buscarTabelasTributarias.bind(API.fiscal),
-            transform: (tabelas) => tabelas
-                .filter(t => t.tipoDeOperacao === 'SAIDA')
                 .flatMap(t => (t.itens || []).map(i => this._flatItem(t, i))),
             uiElement,
         });
@@ -106,34 +92,35 @@ export class FiscalImporter extends ImportBase {
     _flatItem(t, i) {
         return {
             id:                  t.id,
-            regimeEstadualId:    t.regimeEstadualId      ?? null,
-            situacaoFiscalId:    t.situacaoFiscalId      ?? null,
-            figuraFiscalId:      t.figuraFiscalId        ?? null,
-            ufOrigem:            t.uf                    ?? null,
+            regimeEstadualId:    t.regimeEstadualId                     ?? null,
+            situacaoFiscalId:    t.situacaoFiscalId                     ?? null,
+            figuraFiscalId:      t.figuraFiscalId                       ?? null,
+            ufOrigem:            t.uf                                   ?? null,
             tipoDeOperacao:      t.tipoDeOperacao,
-            classificacaoPessoa: i.classificacaoDePessoa ?? null,
-            ufDestino:           i.uf                    ?? null,
-            tributadoNf:         i.tributadoNF           ?? 0,
-            isentoNf:            i.isentoNF              ?? 0,
-            outrosNf:            i.outrosNF              ?? 0,
-            aliquota:            i.aliquota              ?? 0,
-            agregado:            i.agregado              ?? 0,
-            tributadoIcms:       i.tributadoICMS         ?? 0,
-            cargaLiquida:        i.cargaLiquida          ?? 0,
-            aliquotaInterna:     i.aliquotaInterna       ?? 0,
-            fecop:               i.fecop                 ?? 0,
-            fecopSt:             i.fecopST               ?? 0,
-            somaIpiBc:           i.somaIpiBc             ?? false,
-            somaIpiBs:           i.somaIpiBs             ?? false,
-            stDestacado:         i.stDestacado           ?? false,
-            cstId:               i.cstId                 ?? null,
-            csosn:               i.csosn                 ?? null,
-            tributacao:          i.tributacao            ?? null,
-            cfopId:              i.cfopId                ?? null,
-            icmsDesonerado:      i.icmsDesonerado        ?? false,
-            icmsOrigem:          i.icmsOrigem            ?? null,
-            icmsEfetivo:         i.icmsEfetivo           ?? false,
-            reducaoOrigem:       i.reducaoOrigem         ?? 0,
+            classificacaoPessoa: i.classificacaoDePessoa                ?? null,
+            ufDestino:           i.uf                                   ?? null,
+            tributadoNf:         i.tributadoNF                          ?? 0,
+            isentoNf:            i.isentoNF                             ?? 0,
+            outrosNf:            i.outrosNF                             ?? 0,
+            aliquota:            i.aliquota                             ?? 0,
+            agregado:            i.agregado                             ?? 0,
+            tributadoIcms:       i.tributadoICMS                        ?? 0,
+            cargaLiquida:        i.cargaLiquida                         ?? 0,
+            aliquotaInterna:     i.aliquotaInterna                      ?? 0,
+            fecop:               i.fecop                                ?? 0,
+            fecopSt:             i.fecopST                              ?? 0,
+            somaIpiBc:           i.somaIPINaBaseDeCalculo               ?? false,
+            somaIpiBs:           i.somaIPINaBaseDeCalculoSubstituicao   ?? false,
+            stDestacado:         i.stDestacado                          ?? false,
+            csosn:               i.csosn                                ?? null,
+            csosnCupomFiscal:    i.csosnCupomFiscal                     ?? null,
+            cstId:               i.cstId                                ?? null,
+            tributacao:          i.tributacao                           ?? null,
+            cfopId:              i.cfopId                               ?? null,
+            icmsDesonerado:      i.icmsDesonerado                       ?? false,
+            icmsOrigem:          i.icmsOrigem                           ?? null,
+            icmsEfetivo:         i.icmsEfetivo                          ?? false,
+            reducaoOrigem:       i.reducaoOrigem                        ?? 0,
         };
     }
 }

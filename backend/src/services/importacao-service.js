@@ -134,12 +134,8 @@ class ImportacaoService {
         return Fiscal.importarImpostosFederais(impostos);
     }
 
-    static async importarTabelasTributariasEntrada(tabelas) {
-        return Fiscal.importarTabelasTributariasEntrada(tabelas);
-    }
-
-    static async importarTabelasTributariasSaida(tabelas) {
-        return Fiscal.importarTabelasTributariasSaida(tabelas);
+    static async importarTabelasTributarias(tabelas) {
+        return Fiscal.importarTabelasTributarias(tabelas);
     }
 
     // PESSOAS

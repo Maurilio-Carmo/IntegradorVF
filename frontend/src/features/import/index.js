@@ -192,31 +192,10 @@ const Importacao = {
         return result;
     },
 
-    async importarTabelasTributariasEntrada(uiElement) {
-        const result = await fiscalImporter.importarTabelasTributariasEntrada(uiElement);
-        await this.atualizarEstatisticas();
-        return result;
-    },
-
-    async importarTabelasTributariasSaida(uiElement) {
-        const result = await fiscalImporter.importarTabelasTributariasSaida(uiElement);
-        await this.atualizarEstatisticas();
-        return result;
-    },
-
-    /**
-     * Importar tabelas tributárias (entrada + saída)
-     */
     async importarTabelasTributarias(uiElement) {
-        UI.log('📋 Importando tabelas tributárias (entrada + saída)...', 'info');
-        const entrada = await fiscalImporter.importarTabelasTributariasEntrada(uiElement);
-        const saida   = await fiscalImporter.importarTabelasTributariasSaida(uiElement);
+        const result = await fiscalImporter.importarTabelasTributarias(uiElement);
         await this.atualizarEstatisticas();
-        return {
-            success: entrada.success && saida.success,
-            entrada,
-            saida
-        };
+        return result;
     },
 
     // PESSOA

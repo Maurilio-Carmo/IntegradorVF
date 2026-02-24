@@ -8,7 +8,6 @@ router.post('/importar-regime-tributario',           wrapRoute('importarRegimeTr
 router.post('/importar-situacoes-fiscais',           wrapRoute('importarSituacoesFiscais'));
 router.post('/importar-tipos-operacoes',             wrapRoute('importarTiposOperacoes'));
 router.post('/importar-impostos-federais',           wrapRoute('importarImpostosFederais'));
-router.post('/importar-tabelas-tributarias-entrada', wrapRoute('importarTabelasTributariasEntrada'));
-router.post('/importar-tabelas-tributarias-saida',   wrapRoute('importarTabelasTributariasSaida'));
+router.post('/importar-tabelas-tributarias',         wrapRoute('importarTabelasTributarias'));
 
 module.exports = router;

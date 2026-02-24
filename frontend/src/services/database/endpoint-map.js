@@ -44,8 +44,7 @@ export const ENDPOINT_MAP = {
     situacoesFiscais:                  'importar-situacoes-fiscais',
     tiposOperacoes:                    'importar-tipos-operacoes',
     impostosFederais:                  'importar-impostos-federais',
-    tabelasTributariasEntrada:         'importar-tabelas-tributarias-entrada',
-    tabelasTributariasSaida:           'importar-tabelas-tributarias-saida',
+    tabelasTributarias:                'importar-tabelas-tributarias',
 
     // Pessoa 
     lojas:                             'importar-lojas',
