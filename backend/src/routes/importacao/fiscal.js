@@ -9,5 +9,6 @@ router.post('/importar-situacoes-fiscais',           wrapRoute('importarSituacoe
 router.post('/importar-tipos-operacoes',             wrapRoute('importarTiposOperacoes'));
 router.post('/importar-impostos-federais',           wrapRoute('importarImpostosFederais'));
 router.post('/importar-tabelas-tributarias',         wrapRoute('importarTabelasTributarias'));
+router.post('/importar-cenarios-fiscais',            wrapRoute('importarCenariosFiscais'));
 
 module.exports = router;

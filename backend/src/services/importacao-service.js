@@ -138,6 +138,10 @@ class ImportacaoService {
         return Fiscal.importarTabelasTributarias(tabelas);
     }
 
+    static async importarCenariosFiscais(cenarios) {
+        return Fiscal.importarCenariosFiscais(cenarios);
+    }
+
     // PESSOAS
 
     static async importarLojas(lojas) {
@@ -162,7 +166,8 @@ class ImportacaoService {
                 'categorias', 'agentes', 'contas_correntes', 'especies_documentos', 'historico_padrao', 
                 'formas_pagamento', 'pagamentos_pdv', 'recebimentos_pdv', 
                 'motivos_desconto', 'motivos_devolucao', 'motivos_cancelamento',
-                'regime_tributario', 'situacoes_fiscais', 'tipos_operacoes', 'impostos_federais', 'tabelas_tributarias',
+                'regime_tributario', 'situacoes_fiscais', 'tipos_operacoes', 'impostos_federais', 
+                'tabelas_tributarias', 'cenarios_fiscais',
                 'local_estoque', 'tipos_ajustes', 'saldo_estoque',
                 'lojas', 'clientes', 'fornecedores',
             ];

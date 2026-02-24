@@ -198,6 +198,12 @@ const Importacao = {
         return result;
     },
 
+    async importarCenariosFiscais(uiElement) {
+        const result = await fiscalImporter.importarCenariosFiscais(uiElement);
+        await this.atualizarEstatisticas();
+        return result;
+    },
+
     // PESSOA
 
     async importarLojas(uiElement) {

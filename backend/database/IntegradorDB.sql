@@ -62,6 +62,10 @@ DROP TABLE IF EXISTS situacoes_fiscais;
 DROP TABLE IF EXISTS impostos_federais;
 DROP TABLE IF EXISTS tipos_operacoes;
 DROP TABLE IF EXISTS tabelas_tributarias;
+DROP TABLE IF EXISTS cenarios_fiscais_ufs_destino;
+DROP TABLE IF EXISTS cenarios_fiscais_lojas;
+DROP TABLE IF EXISTS cenarios_fiscais_ncms;
+DROP TABLE IF EXISTS cenarios_fiscais;
 
 -- PESSOA
 DROP TABLE IF EXISTS lojas;
@@ -701,6 +705,61 @@ CREATE TABLE tabelas_tributarias (
     FOREIGN KEY (situacao_fiscal_id) REFERENCES situacoes_fiscais(situacao_id) ON DELETE SET NULL
 );
 
+-- CENARIOS FISCAIS
+
+CREATE TABLE cenarios_fiscais (
+    cenario_id INTEGER PRIMARY KEY,
+    descricao TEXT,
+    cst INTEGER,
+    c_class_trib INTEGER,
+    status TEXT CHECK(status IN ('C','U','D','E','S')) DEFAULT 'U',
+    retorno TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- CENARIOS FISCAIS NCMs
+
+CREATE TABLE cenarios_fiscais_ncms (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    codigo_ncm INTEGER NOT NULL,
+    descricao_ncm TEXT,
+    codigo_cenario_fiscal INTEGER NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (codigo_cenario_fiscal) REFERENCES cenarios_fiscais(cenario_id) ON DELETE CASCADE
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS uq_cf_ncm ON cenarios_fiscais_ncms(codigo_cenario_fiscal, codigo_ncm);
+
+-- CENARIOS FISCAIS LOJAS
+
+CREATE TABLE cenarios_fiscais_lojas (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    codigo_loja INTEGER NOT NULL,
+    descricao_loja TEXT,
+    uf_origem TEXT,
+    codigo_cenario_fiscal INTEGER NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (codigo_cenario_fiscal) REFERENCES cenarios_fiscais(cenario_id) ON DELETE CASCADE
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS uq_cf_loja ON cenarios_fiscais_lojas(codigo_cenario_fiscal, codigo_loja);
+
+-- CENARIOS FISCAIS UFs DESTINO
+
+CREATE TABLE cenarios_fiscais_ufs_destino (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    uf_destino TEXT NOT NULL,
+    codigo_cenario_fiscal INTEGER NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (codigo_cenario_fiscal) REFERENCES cenarios_fiscais(cenario_id) ON DELETE CASCADE
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS uq_cf_uf_destino ON cenarios_fiscais_ufs_destino(codigo_cenario_fiscal, uf_destino);
+
 -- LOJAS
 
 CREATE TABLE lojas (
@@ -1155,6 +1214,16 @@ SELECT
 FROM saldo_estoque se
 LEFT JOIN produtos p ON se.produto_id = p.produto_id
 LEFT JOIN local_estoque le ON se.local_id = le.local_id;
+
+DROP VIEW IF EXISTS vw_tabelas_tributarias_entrada;
+CREATE VIEW IF NOT EXISTS vw_tabelas_tributarias_entrada AS
+SELECT * FROM tabelas_tributarias
+WHERE tipo_operacao = 'ENTRADA';
+
+DROP VIEW IF EXISTS vw_tabelas_tributarias_saida;
+CREATE VIEW IF NOT EXISTS vw_tabelas_tributarias_saida AS
+SELECT * FROM tabelas_tributarias
+WHERE tipo_operacao = 'SAIDA';
 
 -- View: Relatório geral de sincronização por entidade
 DROP VIEW IF EXISTS vw_relatorio_sincronizacao;

@@ -188,6 +188,10 @@ export class FiscalAPI extends APIBase {
     async buscarTabelasTributarias(onProgress, onPageFetched) {
         return await this.fetchAll('fiscal/tabelas-tributarias', onProgress, onPageFetched);
     }
+
+    async buscarCenariosFiscais(onProgress, onPageFetched) {
+        return await this.fetchAll('fiscal/cenarios-fiscais-ncm', onProgress, onPageFetched);
+    }
 }
 
 // PESSOA 

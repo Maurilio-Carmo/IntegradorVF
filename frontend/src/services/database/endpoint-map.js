@@ -45,6 +45,7 @@ export const ENDPOINT_MAP = {
     tiposOperacoes:                    'importar-tipos-operacoes',
     impostosFederais:                  'importar-impostos-federais',
     tabelasTributarias:                'importar-tabelas-tributarias',
+    cenariosFiscais:                   'importar-cenarios-fiscais',
 
     // Pessoa 
     lojas:                             'importar-lojas',

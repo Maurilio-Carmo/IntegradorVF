@@ -1,6 +1,7 @@
 // backend/src/modules/sqlite-repository/repositories/fiscal.js
 
 const BaseRepository = require('../base-repository');
+const db = require('../../../config/database-sqlite').getConnection();
 
 /**
  * FiscalRepository
@@ -320,6 +321,115 @@ class FiscalRepository extends BaseRepository {
             status:                  'U',
         };
     }
+
+    // ─── CENÁRIOS FISCAIS NCM ────────────────────────────────────────────────
+    static importarCenariosFiscais(cenarios) {
+        if (!cenarios || cenarios.length === 0) {
+            return { success: true, count: 0 };
+        }
+
+        try {
+            const db = require('../../../config/database-sqlite').getConnection();
+
+            // ── Prepared statements ──────────────────────────────────────────
+            const stmtCenario = db.prepare(`
+                INSERT INTO cenarios_fiscais (
+                    cenario_id, descricao, cst, c_class_trib, status
+                ) VALUES (
+                    @cenario_id, @descricao, @cst, @c_class_trib, @status
+                )
+                ON CONFLICT(cenario_id) DO UPDATE SET
+                    descricao    = excluded.descricao,
+                    cst          = excluded.cst,
+                    c_class_trib = excluded.c_class_trib,
+                    updated_at   = CURRENT_TIMESTAMP
+                WHERE status NOT IN ('C', 'D')
+            `);
+
+            const stmtNcm = db.prepare(`
+                INSERT INTO cenarios_fiscais_ncms (
+                    codigo_ncm, descricao_ncm, codigo_cenario_fiscal
+                ) VALUES (
+                    @codigo_ncm, @descricao_ncm, @codigo_cenario_fiscal
+                )
+                ON CONFLICT(codigo_cenario_fiscal, codigo_ncm) DO UPDATE SET
+                    descricao_ncm = excluded.descricao_ncm
+            `);
+
+            const stmtLoja = db.prepare(`
+                INSERT INTO cenarios_fiscais_lojas (
+                    codigo_loja, descricao_loja, uf_origem, codigo_cenario_fiscal
+                ) VALUES (
+                    @codigo_loja, @descricao_loja, @uf_origem, @codigo_cenario_fiscal
+                )
+                ON CONFLICT(codigo_cenario_fiscal, codigo_loja) DO UPDATE SET
+                    descricao_loja = excluded.descricao_loja,
+                    uf_origem      = excluded.uf_origem
+            `);
+
+            const stmtUf = db.prepare(`
+                INSERT INTO cenarios_fiscais_ufs_destino (
+                    uf_destino, codigo_cenario_fiscal
+                ) VALUES (
+                    @uf_destino, @codigo_cenario_fiscal
+                )
+                ON CONFLICT(codigo_cenario_fiscal, uf_destino) DO NOTHING
+            `);
+
+            // ── Execução em transação única ──────────────────────────────────
+            const transacao = db.transaction((lista) => {
+                for (const c of lista) {
+                    const cenarioId = c.id ?? null;
+
+                    // 1. Cenário principal
+                    stmtCenario.run({
+                        cenario_id:   cenarioId,
+                        descricao:    c.descricao    ?? null,
+                        cst:          c.cst          ?? null,
+                        c_class_trib: c.cClassTrib   ?? null,
+                        status:       'U',
+                    });
+
+                    // 2. NCMs
+                    for (const n of (c.ncms || [])) {
+                        stmtNcm.run({
+                            codigo_ncm:            n.codigoNcm            ?? null,
+                            descricao_ncm:         n.descricaoNcm         ?? null,
+                            codigo_cenario_fiscal: n.codigoCenarioFiscal  ?? cenarioId,
+                        });
+                    }
+
+                    // 3. Lojas
+                    for (const l of (c.lojas || [])) {
+                        stmtLoja.run({
+                            codigo_loja:           l.codigoLoja           ?? null,
+                            descricao_loja:        l.descricaoLoja        ?? null,
+                            uf_origem:             l.ufOrigem             ?? null,
+                            codigo_cenario_fiscal: l.codigoCenarioFiscal  ?? cenarioId,
+                        });
+                    }
+
+                    // 4. UFs Destino
+                    for (const u of (c.ufsDestino || [])) {
+                        stmtUf.run({
+                            uf_destino:            u.ufDestino            ?? null,
+                            codigo_cenario_fiscal: u.codigoCenarioFiscal  ?? cenarioId,
+                        });
+                    }
+                }
+            });
+
+            transacao(cenarios);
+
+            console.log(`✅ [FiscalRepository] ${cenarios.length} cenários fiscais importados.`);
+            return { success: true, count: cenarios.length };
+
+        } catch (error) {
+            console.error('❌ [FiscalRepository] importarCenariosFiscais:', error.message);
+            return { success: false, error: error.message };
+        }
+    }
+
 }
 
 module.exports = FiscalRepository;

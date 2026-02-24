@@ -62,6 +62,7 @@ export class ImportButtonManager {
             'importar-tipos-operacoes':              'importarTiposOperacoes',
             'importar-impostos-federais':            'importarImpostosFederais',
             'importar-tabelas-tributarias':          'importarTabelasTributarias',
+            'importar-cenarios-fiscais':             'importarCenariosFiscais',
 
             // PESSOA
             'importar-lojas':                'importarLojas',

@@ -123,6 +123,41 @@ export class FiscalImporter extends ImportBase {
             reducaoOrigem:       i.reducaoOrigem                        ?? 0,
         };
     }
+
+    /**
+     * Importar cenários fiscais NCM
+     * @param {*} uiElement 
+     * @returns 
+     */
+    async importarCenariosFiscais(uiElement) {
+        return await this.execute({
+            name:      'cenários fiscais NCM',
+            endpoint:  'cenariosFiscais',
+            apiMethod: API.fiscal.buscarCenariosFiscais.bind(API.fiscal),
+            transform: (itens) => itens.map(c => ({
+                id:          c.id          ?? null,
+                descricao:   c.descricao   ?? null,
+                cst:         c.cst         ?? null,
+                cClassTrib:  c.cclassTrib  ?? null,
+                ncms:        (c.ncms        || []).map(n => ({
+                    codigoNcm:           n.codigoNcm           ?? null,
+                    descricaoNcm:        n.descricaoNcm        ?? null,
+                    codigoCenarioFiscal: n.codigoCenarioFiscal ?? c.id,
+                })),
+                lojas:       (c.lojas       || []).map(l => ({
+                    codigoLoja:          l.codigoLoja          ?? null,
+                    descricaoLoja:       l.descricaoLoja       ?? null,
+                    ufOrigem:            l.ufOrigem            ?? null,
+                    codigoCenarioFiscal: l.codigoCenarioFiscal ?? c.id,
+                })),
+                ufsDestino:  (c.ufsDestino  || []).map(u => ({
+                    ufDestino:           u.ufDestino           ?? null,
+                    codigoCenarioFiscal: u.codigoCenarioFiscal ?? c.id,
+                })),
+            })),
+            uiElement,
+        });
+    }
 }
 
 export default FiscalImporter;

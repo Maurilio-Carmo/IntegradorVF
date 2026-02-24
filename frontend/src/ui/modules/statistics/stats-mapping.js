@@ -43,8 +43,8 @@ export const STATS_MAPPING = {
     situacoes_fiscais:            'statSituacoesFiscais',
     tipos_operacoes:              'statTiposOperacoes',
     impostos_federais:            'statImpostosFederais',
-    tabelas_tributarias_entrada:  'statTabelasTributariasEntrada',
-    tabelas_tributarias_saida:    'statTabelasTributariasSaida',
+    tabelas_tributarias:          'statTabelasTributarias',
+    cenarios_fiscais:              'statCenariosFiscais',
 
     // ── Estoque ──────────────────────────────────────────────────────────────
     tipos_ajustes:                'statTiposAjustes',
