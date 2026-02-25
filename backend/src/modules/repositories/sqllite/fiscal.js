@@ -219,40 +219,56 @@ class FiscalRepository extends BaseRepository {
         );
     }
 
-    // ─── TABELAS TRIBUTÁRIAS ENTRADA ──────────────────────────────────────────
+    // ─── TABELAS TRIBUTÁRIAS ─────────────────────────────────────────────
     static importarTabelasTributarias(tabelas) {
-        return BaseRepository._executarTransacao(
-            'tabelas tributárias',
-            tabelas,
-            (db) => db.prepare(`
+        if (!tabelas || tabelas.length === 0) {
+            return { success: true, count: 0 };
+        }
+
+        try {
+            console.log(`📥 Importando ${tabelas.length} tabelas tributárias...`);
+            const db = require('../../../config/database-sqlite').getConnection();
+
+            const stmtTabTrib = db.prepare(`
                 INSERT INTO tabelas_tributarias (
-                    tabela_id, tipo_operacao,
-                    regime_estadual_id, situacao_fiscal_id, figura_fiscal_id,
-                    uf_origem, classificacao_pessoa, uf_destino,
-                    tributado_nf, isento_nf, outros_nf,
-                    aliquota, agregado, tributado_icms, carga_liquida, aliquota_interna,
-                    fecop, fecop_st, soma_ipi_bc, soma_ipi_bs, st_destacado,
-                    csosn, csosn_cupom_fiscal, csosn_doc_fiscal,
-                    cst_id, tributacao, cfop_id, cfop_cupom_id,
-                    icms_desonerado, icms_origem, icms_efetivo, reducao_origem,
-                    status
+                    tabela_id, tipo_operacao, regime_estadual_id, situacao_fiscal_id,
+                    figura_fiscal_id, uf_origem, decreto, status
                 ) VALUES (
-                    @tabela_id, @tipo_operacao,
-                    @regime_estadual_id, @situacao_fiscal_id, @figura_fiscal_id,
-                    @uf_origem, @classificacao_pessoa, @uf_destino,
-                    @tributado_nf, @isento_nf, @outros_nf,
-                    @aliquota, @agregado, @tributado_icms, @carga_liquida, @aliquota_interna,
-                    @fecop, @fecop_st, @soma_ipi_bc, @soma_ipi_bs, @st_destacado,
-                    @csosn, @csosn_cupom_fiscal, @csosn_doc_fiscal,
-                    @cst_id, @tributacao, @cfop_id, @cfop_cupom_id,
-                    @icms_desonerado, @icms_origem, @icms_efetivo, @reducao_origem,
-                    @status
+                    @tabela_id, @tipo_operacao, @regime_estadual_id, @situacao_fiscal_id,
+                    @figura_fiscal_id, @uf_origem, @decreto, @status
+                )
+                ON CONFLICT(tabela_id, tipo_operacao)
+                DO UPDATE SET
+                    regime_estadual_id = excluded.regime_estadual_id,
+                    situacao_fiscal_id = excluded.situacao_fiscal_id,
+                    figura_fiscal_id   = excluded.figura_fiscal_id,
+                    uf_origem          = excluded.uf_origem,
+                    decreto            = excluded.decreto,
+                    updated_at         = CURRENT_TIMESTAMP
+                WHERE status NOT IN ('C','D');
+            `);
+
+            const stmtTabTribDest = db.prepare(`
+                INSERT INTO tabelas_tributarias_destino (
+                    tabela_id, tipo_operacao, classificacao_pessoa, uf_destino, tributacao,
+                    tributado_nf, isento_nf, outros_nf, aliquota, agregado,
+                    tributado_icms, carga_liquida, aliquota_interna, icms_origem,
+                    icms_desonerado, icms_efetivo, reducao_origem, motivo_desoneracao_icms,
+                    codigo_beneficio_fiscal, fecop, fecop_st, soma_ipi_bc, soma_ipi_bs,
+                    st_destacado, csosn, csosn_doc_fiscal, csosn_cupom_fiscal,
+                    cst_id, cfop_id, cfop_cupom_id, status
+                ) VALUES (
+                    @tabela_id, @tipo_operacao, @classificacao_pessoa, @uf_destino, @tributacao,
+                    @tributado_nf, @isento_nf, @outros_nf, @aliquota, @agregado,
+                    @tributado_icms, @carga_liquida, @aliquota_interna, @icms_origem,
+                    @icms_desonerado, @icms_efetivo, @reducao_origem, @motivo_desoneracao_icms,
+                    @codigo_beneficio_fiscal, @fecop, @fecop_st, @soma_ipi_bc, @soma_ipi_bs,
+                    @st_destacado, @csosn, @csosn_doc_fiscal, @csosn_cupom_fiscal,
+                    @cst_id, @cfop_id, @cfop_cupom_id, @status
                 )
                 ON CONFLICT(tabela_id, tipo_operacao, classificacao_pessoa, uf_destino)
                 DO UPDATE SET
-                    regime_estadual_id      = excluded.regime_estadual_id,
-                    situacao_fiscal_id      = excluded.situacao_fiscal_id,
-                    figura_fiscal_id        = excluded.figura_fiscal_id,
+                    tributacao              = excluded.tributacao,
                     tributado_nf            = excluded.tributado_nf,
                     isento_nf               = excluded.isento_nf,
                     outros_nf               = excluded.outros_nf,
@@ -261,39 +277,68 @@ class FiscalRepository extends BaseRepository {
                     tributado_icms          = excluded.tributado_icms,
                     carga_liquida           = excluded.carga_liquida,
                     aliquota_interna        = excluded.aliquota_interna,
+                    icms_origem             = excluded.icms_origem,
+                    icms_desonerado         = excluded.icms_desonerado,
+                    icms_efetivo            = excluded.icms_efetivo,
+                    reducao_origem          = excluded.reducao_origem,
+                    motivo_desoneracao_icms = excluded.motivo_desoneracao_icms,
+                    codigo_beneficio_fiscal = excluded.codigo_beneficio_fiscal,
                     fecop                   = excluded.fecop,
                     fecop_st                = excluded.fecop_st,
                     soma_ipi_bc             = excluded.soma_ipi_bc,
                     soma_ipi_bs             = excluded.soma_ipi_bs,
                     st_destacado            = excluded.st_destacado,
                     csosn                   = excluded.csosn,
-                    csosn_cupom_fiscal      = excluded.csosn_cupom_fiscal,
                     csosn_doc_fiscal        = excluded.csosn_doc_fiscal,
+                    csosn_cupom_fiscal      = excluded.csosn_cupom_fiscal,
                     cst_id                  = excluded.cst_id,
-                    tributacao              = excluded.tributacao,
                     cfop_id                 = excluded.cfop_id,
                     cfop_cupom_id           = excluded.cfop_cupom_id,
-                    icms_desonerado         = excluded.icms_desonerado,
-                    icms_origem             = excluded.icms_origem,
-                    icms_efetivo            = excluded.icms_efetivo,
-                    reducao_origem          = excluded.reducao_origem,
                     updated_at              = CURRENT_TIMESTAMP
-                WHERE status NOT IN ('C', 'D')
-            `),
-            (t) => [FiscalRepository._mapTabela(t)]
-        );
+                WHERE status NOT IN ('C','D');
+            `);
+
+            const transacao = db.transaction((lista) => {
+                for (const t of lista) {
+                    const dados = FiscalRepository._mapTabela(t);
+
+                    if (!dados.tipo_operacao) {
+                        console.warn(`⚠️ tabela_id=${dados.tabela_id} ignorada — tipo_operacao ausente`);
+                        continue;
+                    }
+                    if (!dados.classificacao_pessoa || !dados.uf_destino) {
+                        console.warn(`⚠️ tabela_id=${dados.tabela_id} ignorada — classificacao_pessoa ou uf_destino ausente`);
+                        continue;
+                    }
+
+                    stmtTabTrib.run(dados);
+                    stmtTabTribDest.run(dados);
+                }
+            });
+
+            transacao(tabelas);
+
+            console.log(`✅ ${tabelas.length} tabelas tributárias importadas`);
+            return { success: true, count: tabelas.length };
+
+        } catch (error) {
+            console.error(`❌ Erro ao importar tabelas tributárias:`, error.message);
+            throw error;
+        }
     }
 
     static _mapTabela(t) {
         return {
             tabela_id:               t.tabelaId              ?? t.id   ?? null,
-            tipo_operacao:           t.tipoDeOperacao,
+            tipo_operacao:           t.tipoDeOperacao ,
             regime_estadual_id:      t.regimeEstadualId                ?? null,
             situacao_fiscal_id:      t.situacaoFiscalId                ?? null,
             figura_fiscal_id:        t.figuraFiscalId                  ?? null,
             uf_origem:               t.ufOrigem                        ?? null,
+            decreto:                 t.decreto                         ?? null,
             classificacao_pessoa:    t.classificacaoPessoa             ?? null,
             uf_destino:              t.ufDestino                       ?? null,
+            tributacao:              t.tributacao                      ?? null,
             tributado_nf:            t.tributadoNf                     ?? 0,
             isento_nf:               t.isentoNf                        ?? 0,
             outros_nf:               t.outrosNf                        ?? 0,
@@ -302,22 +347,23 @@ class FiscalRepository extends BaseRepository {
             tributado_icms:          t.tributadoIcms                   ?? 0,
             carga_liquida:           t.cargaLiquida                    ?? 0,
             aliquota_interna:        t.aliquotaInterna                 ?? 0,
+            icms_origem:             t.icmsOrigem                      ?? 0,
+            icms_desonerado:         BaseRepository._bool(t.icmsDesonerado),
+            icms_efetivo:            BaseRepository._bool(t.icmsEfetivo),
+            reducao_origem:          t.reducaoOrigem                   ?? 0,
+            motivo_desoneracao_icms: t.motivoDesoneracaoICMS           ?? null,
+            codigo_beneficio_fiscal: t.codigoBeneficioFiscal           ?? null,
             fecop:                   t.fecop                           ?? 0,
             fecop_st:                t.fecopSt                         ?? 0,
             soma_ipi_bc:             BaseRepository._bool(t.somaIpiBc),
             soma_ipi_bs:             BaseRepository._bool(t.somaIpiBs),
             st_destacado:            BaseRepository._bool(t.stDestacado),
             csosn:                   t.csosn                           ?? null,
-            csosn_cupom_fiscal:      t.csosnCupomFiscal                ?? null,
             csosn_doc_fiscal:        t.csosnDocumentoFiscal            ?? null,
+            csosn_cupom_fiscal:      t.csosnCupomFiscal                ?? null,
             cst_id:                  t.cstId                           ?? null,
-            tributacao:              t.tributacao                       ?? null,
             cfop_id:                 t.cfopId                          ?? null,
             cfop_cupom_id:           t.cfopCuponsFiscaisId             ?? null,
-            icms_desonerado:         BaseRepository._bool(t.icmsDesonerado),
-            icms_origem:             t.icmsOrigem                      ?? 0,
-            icms_efetivo:            BaseRepository._bool(t.icmsEfetivo),
-            reducao_origem:          t.reducaoOrigem                   ?? 0,
             status:                  'U',
         };
     }
@@ -368,7 +414,7 @@ class FiscalRepository extends BaseRepository {
             `);
 
             const stmtUf = db.prepare(`
-                INSERT INTO cenarios_fiscais_ufs_destino (
+                INSERT INTO cenarios_fiscais_destino (
                     uf_destino, codigo_cenario_fiscal
                 ) VALUES (
                     @uf_destino, @codigo_cenario_fiscal

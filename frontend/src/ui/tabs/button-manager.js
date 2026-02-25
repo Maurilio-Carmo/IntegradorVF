@@ -106,7 +106,8 @@ export class ImportButtonManager {
                 'importarSituacoesFiscais',
                 'importarTiposOperacoes',
                 'importarImpostosFederais',
-                'importarTabelasTributarias'
+                'importarTabelasTributarias',
+                'importarCenariosFiscais'
             ],
             'btnImportarTudoPessoa': [
                 'importarLojas',

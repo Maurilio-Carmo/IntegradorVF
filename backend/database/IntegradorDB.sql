@@ -61,8 +61,9 @@ DROP TABLE IF EXISTS regime_tributario;
 DROP TABLE IF EXISTS situacoes_fiscais;
 DROP TABLE IF EXISTS impostos_federais;
 DROP TABLE IF EXISTS tipos_operacoes;
+DROP TABLE IF EXISTS tabelas_tributarias_destino;
 DROP TABLE IF EXISTS tabelas_tributarias;
-DROP TABLE IF EXISTS cenarios_fiscais_ufs_destino;
+DROP TABLE IF EXISTS cenarios_fiscais_destino;
 DROP TABLE IF EXISTS cenarios_fiscais_lojas;
 DROP TABLE IF EXISTS cenarios_fiscais_ncms;
 DROP TABLE IF EXISTS cenarios_fiscais;
@@ -569,9 +570,9 @@ CREATE TABLE saldo_estoque (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 
-    FOREIGN KEY (loja_id) REFERENCES lojas(loja_id) ON DELETE SET NULL,
-    FOREIGN KEY (produto_id) REFERENCES produtos(produto_id) ON DELETE SET NULL,
-    FOREIGN KEY (local_id) REFERENCES local_estoque(local_id) ON DELETE SET NULL
+    FOREIGN KEY (loja_id) REFERENCES lojas(loja_id) ON DELETE CASCADE,
+    FOREIGN KEY (produto_id) REFERENCES produtos(produto_id) ON DELETE CASCADE,
+    FOREIGN KEY (local_id) REFERENCES local_estoque(local_id) ON DELETE CASCADE
 );
 
 -- REGIME TRIBUTÁRIO
@@ -660,15 +661,32 @@ CREATE TABLE tipos_operacoes (
 
 -- TABELAS TRIBUTÁRIAS
 
-CREATE TABLE tabelas_tributarias (
-    tabela_id INTEGER,
-    tipo_operacao TEXT CHECK(tipo_operacao IN ('ENTRADA','SAIDA')),
+CREATE TABLE IF NOT EXISTS tabelas_tributarias (
+    tabela_id INTEGER NOT NULL,
+    tipo_operacao TEXT NOT NULL CHECK(tipo_operacao IN ('ENTRADA','SAIDA')),
     regime_estadual_id INTEGER,
     situacao_fiscal_id INTEGER,
     figura_fiscal_id INTEGER,
     uf_origem TEXT,
-    classificacao_pessoa TEXT NOT NULL CHECK(classificacao_pessoa IN ('ENTRADA_DE_INDUSTRIA','ENTRADA_DE_DISTRIBUIDOR','ENTRADA_DE_MICROEMPRESA','ENTRADA_DE_VAREJO','ENTRADA_DE_TRANSFERENCIA','SAIDA_PARA_CONTRIBUINTE','SAIDA_PARA_NAO_CONTRIBUINTE','SAIDA_PARA_TRANSFERENCIA')),
-    uf_destino TEXT,
+    decreto TEXT,
+    status TEXT CHECK(status IN ('C','U','D','E','S')) DEFAULT 'U',
+    retorno TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (tabela_id, tipo_operacao),
+    FOREIGN KEY (regime_estadual_id) REFERENCES regime_tributario(regime_id)   ON DELETE SET NULL,
+    FOREIGN KEY (situacao_fiscal_id) REFERENCES situacoes_fiscais(situacao_id) ON DELETE SET NULL
+);
+
+-- TABELAS TRIBUTÁRIAS DESTINO
+
+CREATE TABLE IF NOT EXISTS tabelas_tributarias_destino (
+    tabela_id INTEGER NOT NULL,
+    tipo_operacao TEXT NOT NULL,
+    classificacao_pessoa TEXT NOT NULL,
+    uf_destino TEXT NOT NULL,
+    tributacao TEXT,
     tributado_nf REAL DEFAULT 0,
     isento_nf REAL DEFAULT 0,
     outros_nf REAL DEFAULT 0,
@@ -681,7 +699,7 @@ CREATE TABLE tabelas_tributarias (
     icms_desonerado INTEGER DEFAULT 0,
     icms_efetivo INTEGER DEFAULT 0,
     reducao_origem REAL DEFAULT 0,
-    motivo_desoneracao TEXT,
+    motivo_desoneracao_icms TEXT,
     codigo_beneficio_fiscal TEXT,
     fecop REAL DEFAULT 0,
     fecop_st REAL DEFAULT 0,
@@ -689,20 +707,17 @@ CREATE TABLE tabelas_tributarias (
     soma_ipi_bs INTEGER DEFAULT 0,
     st_destacado INTEGER DEFAULT 0,
     csosn TEXT,
+    csosn_doc_fiscal TEXT,
     csosn_cupom_fiscal TEXT,
-    csosn_doc_fiscal TEXT, 
     cst_id INTEGER,
     cfop_id INTEGER,
     cfop_cupom_id INTEGER,
-    tributacao TEXT,
     status TEXT CHECK(status IN ('C','U','D','E','S')) DEFAULT 'U',
-    retorno TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    
+
     PRIMARY KEY (tabela_id, tipo_operacao, classificacao_pessoa, uf_destino),
-    FOREIGN KEY (regime_estadual_id) REFERENCES regime_tributario(regime_id) ON DELETE SET NULL,
-    FOREIGN KEY (situacao_fiscal_id) REFERENCES situacoes_fiscais(situacao_id) ON DELETE SET NULL
+    FOREIGN KEY (tabela_id, tipo_operacao) REFERENCES tabelas_tributarias(tabela_id, tipo_operacao) ON DELETE CASCADE
 );
 
 -- CENARIOS FISCAIS
@@ -749,7 +764,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS uq_cf_loja ON cenarios_fiscais_lojas(codigo_ce
 
 -- CENARIOS FISCAIS UFs DESTINO
 
-CREATE TABLE cenarios_fiscais_ufs_destino (
+CREATE TABLE cenarios_fiscais_destino (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     uf_destino TEXT NOT NULL,
     codigo_cenario_fiscal INTEGER NOT NULL,
@@ -758,7 +773,7 @@ CREATE TABLE cenarios_fiscais_ufs_destino (
     FOREIGN KEY (codigo_cenario_fiscal) REFERENCES cenarios_fiscais(cenario_id) ON DELETE CASCADE
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS uq_cf_uf_destino ON cenarios_fiscais_ufs_destino(codigo_cenario_fiscal, uf_destino);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_cf_destino ON cenarios_fiscais_destino(codigo_cenario_fiscal, uf_destino);
 
 -- LOJAS
 
@@ -1119,10 +1134,14 @@ DROP TRIGGER IF EXISTS trg_tabelas_tributarias_updated_at;
 CREATE TRIGGER trg_tabelas_tributarias_updated_at
 AFTER UPDATE ON tabelas_tributarias
 BEGIN
-    UPDATE tabelas_tributarias SET updated_at = CURRENT_TIMESTAMP
-    WHERE tabela_id = NEW.tabela_id
-      AND classificacao_pessoa = NEW.classificacao_pessoa
-      AND uf_destino = NEW.uf_destino;
+    UPDATE tabelas_tributarias SET updated_at = CURRENT_TIMESTAMP WHERE tabela_id = NEW.tabela_id AND tipo_operacao = NEW.tipo_operacao;
+END;
+
+DROP TRIGGER IF EXISTS trg_tabelas_tributarias_destino_updated_at;
+CREATE TRIGGER trg_tabelas_tributarias_destino_updated_at
+AFTER UPDATE ON tabelas_tributarias_destino
+BEGIN
+    UPDATE tabelas_tributarias_destino SET updated_at = CURRENT_TIMESTAMP WHERE tabela_id = NEW.tabela_id AND classificacao_pessoa = NEW.classificacao_pessoa AND uf_destino = NEW.uf_destino AND uf_destino = NEW.uf_destino;
 END;
 
 DROP TRIGGER IF EXISTS trg_lojas_updated_at;
@@ -1215,15 +1234,21 @@ FROM saldo_estoque se
 LEFT JOIN produtos p ON se.produto_id = p.produto_id
 LEFT JOIN local_estoque le ON se.local_id = le.local_id;
 
-DROP VIEW IF EXISTS vw_tabelas_tributarias_entrada;
 CREATE VIEW IF NOT EXISTS vw_tabelas_tributarias_entrada AS
-SELECT * FROM tabelas_tributarias
-WHERE tipo_operacao = 'ENTRADA';
+SELECT tt.decreto, tt.id_externo, tt.uf_origem, tt.regime_estadual_id,
+       tt.situacao_fiscal_id, tt.figura_fiscal_id, ttd.*
+FROM tabelas_tributarias tt
+JOIN tabelas_tributarias_destino ttd
+    ON tt.tabela_id = ttd.tabela_id AND tt.tipo_operacao = ttd.tipo_operacao
+WHERE tt.tipo_operacao = 'ENTRADA';
 
-DROP VIEW IF EXISTS vw_tabelas_tributarias_saida;
 CREATE VIEW IF NOT EXISTS vw_tabelas_tributarias_saida AS
-SELECT * FROM tabelas_tributarias
-WHERE tipo_operacao = 'SAIDA';
+SELECT tt.decreto, tt.id_externo, tt.uf_origem, tt.regime_estadual_id,
+       tt.situacao_fiscal_id, tt.figura_fiscal_id, ttd.*
+FROM tabelas_tributarias tt
+JOIN tabelas_tributarias_destino ttd
+    ON tt.tabela_id = ttd.tabela_id AND tt.tipo_operacao = ttd.tipo_operacao
+WHERE tt.tipo_operacao = 'SAIDA';
 
 -- View: Relatório geral de sincronização por entidade
 DROP VIEW IF EXISTS vw_relatorio_sincronizacao;
@@ -1259,6 +1284,11 @@ SELECT 'Situações Fiscais'        AS entidade, COUNT(*) AS total, SUM(status='
 SELECT 'Tipos Operações'          AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM tipos_operacoes UNION ALL
 SELECT 'Impostos Federais'        AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM impostos_federais UNION ALL
 SELECT 'Tab. Tributárias'         AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM tabelas_tributarias UNION ALL
+SELECT 'Tab. Trib. Destino'       AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM tabelas_tributarias_destino UNION ALL
+SELECT 'Cenarios Fiscais'         AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM cenarios_fiscais UNION ALL
+SELECT 'Cenarios Fisc NCM'        AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM cenarios_fiscais_ncms UNION ALL
+SELECT 'Cenarios Fisc Lojas'      AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM cenarios_fiscais_lojas UNION ALL
+SELECT 'Cenarios Fisc Dest.'      AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM cenarios_fiscais_destino UNION ALL
 SELECT 'Lojas'                    AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM lojas UNION ALL
 SELECT 'Clientes'                 AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM clientes UNION ALL
 SELECT 'Fornecedores'             AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM fornecedores;
