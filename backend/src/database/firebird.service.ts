@@ -18,26 +18,25 @@ export class FirebirdService implements OnModuleInit, OnModuleDestroy {
 
   onModuleInit(): void {
     this.options = {
-      host:     this.config.get<string>('FB_HOST', '127.0.0.1'),
-      port:     this.config.get<number>('FB_PORT', 3050),
-      database: this.config.get<string>('FB_DATABASE', ''),
-      user:     this.config.get<string>('FB_USER', 'SYSDBA'),
-      password: this.config.get<string>('FB_PASSWORD', 'masterkey'),
-      charset:  this.config.get<string>('FB_CHARSET', 'UTF8'),
+      host:           this.config.get<string>('FB_HOST',     '127.0.0.1'),
+      port:           this.config.get<number>('FB_PORT',     3050),
+      database:       this.config.get<string>('FB_DATABASE', ''),
+      user:           this.config.get<string>('FB_USER',     'SYSDBA'),
+      password:       this.config.get<string>('FB_PASSWORD', 'masterkey'),
+      charset:        this.config.get<string>('FB_CHARSET',  'UTF8'),
       lowercase_keys: false,
-      role:     undefined,
-      pageSize: 4096,
+      role:           undefined,
+      pageSize:       4096,
     };
 
-    const poolSize = this.config.get<number>('FB_POOL_SIZE', 5);
-
     if (!this.options.database) {
-      this.log.warn('⚠️  FB_DATABASE não definido — Firebird desabilitado');
+      this.log.warn('⚠️  FB_DATABASE não configurado — Firebird desabilitado');
       return;
     }
 
+    const poolSize = this.config.get<number>('FB_POOL_SIZE', 5);
     this.pool = Firebird.pool(poolSize, this.options);
-    this.log.log(`✅ Firebird pool criado (${poolSize} conexões): ${this.options.database}`);
+    this.log.log(`✅ Firebird pool criado (${poolSize} conex.): ${this.options.database}`);
   }
 
   onModuleDestroy(): void {
@@ -45,10 +44,57 @@ export class FirebirdService implements OnModuleInit, OnModuleDestroy {
     this.log.log('🔒 Firebird pool destruído');
   }
 
-  /** Executa uma query SELECT e retorna array de resultados */
+  /** Verifica se o Firebird está configurado e acessível */
+  isEnabled(): boolean {
+    return !!this.pool && !!this.options?.database;
+  }
+
+  /**
+   * Testa a conectividade com o banco Firebird.
+   * Retorna objeto com status, versão do servidor e tempo de resposta.
+   */
+  testConnection(): Promise<{ connected: boolean; host: string; database: string; responseMs: number; error?: string }> {
+    const start = Date.now();
+    const info  = { host: this.options?.host ?? '', database: this.options?.database ?? '' };
+
+    if (!this.isEnabled()) {
+      return Promise.resolve({
+        connected:  false,
+        ...info,
+        responseMs: 0,
+        error:      'FB_DATABASE não configurado no .env',
+      });
+    }
+
+    return new Promise((resolve) => {
+      this.pool.get((err, db) => {
+        if (err) {
+          return resolve({
+            connected:  false,
+            ...info,
+            responseMs: Date.now() - start,
+            error:      err.message,
+          });
+        }
+
+        // Consulta mínima para validar a conexão
+        db.query('SELECT 1 FROM RDB$DATABASE', [], (qErr) => {
+          db.detach();
+          resolve({
+            connected:  !qErr,
+            ...info,
+            responseMs: Date.now() - start,
+            ...(qErr ? { error: qErr.message } : {}),
+          });
+        });
+      });
+    });
+  }
+
+  /** Executa SELECT e retorna array de resultados */
   query<T = Record<string, unknown>>(sql: string, params: unknown[] = []): Promise<T[]> {
     return new Promise((resolve, reject) => {
-      if (!this.pool) return resolve([]);
+      if (!this.isEnabled()) return resolve([]);
 
       this.pool.get((err, db) => {
         if (err) return reject(err);
@@ -65,7 +111,7 @@ export class FirebirdService implements OnModuleInit, OnModuleDestroy {
   /** Executa DML (INSERT / UPDATE / DELETE) */
   execute(sql: string, params: unknown[] = []): Promise<void> {
     return new Promise((resolve, reject) => {
-      if (!this.pool) return resolve();
+      if (!this.isEnabled()) return resolve();
 
       this.pool.get((err, db) => {
         if (err) return reject(err);
@@ -77,10 +123,5 @@ export class FirebirdService implements OnModuleInit, OnModuleDestroy {
         });
       });
     });
-  }
-
-  /** Verifica se a conexão está disponível */
-  isEnabled(): boolean {
-    return !!this.pool && !!this.options?.database;
   }
 }

@@ -3,16 +3,16 @@ import { Injectable } from '@nestjs/common';
 import { AppLoggerService } from '../logger/logger.service';
 
 /**
- * Serviço de comparação entre dois datasets (SQLite ↔ Firebird ou qualquer fonte).
  * Porta direta de backend/src/modules/comparator/comparator.js.
- * Detecta inclusões (toCreate), alterações (toUpdate) e exclusões (toDelete).
+ * Detecta inclusões (toCreate), alterações (toUpdate) e exclusões (toDelete)
+ * entre dois datasets. Não acessa API nem interface — baixo acoplamento.
  */
 @Injectable()
 export class ComparatorService {
 
   constructor(private readonly logger: AppLoggerService) {}
 
-  compare(sourceData: any[], targetData: any[], options: CompareOptions = {}) {
+  compare(sourceData: any[], targetData: any[], options: CompareOptions = {}): CompareResult {
     const {
       keyField      = 'id',
       compareFields = [],
@@ -20,18 +20,20 @@ export class ComparatorService {
       trimStrings   = true,
     } = options;
 
+    // CORREÇÃO: segundo argumento de info() deve ser string (módulo), não objeto
     this.logger.info(
-      `🔍 Comparando: ${sourceData.length} origem vs ${targetData.length} destino`
+      `🔍 Comparando: ${sourceData.length} origem vs ${targetData.length} destino`,
+      'Comparator',
     );
 
     const result: CompareResult = {
       summary: {
-        sourceTotal:     sourceData.length,
-        targetTotal:     targetData.length,
-        toCreate:        0,
-        toUpdate:        0,
-        toDelete:        0,
-        unchanged:       0,
+        sourceTotal:      sourceData.length,
+        targetTotal:      targetData.length,
+        toCreate:         0,
+        toUpdate:         0,
+        toDelete:         0,
+        unchanged:        0,
         processingTimeMs: 0,
       },
       toCreate:  [],
@@ -41,16 +43,17 @@ export class ComparatorService {
     };
 
     const start     = Date.now();
-    const sourceMap = this.buildMap(sourceData, keyField, options);
-    const targetMap = this.buildMap(targetData, keyField, options);
+    const opts      = { keyField, compareFields, caseSensitive, trimStrings };
+    const sourceMap = this.buildMap(sourceData, keyField, opts);
+    const targetMap = this.buildMap(targetData, keyField, opts);
 
-    // Registros no target ausentes no source → precisam ser CRIADOS na source
+    // Registros no target → verificar se existem no source
     for (const [key, targetItem] of targetMap) {
       const sourceItem = sourceMap.get(key);
       if (!sourceItem) {
         result.toCreate.push(targetItem);
       } else {
-        const diff = this.findDifferences(sourceItem, targetItem, compareFields, options);
+        const diff = this.findDifferences(sourceItem, targetItem, compareFields, opts);
         if (diff.length > 0) {
           result.toUpdate.push({ ...targetItem, _changes: diff });
         } else {
@@ -59,21 +62,22 @@ export class ComparatorService {
       }
     }
 
-    // Registros no source ausentes no target → precisam ser DELETADOS
+    // Registros no source ausentes no target → deletar
     for (const [key, sourceItem] of sourceMap) {
       if (!targetMap.has(key)) {
         result.toDelete.push(sourceItem);
       }
     }
 
-    // Atualiza sumário
-    result.summary.toCreate        = result.toCreate.length;
-    result.summary.toUpdate        = result.toUpdate.length;
-    result.summary.toDelete        = result.toDelete.length;
-    result.summary.unchanged       = result.unchanged.length;
+    result.summary.toCreate         = result.toCreate.length;
+    result.summary.toUpdate         = result.toUpdate.length;
+    result.summary.toDelete         = result.toDelete.length;
+    result.summary.unchanged        = result.unchanged.length;
     result.summary.processingTimeMs = Date.now() - start;
 
-    this.logger.info('📊 Comparação concluída', result.summary);
+    // CORREÇÃO: passar summary como terceiro argumento (detalhes), não segundo
+    this.logger.info('📊 Comparação concluída', 'Comparator', result.summary);
+
     return result;
   }
 
@@ -108,7 +112,7 @@ export class ComparatorService {
   }
 }
 
-// ─── Tipos ────────────────────────────────────────────────────────────────────
+// ─── Interfaces ───────────────────────────────────────────────────────────────
 
 interface CompareOptions {
   keyField?:       string;

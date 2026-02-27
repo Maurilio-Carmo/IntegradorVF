@@ -21,15 +21,12 @@ export class SqliteService implements OnModuleInit, OnModuleDestroy {
     const dbPath = this.config.get<string>('DATABASE_PATH')
       ?? path.join(process.cwd(), 'backend', 'database', 'integrador.db');
 
-    // Garante que a pasta existe antes de abrir o arquivo
     const dir = path.dirname(dbPath);
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
 
     this.db = new Database(dbPath);
-
-    // Performance básica recomendada para SQLite
     this.db.pragma('journal_mode = WAL');
     this.db.pragma('foreign_keys = ON');
 
@@ -41,23 +38,47 @@ export class SqliteService implements OnModuleInit, OnModuleDestroy {
     this.log.log('🔒 SQLite desconectado');
   }
 
-  /** Retorna a instância raw para uso nos repositórios */
+  /** Retorna a instância raw do banco */
   getDb(): Database.Database {
     return this.db;
   }
 
-  /** Executa uma query SELECT e retorna array de resultados */
+  /** SELECT — retorna array de resultados */
   query<T = Record<string, unknown>>(sql: string, params: unknown[] = []): T[] {
     return this.db.prepare(sql).all(...params) as T[];
   }
 
-  /** Executa INSERT / UPDATE / DELETE */
+  /** INSERT / UPDATE / DELETE */
   run(sql: string, params: unknown[] = []): Database.RunResult {
     return this.db.prepare(sql).run(...params);
   }
 
-  /** Executa uma query que retorna apenas 1 linha */
+  /** SELECT — retorna apenas 1 linha */
   get<T = Record<string, unknown>>(sql: string, params: unknown[] = []): T | undefined {
     return this.db.prepare(sql).get(...params) as T | undefined;
+  }
+
+  /**
+   * Executa um conjunto de operações em uma transação atômica.
+   * Se qualquer operação falhar, tudo é revertido automaticamente.
+   *
+   * @example
+   * this.sqlite.transaction(() => {
+   *   this.sqlite.run('DELETE FROM tabela_a');
+   *   this.sqlite.run('DELETE FROM tabela_b');
+   * });
+   */
+  transaction(fn: () => void): void {
+    const txn = this.db.transaction(fn);
+    txn();
+  }
+
+  /**
+   * Executa um conjunto de operações em transação e retorna um valor.
+   * Útil quando a função precisa retornar dados após a transação.
+   */
+  transactionWith<T>(fn: () => T): T {
+    const txn = this.db.transaction(fn);
+    return txn();
   }
 }

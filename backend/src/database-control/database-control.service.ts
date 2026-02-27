@@ -13,7 +13,6 @@ import * as path from 'path';
 export class DatabaseControlService {
   private readonly log = new Logger(DatabaseControlService.name);
 
-  /** Lista completa de domínios/tabelas do IntegradorDB.sql */
   private readonly TABELAS = [
     'secoes', 'grupos', 'subgrupos', 'marcas', 'familias',
     'produtos', 'produto_auxiliares', 'produto_fornecedores',
@@ -33,7 +32,7 @@ export class DatabaseControlService {
     private readonly logger: AppLoggerService,
   ) {}
 
-  /** Executa o SQL de criação — idempotente (IF NOT EXISTS) */
+  /** Executa o IntegradorDB.sql — idempotente (IF NOT EXISTS) */
   async criarTabelas() {
     const sqlPath = path.join(process.cwd(), 'backend', 'database', 'IntegradorDB.sql');
     const sql     = fs.readFileSync(sqlPath, 'utf8');
@@ -48,15 +47,14 @@ export class DatabaseControlService {
         try {
           this.sqlite.run(stmt);
           if (stmt.toUpperCase().startsWith('CREATE')) criadas++;
-        } catch (err) {
-          // "already exists" é esperado em execuções repetidas — ignorar
-          if (!err.message.includes('already exists')) {
+        } catch (err: any) {
+          if (!err.message?.includes('already exists')) {
             erros.push(err.message);
           }
         }
       });
 
-    // Tabela de histórico de sync — pode não estar no SQL original
+    // Tabela de histórico — pode não estar no SQL original
     this.sqlite.run(`
       CREATE TABLE IF NOT EXISTS sync_historico (
         id           INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -67,7 +65,8 @@ export class DatabaseControlService {
       )
     `);
 
-    this.logger.success(`✅ Banco criado: ${criadas} tabelas`);
+    // CORREÇÃO: success() agora existe no AppLoggerService
+    this.logger.success(`Banco criado: ${criadas} tabelas`, 'DatabaseControl');
     return { success: true, tabelas_criadas: criadas, erros };
   }
 
@@ -75,6 +74,7 @@ export class DatabaseControlService {
   async limparDados() {
     let limpas = 0;
 
+    // CORREÇÃO: sqlite.transaction() agora existe no SqliteService
     this.sqlite.transaction(() => {
       this.TABELAS.forEach(tabela => {
         try {
@@ -84,7 +84,7 @@ export class DatabaseControlService {
       });
     });
 
-    this.logger.info(`🧹 Dados limpos: ${limpas} tabelas`);
+    this.logger.info(`Dados limpos: ${limpas} tabelas`, 'DatabaseControl');
     return { success: true, tabelas_limpas: limpas };
   }
 
@@ -94,11 +94,11 @@ export class DatabaseControlService {
       try { this.sqlite.run(`DROP TABLE IF EXISTS ${tabela}`); } catch {}
     });
 
-    this.logger.warn('💣 Reset completo executado — recriando banco...');
+    this.logger.warn('Reset completo executado — recriando banco...', 'DatabaseControl');
     return this.criarTabelas();
   }
 
-  /** Retorna a contagem de registros por tabela */
+  /** Retorna contagem de registros por tabela */
   async obterEstatisticas() {
     const stats: Record<string, any> = {};
 

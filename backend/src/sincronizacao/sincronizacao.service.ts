@@ -9,11 +9,11 @@ interface ApiConfig { apiUrl: string; apiKey: string; }
 const DOMINIOS_SET = new Set(DOMINIOS_VALIDOS);
 
 /**
- * Motor de sincronização bidirecional entre SQLite e a API Varejo Fácil.
+ * Motor de sincronização entre SQLite e a API Varejo Fácil.
  *
  * Status dos registros:
- *   C → POST (criar na API)
- *   U → PUT  (atualizar na API)
+ *   C → POST   (criar na API)
+ *   U → PUT    (atualizar na API)
  *   D → DELETE (remover na API)
  *   S → Sincronizado com sucesso
  *   E → Erro — disponível para reprocessamento
@@ -45,23 +45,32 @@ export class SincronizacaoService {
       `SELECT * FROM ${dominio} WHERE status IN ('C','U','D') ORDER BY updated_at`
     );
 
-    this.logger.info(`🔄 Sync ${dominio}: ${pendentes.length} registros pendentes`);
+    this.logger.info(
+      `Sync ${dominio}: ${pendentes.length} registros pendentes`,
+      'Sincronizacao',
+    );
 
     const resultado = {
-      criados:    0,
+      criados:     0,
       atualizados: 0,
-      deletados:  0,
-      erros:      0,
-      total:      pendentes.length,
+      deletados:   0,
+      erros:       0,
+      total:       pendentes.length,
     };
 
-    for (const registro of pendentes) {
+    for (const registro of pendentes as any[]) {
       await this.processarRegistro(dominio, registro, apiConfig, resultado);
     }
 
     const duracao = Date.now() - inicio;
     this.salvarHistorico(dominio, resultado, duracao);
-    this.logger.success(`✅ Sync ${dominio} concluído em ${duracao}ms`, resultado);
+
+    // CORREÇÃO: success() agora existe no AppLoggerService
+    this.logger.success(
+      `Sync ${dominio} concluído em ${duracao}ms`,
+      'Sincronizacao',
+      resultado,
+    );
 
     return { ...resultado, duracao_ms: duracao, dominio };
   }
@@ -72,7 +81,8 @@ export class SincronizacaoService {
     this.validarApiConfig(apiConfig);
 
     const registro = this.sqlite.get(
-      `SELECT * FROM ${dominio} WHERE id = ? AND status = 'E'`, [id]
+      `SELECT * FROM ${dominio} WHERE id = ? AND status = 'E'`,
+      [id]
     );
 
     if (!registro) {
@@ -82,8 +92,7 @@ export class SincronizacaoService {
     }
 
     const resultado = { criados: 0, atualizados: 0, deletados: 0, erros: 0, total: 1 };
-    // Reprocessa como U (update) independente do status original
-    const reg = { ...registro, status: 'U' };
+    const reg = { ...(registro as any), status: 'U' };
     await this.processarRegistro(dominio, reg, apiConfig, resultado);
 
     return resultado;
@@ -111,7 +120,7 @@ export class SincronizacaoService {
       const payload = this.extrairPayload(registro);
 
       if (status === 'C') {
-        await this.httpCall('POST',   baseUrl,         apiConfig.apiKey, payload);
+        await this.httpCall('POST',   baseUrl,            apiConfig.apiKey, payload);
         resultado.criados++;
       } else if (status === 'U') {
         await this.httpCall('PUT',    `${baseUrl}/${id}`, apiConfig.apiKey, payload);
@@ -123,20 +132,18 @@ export class SincronizacaoService {
 
       this.marcarStatus(dominio, id, 'S', JSON.stringify({ ok: true }));
 
-    } catch (err) {
-      this.logger.error(`❌ Falha ${dominio}[${id}]: ${err.message}`);
+    } catch (err: any) {
+      this.logger.error(`Falha ${dominio}[${id}]: ${err.message}`, 'Sincronizacao');
       this.marcarStatus(dominio, id, 'E', err.message);
       resultado.erros++;
     }
   }
 
-  /** Remove campos de controle interno antes de enviar à API */
   private extrairPayload(registro: any): any {
     const { status, retorno, created_at, updated_at, _rowid_, ...payload } = registro;
     return payload;
   }
 
-  /** Atualiza status e retorno do registro no SQLite */
   private marcarStatus(dominio: string, id: any, status: string, retorno: string) {
     this.sqlite.run(
       `UPDATE ${dominio}
@@ -146,25 +153,22 @@ export class SincronizacaoService {
     );
   }
 
-  /** Persiste resultado no histórico de sync */
   private salvarHistorico(dominio: string, resultado: any, duracaoMs: number) {
     try {
       this.sqlite.run(
-        `INSERT INTO sync_historico (dominio, resultado, duracao_ms)
-         VALUES (?, ?, ?)`,
+        `INSERT INTO sync_historico (dominio, resultado, duracao_ms) VALUES (?, ?, ?)`,
         [dominio, JSON.stringify(resultado), duracaoMs]
       );
-    } catch { /* sync_historico pode não existir em banco antigo */ }
+    } catch { /* sync_historico pode não existir ainda */ }
   }
 
-  /** Wrapper de fetch com tratamento de erro HTTP */
   private async httpCall(method: string, url: string, apiKey: string, body?: any) {
     const res = await fetch(url, {
       method,
       headers: {
-        'x-api-key':    apiKey,
-        'Content-Type': 'application/json',
-        'Accept':       'application/json',
+        'x-api-key':      apiKey,
+        'Content-Type':   'application/json',
+        'Accept':         'application/json',
       },
       ...(body ? { body: JSON.stringify(body) } : {}),
     });
@@ -178,16 +182,14 @@ export class SincronizacaoService {
   }
 
   private validarDominio(dominio: string) {
-    if (!DOMINIOS_SET.has(dominio as any)) {
+    if (!DOMINIOS_SET.has(dominio)) {
       throw new BadRequestException(`Domínio inválido: "${dominio}"`);
     }
   }
 
   private validarApiConfig(config: ApiConfig) {
     if (!config?.apiUrl || !config?.apiKey) {
-      throw new BadRequestException(
-        'Headers x-api-url e x-api-key são obrigatórios'
-      );
+      throw new BadRequestException('Headers x-api-url e x-api-key são obrigatórios');
     }
   }
 }

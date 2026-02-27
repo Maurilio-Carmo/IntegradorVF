@@ -1,16 +1,16 @@
 // backend/src/firebird-sync/firebird-sync.service.ts
-import { Injectable }       from '@nestjs/common';
-import { SqliteService }    from '../database/sqlite.service';
-import { FirebirdService }  from '../database/firebird.service';
+import { Injectable }        from '@nestjs/common';
+import { SqliteService }     from '../database/sqlite.service';
+import { FirebirdService }   from '../database/firebird.service';
 import { ComparatorService } from '../comparator/comparator.service';
-import { AppLoggerService } from '../logger/logger.service';
-import { CompararDto }      from './dto/comparar.dto';
+import { AppLoggerService }  from '../logger/logger.service';
+import { CompararDto }       from './dto/comparar.dto';
 
 /**
- * Serviço de sincronização bidirecional entre SQLite e Firebird 2.5.
+ * Sincronização bidirecional entre SQLite e Firebird 2.5.
  *
  * Direções disponíveis:
- *   SQLite  → Firebird : migrarParaFirebird()      (usa UPDATE OR INSERT nativo do FB 2.5)
+ *   SQLite  → Firebird : migrarParaFirebird()        (UPDATE OR INSERT nativo do FB 2.5)
  *   Firebird → SQLite  : atualizarSqliteFromFirebird()
  *   Diff apenas        : comparar()
  */
@@ -23,7 +23,7 @@ export class FirebirdSyncService {
     private readonly logger:     AppLoggerService,
   ) {}
 
-  /** Testa a conectividade com o Firebird */
+  /** Testa a conectividade com o Firebird — CORREÇÃO: chama testConnection() que agora existe */
   async testarConexao() {
     return this.firebird.testConnection();
   }
@@ -49,14 +49,14 @@ export class FirebirdSyncService {
     const firebirdData = await this.firebird.query(`SELECT * FROM ${tabelaFB}`);
 
     return this.comparator.compare(sqliteData, firebirdData, {
-      keyField:      dto.campoChave      ?? 'id',
-      compareFields: dto.camposComparar  ?? [],
+      keyField:      dto.campoChave     ?? 'id',
+      compareFields: dto.camposComparar ?? [],
     });
   }
 
   /**
    * Migra todos os registros do SQLite para o Firebird.
-   * Usa UPDATE OR INSERT (sintaxe nativa do Firebird 2.5) — idempotente.
+   * Usa UPDATE OR INSERT (Firebird 2.5 nativo) — idempotente.
    */
   async migrarParaFirebird(dominio: string) {
     const registros = this.sqlite.query(`SELECT * FROM ${dominio}`);
@@ -64,17 +64,22 @@ export class FirebirdSyncService {
     let migrados    = 0;
     const erros: any[] = [];
 
-    for (const reg of registros) {
+    for (const reg of registros as any[]) {
       try {
         await this.upsertFirebird(tabela, reg);
         migrados++;
-      } catch (err) {
+      } catch (err: any) {
         erros.push({ id: reg.id, erro: err.message });
-        this.logger.error(`Falha ao migrar ${tabela}[${reg.id}]`, err.message);
+        this.logger.error(`Falha ao migrar ${tabela}[${reg.id}]: ${err.message}`, 'FirebirdSync');
       }
     }
 
-    this.logger.success(`Migração ${tabela}: ${migrados}/${registros.length}`, { erros: erros.length });
+    // CORREÇÃO: success() agora existe no AppLoggerService
+    this.logger.success(
+      `Migração ${tabela}: ${migrados}/${registros.length}`,
+      'FirebirdSync',
+      { erros: erros.length },
+    );
 
     return {
       migrados,
@@ -86,64 +91,64 @@ export class FirebirdSyncService {
 
   /**
    * Sobrescreve o SQLite com dados do Firebird (sentido inverso).
-   * Útil para importar dados já existentes no legado.
    */
   async atualizarSqliteFromFirebird(dominio: string, dto: CompararDto) {
     const tabelaFB = dto.tabelaFirebird ?? dominio.toUpperCase();
-    const fbData   = await this.firebird.query(`SELECT * FROM ${tabelaFB}`);
-
+    const registros = await this.firebird.query(`SELECT * FROM ${tabelaFB}`);
     let atualizados = 0;
-    const erros: any[] = [];
 
-    for (const reg of fbData) {
+    for (const reg of registros as any[]) {
       try {
-        // Estratégia de UPSERT genérica no SQLite
-        const campos  = Object.keys(reg);
+        const colunas = Object.keys(reg);
         const valores = Object.values(reg);
-        const placeholders = campos.map(() => '?').join(', ');
-        const updates = campos.map(c => `${c} = excluded.${c}`).join(', ');
+        const placeholders = colunas.map(() => '?').join(', ');
+        const updates      = colunas.map(c => `${c} = ?`).join(', ');
+        const chave        = dto.campoChave ?? 'id';
 
-        this.sqlite.run(
-          `INSERT INTO ${dominio} (${campos.join(', ')})
-           VALUES (${placeholders})
-           ON CONFLICT(id) DO UPDATE SET ${updates}`,
-          valores
+        // Tenta UPDATE primeiro, depois INSERT
+        const resultado = this.sqlite.run(
+          `UPDATE ${dominio} SET ${updates} WHERE ${chave} = ?`,
+          [...valores, reg[chave]]
         );
+
+        if (resultado.changes === 0) {
+          this.sqlite.run(
+            `INSERT INTO ${dominio} (${colunas.join(', ')}) VALUES (${placeholders})`,
+            valores
+          );
+        }
+
         atualizados++;
-      } catch (err) {
-        erros.push({ id: reg.id ?? '?', erro: err.message });
+      } catch (err: any) {
+        this.logger.error(`Falha upsert ${dominio}: ${err.message}`, 'FirebirdSync');
       }
     }
 
-    this.logger.info(`SQLite atualizado do Firebird (${dominio}): ${atualizados}/${fbData.length}`);
+    this.logger.success(
+      `SQLite atualizado a partir do Firebird: ${atualizados} registros`,
+      'FirebirdSync',
+    );
 
-    return { atualizados, total: fbData.length, erros: erros.length, detalhes_erros: erros };
+    return { dominio, atualizados, total: registros.length };
   }
 
-  // ─── Helpers privados ───────────────────────────────────────────────────────
+  // ─── privado ────────────────────────────────────────────────────────────────
 
   /**
-   * UPSERT no Firebird 2.5 usando sintaxe nativa UPDATE OR INSERT.
-   * Remove campos de controle SQLite antes de enviar.
+   * Executa UPDATE OR INSERT no Firebird 2.5.
+   * Sintaxe nativa: UPDATE OR INSERT INTO tabela (cols) VALUES (...) MATCHING (id)
    */
-  private async upsertFirebird(tabela: string, registro: any) {
-    // Exclui colunas de controle que não existem no Firebird
-    const { status, retorno, created_at, updated_at, ...dados } = registro;
+  private async upsertFirebird(tabela: string, registro: any): Promise<void> {
+    const colunas      = Object.keys(registro);
+    const valores      = Object.values(registro);
+    const placeholders = colunas.map(() => '?').join(', ');
 
-    const campos  = Object.keys(dados);
-    const valores = Object.values(dados);
-
-    if (campos.length === 0) return;
-
-    // UPDATE OR INSERT é a sintaxe oficial do Firebird 2.5 para UPSERT
     const sql = `
-      UPDATE OR INSERT INTO ${tabela}
-        (${campos.join(', ')})
-      VALUES
-        (${campos.map(() => '?').join(', ')})
+      UPDATE OR INSERT INTO ${tabela} (${colunas.join(', ')})
+      VALUES (${placeholders})
       MATCHING (ID)
     `;
 
-    await this.firebird.query(sql, valores);
+    await this.firebird.execute(sql, valores);
   }
 }
