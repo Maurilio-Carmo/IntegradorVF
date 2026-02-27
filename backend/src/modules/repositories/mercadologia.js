@@ -1,6 +1,6 @@
 // backend/src/modules/sqlite-repository/repositories/mercadologia.js
 
-const BaseRepository = require('../base-repository');
+const BaseRepository = require('./base-repository');
 
 /**
  * MercadologiaRepository

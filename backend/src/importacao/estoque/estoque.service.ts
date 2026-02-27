@@ -1,7 +1,7 @@
 // backend/src/importacao/estoque/estoque.service.ts
 import { Injectable } from '@nestjs/common';
 
-const ImportacaoService = require('../../../services/importacao-service');
+const ImportacaoService = require('../../services/importacao-service');
 
 @Injectable()
 export class EstoqueService {

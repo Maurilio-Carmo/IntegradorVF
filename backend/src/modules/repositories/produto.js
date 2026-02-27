@@ -1,7 +1,7 @@
 // backend/src/modules/sqlite-repository/repositories/produto.js
 
-const BaseRepository = require('../base-repository');
-const dbSQLite = require('../../../config/database-sqlite'); 
+const BaseRepository = require('./base-repository');
+const dbSQLite = require('../../config/database-sqlite'); 
 
 /**
  * ProdutoRepository

@@ -1,6 +1,6 @@
 // backend/src/modules/sqlite-repository/repositories/pessoa.js
 
-const BaseRepository = require('../base-repository');
+const BaseRepository = require('./base-repository');
 
 /**
  * PessoaRepository

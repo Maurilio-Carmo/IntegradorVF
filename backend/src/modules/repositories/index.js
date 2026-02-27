@@ -5,13 +5,13 @@
  * Exporta todos os repositórios organizados por domínio.
  */
 
-const Mercadologia = require('./sqllite/mercadologia.js');
-const Produto      = require('./sqllite/produto.js');
-const Financeiro   = require('./sqllite/financeiro.js');
-const FrenteLoja   = require('./sqllite/frente-loja.js');
-const Estoque      = require('./sqllite/estoque.js');
-const Fiscal       = require('./sqllite/fiscal.js');
-const Pessoa       = require('./sqllite/pessoa.js');
+const Mercadologia = require('./mercadologia.js');
+const Produto      = require('./produto.js');
+const Financeiro   = require('./financeiro.js');
+const FrenteLoja   = require('./frente-loja.js');
+const Estoque      = require('./estoque.js');
+const Fiscal       = require('./fiscal.js');
+const Pessoa       = require('./pessoa.js');
 
 module.exports = {
     Mercadologia,

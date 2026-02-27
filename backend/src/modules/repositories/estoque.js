@@ -1,6 +1,6 @@
 // backend/src/modules/sqlite-repository/repositories/estoque.js
 
-const BaseRepository = require('../base-repository');
+const BaseRepository = require('./base-repository');
 
 /**
  * EstoqueRepository

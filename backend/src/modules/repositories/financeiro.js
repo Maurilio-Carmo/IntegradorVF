@@ -2,7 +2,7 @@
 
 'use strict';
 
-const BaseRepository = require('../base-repository');
+const BaseRepository = require('./base-repository');
 
 /**
  * FinanceiroRepository

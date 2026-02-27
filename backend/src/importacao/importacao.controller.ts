@@ -4,7 +4,7 @@ import { ApiTags, ApiOperation } from '@nestjs/swagger';
 
 // Reaproveita o service legado via require() durante a transição
 // Substituir por SqliteService.query() direto numa futura refatoração
-const ImportacaoService = require('../../services/importacao-service');
+const ImportacaoService = require('../services/importacao.service');
 
 /**
  * Controller para endpoints gerais do módulo de importação.

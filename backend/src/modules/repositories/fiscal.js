@@ -1,7 +1,7 @@
 // backend/src/modules/sqlite-repository/repositories/fiscal.js
 
-const BaseRepository = require('../base-repository');
-const db = require('../../../config/database-sqlite').getConnection();
+const BaseRepository = require('./base-repository');
+const db = require('../../config/database-sqlite').getConnection();
 
 /**
  * FiscalRepository
