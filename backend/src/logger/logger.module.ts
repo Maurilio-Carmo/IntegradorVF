@@ -1,10 +1,9 @@
 // backend/src/logger/logger.module.ts
-import { Global, Module }   from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { AppLoggerService } from './logger.service';
 
 /**
- * Módulo global de logs.
- * @Global → injetável em qualquer serviço sem importar o módulo.
+ * @Global() — AppLoggerService disponível em todos os módulos.
  */
 @Global()
 @Module({

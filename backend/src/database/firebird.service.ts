@@ -1,58 +1,86 @@
 // backend/src/database/firebird.service.ts
-import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService }      from '@nestjs/config';
-import * as Firebird          from 'node-firebird';
+import {
+  Injectable,
+  OnModuleInit,
+  OnModuleDestroy,
+  Logger,
+} from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import * as Firebird     from 'node-firebird';
 
-/**
- * Serviço de acesso ao Firebird 2.5 via node-firebird.
- * Usa o padrão callback→Promise para cada query.
- * Cada chamada abre e fecha a conexão de forma isolada (stateless).
- */
 @Injectable()
-export class FirebirdService {
+export class FirebirdService implements OnModuleInit, OnModuleDestroy {
+  private pool!: Firebird.ConnectionPool;
   private readonly log = new Logger(FirebirdService.name);
-  private options: any;
+  private options!: Firebird.Options;
 
-  constructor(private readonly config: ConfigService) {
+  constructor(private readonly config: ConfigService) {}
+
+  onModuleInit(): void {
     this.options = {
-      host:           this.config.get('FIREBIRD_HOST',     'localhost'),
-      port:           parseInt(this.config.get('FIREBIRD_PORT', '3050')),
-      database:       this.config.get('FIREBIRD_DATABASE', ''),
-      user:           this.config.get('FIREBIRD_USER',     'SYSDBA'),
-      password:       this.config.get('FIREBIRD_PASSWORD', 'masterkey'),
-      lowercase_keys: true,    // retorna colunas em minúsculas
+      host:     this.config.get<string>('FB_HOST', '127.0.0.1'),
+      port:     this.config.get<number>('FB_PORT', 3050),
+      database: this.config.get<string>('FB_DATABASE', ''),
+      user:     this.config.get<string>('FB_USER', 'SYSDBA'),
+      password: this.config.get<string>('FB_PASSWORD', 'masterkey'),
+      charset:  this.config.get<string>('FB_CHARSET', 'UTF8'),
+      lowercase_keys: false,
+      role:     undefined,
+      pageSize: 4096,
     };
+
+    const poolSize = this.config.get<number>('FB_POOL_SIZE', 5);
+
+    if (!this.options.database) {
+      this.log.warn('⚠️  FB_DATABASE não definido — Firebird desabilitado');
+      return;
+    }
+
+    this.pool = Firebird.pool(poolSize, this.options);
+    this.log.log(`✅ Firebird pool criado (${poolSize} conexões): ${this.options.database}`);
   }
 
-  /** Executa uma query e retorna array de resultados */
-  query<T = any>(sql: string, params: any[] = []): Promise<T[]> {
-    return new Promise((resolve, reject) => {
-      Firebird.attach(this.options, (err, db) => {
-        if (err) return reject(new Error(`Firebird connect: ${err.message}`));
+  onModuleDestroy(): void {
+    this.pool?.destroy();
+    this.log.log('🔒 Firebird pool destruído');
+  }
 
-        db.query(sql, params, (err, result) => {
-          db.detach(); // sempre fecha a conexão
-          if (err) reject(new Error(`Firebird query: ${err.message}`));
-          else     resolve((result ?? []) as T[]);
+  /** Executa uma query SELECT e retorna array de resultados */
+  query<T = Record<string, unknown>>(sql: string, params: unknown[] = []): Promise<T[]> {
+    return new Promise((resolve, reject) => {
+      if (!this.pool) return resolve([]);
+
+      this.pool.get((err, db) => {
+        if (err) return reject(err);
+
+        db.query(sql, params, (qErr, result) => {
+          db.detach();
+          if (qErr) return reject(qErr);
+          resolve((result ?? []) as T[]);
         });
       });
     });
   }
 
-  /** Retorna o primeiro registro ou null */
-  async get<T = any>(sql: string, params: any[] = []): Promise<T | null> {
-    const rows = await this.query<T>(sql, params);
-    return rows[0] ?? null;
+  /** Executa DML (INSERT / UPDATE / DELETE) */
+  execute(sql: string, params: unknown[] = []): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if (!this.pool) return resolve();
+
+      this.pool.get((err, db) => {
+        if (err) return reject(err);
+
+        db.query(sql, params, (qErr) => {
+          db.detach();
+          if (qErr) return reject(qErr);
+          resolve();
+        });
+      });
+    });
   }
 
-  /** Testa a conexão com o banco Firebird */
-  async testConnection(): Promise<{ connected: boolean; message: string }> {
-    try {
-      await this.query('SELECT 1 FROM RDB$DATABASE');
-      return { connected: true, message: 'Conexão estabelecida com sucesso' };
-    } catch (err) {
-      this.log.warn(`Firebird não disponível: ${err.message}`);
-      return { connected: false, message: err.message };
-    }
+  /** Verifica se a conexão está disponível */
+  isEnabled(): boolean {
+    return !!this.pool && !!this.options?.database;
   }
 }

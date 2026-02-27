@@ -4,8 +4,8 @@ import { SqliteService }   from './sqlite.service';
 import { FirebirdService } from './firebird.service';
 
 /**
- * Módulo global de banco de dados.
- * @Global → disponível em todos os módulos sem necessidade de importar explicitamente.
+ * @Global() — SqliteService e FirebirdService ficam disponíveis
+ * em TODOS os módulos sem necessidade de reimportar DatabaseModule.
  */
 @Global()
 @Module({
