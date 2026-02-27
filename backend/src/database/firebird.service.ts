@@ -12,7 +12,10 @@ import * as Firebird     from 'node-firebird';
 export class FirebirdService implements OnModuleInit, OnModuleDestroy {
   private pool!: Firebird.ConnectionPool;
   private readonly log = new Logger(FirebirdService.name);
-  private options!: Firebird.Options;
+
+  // Tipado como `any` porque node-firebird@1.x não declara `charset`
+  // nos seus tipos TypeScript, mas a propriedade existe em runtime.
+  private options!: any;
 
   constructor(private readonly config: ConfigService) {}
 
@@ -35,7 +38,7 @@ export class FirebirdService implements OnModuleInit, OnModuleDestroy {
     }
 
     const poolSize = this.config.get<number>('FB_POOL_SIZE', 5);
-    this.pool = Firebird.pool(poolSize, this.options);
+    this.pool = Firebird.pool(poolSize, this.options as Firebird.Options);
     this.log.log(`✅ Firebird pool criado (${poolSize} conex.): ${this.options.database}`);
   }
 
@@ -50,12 +53,21 @@ export class FirebirdService implements OnModuleInit, OnModuleDestroy {
   }
 
   /**
-   * Testa a conectividade com o banco Firebird.
-   * Retorna objeto com status, versão do servidor e tempo de resposta.
+   * Testa conectividade com o banco Firebird.
+   * Retorna objeto com status, host, database e tempo de resposta.
    */
-  testConnection(): Promise<{ connected: boolean; host: string; database: string; responseMs: number; error?: string }> {
+  testConnection(): Promise<{
+    connected:  boolean;
+    host:       string;
+    database:   string;
+    responseMs: number;
+    error?:     string;
+  }> {
     const start = Date.now();
-    const info  = { host: this.options?.host ?? '', database: this.options?.database ?? '' };
+    const info  = {
+      host:     this.options?.host     ?? '',
+      database: this.options?.database ?? '',
+    };
 
     if (!this.isEnabled()) {
       return Promise.resolve({
@@ -67,7 +79,7 @@ export class FirebirdService implements OnModuleInit, OnModuleDestroy {
     }
 
     return new Promise((resolve) => {
-      this.pool.get((err, db) => {
+      this.pool.get((err: any, db: any) => {
         if (err) {
           return resolve({
             connected:  false,
@@ -77,8 +89,7 @@ export class FirebirdService implements OnModuleInit, OnModuleDestroy {
           });
         }
 
-        // Consulta mínima para validar a conexão
-        db.query('SELECT 1 FROM RDB$DATABASE', [], (qErr) => {
+        db.query('SELECT 1 FROM RDB$DATABASE', [], (qErr: any) => {
           db.detach();
           resolve({
             connected:  !qErr,
@@ -96,10 +107,10 @@ export class FirebirdService implements OnModuleInit, OnModuleDestroy {
     return new Promise((resolve, reject) => {
       if (!this.isEnabled()) return resolve([]);
 
-      this.pool.get((err, db) => {
+      this.pool.get((err: any, db: any) => {
         if (err) return reject(err);
 
-        db.query(sql, params, (qErr, result) => {
+        db.query(sql, params, (qErr: any, result: any) => {
           db.detach();
           if (qErr) return reject(qErr);
           resolve((result ?? []) as T[]);
@@ -113,10 +124,10 @@ export class FirebirdService implements OnModuleInit, OnModuleDestroy {
     return new Promise((resolve, reject) => {
       if (!this.isEnabled()) return resolve();
 
-      this.pool.get((err, db) => {
+      this.pool.get((err: any, db: any) => {
         if (err) return reject(err);
 
-        db.query(sql, params, (qErr) => {
+        db.query(sql, params, (qErr: any) => {
           db.detach();
           if (qErr) return reject(qErr);
           resolve();

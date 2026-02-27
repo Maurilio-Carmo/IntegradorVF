@@ -5,7 +5,7 @@ const ImportacaoService = require('../../../services/importacao-service');
 
 @Injectable()
 export class PessoaService {
-  importarLojas(data: any[])       { return ImportacaoService.importarLojas(data); }
-  importarClientes(data: any[])    { return ImportacaoService.importarClientes(data); }
+  importarLojas(data: any[])        { return ImportacaoService.importarLojas(data); }
+  importarClientes(data: any[])     { return ImportacaoService.importarClientes(data); }
   importarFornecedores(data: any[]) { return ImportacaoService.importarFornecedores(data); }
 }

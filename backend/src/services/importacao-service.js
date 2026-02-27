@@ -1,0 +1,187 @@
+// backend/src/services/importacao-service.js
+
+/**
+ * ImportacaoService — Orquestrador de Importação
+ * Responsabilidade ÚNICA: receber dados da API e delegar para o repositório correto.
+*/
+
+const {
+    Mercadologia,
+    Produto,
+    Financeiro,
+    FrenteLoja,
+    Estoque,
+    Fiscal,
+    Pessoa,
+} = require('../modules/repositories/index');
+
+const dbSQLite = require('../config/database-sqlite');
+class ImportacaoService {
+
+    // MERCADOLÓGICA
+
+    static async importarSecoes(secoes) {
+        return Mercadologia.importarSecoes(secoes);
+    }
+
+    static async importarGrupos(grupos) {
+        return Mercadologia.importarGrupos(grupos);
+    }
+
+    static async importarSubgrupos(subgrupos) {
+        return Mercadologia.importarSubgrupos(subgrupos);
+    }
+
+    // PRODUTOS
+
+    static async importarMarcas(marcas) {
+        return Produto.importarMarcas(marcas);
+    }
+
+    static async importarFamilias(familias) {
+        return Produto.importarFamilias(familias);
+    }
+
+    static async importarProdutos(produtos, lojaId = null) {
+        return Produto.importarProdutos(produtos, lojaId);
+    }
+
+    static async importarProdutoAuxiliares(produtoAuxiliares) {
+        return Produto.importarProdutoAuxiliares(produtoAuxiliares);
+    }
+
+    static async importarProdutoFornecedores(produtoFornecedores) {
+        return Produto.importarProdutoFornecedores(produtoFornecedores);
+    }
+
+    // FINANCEIRO
+
+    static async importarCategorias(categorias) {
+        return Financeiro.importarCategorias(categorias);
+    }
+
+    static async importarAgentes(agentes) {
+        return Financeiro.importarAgentes(agentes);
+    }
+
+    static async importarContasCorrentes(contas) {
+        return Financeiro.importarContasCorrentes(contas);
+    }
+
+    static async importarEspeciesDocumento(especies) {
+        return Financeiro.importarEspeciesDocumento(especies);
+    }
+
+    static async importarHistoricoPadrao(historicos) {
+        return Financeiro.importarHistoricoPadrao(historicos);
+    }
+
+    // FRENTE DE LOJA  (PDV, TIPOS, MOTIVOS)
+
+    static async importarFormasPagamento(formasPagamento) {
+        return FrenteLoja.importarFormasPagamento(formasPagamento);
+    }
+
+    static async importarPagamentosPDV(pagamentos) {
+        return FrenteLoja.importarPagamentosPDV(pagamentos);
+    }
+
+    static async importarRecebimentosPDV(recebimentos) {
+        return FrenteLoja.importarRecebimentosPDV(recebimentos);
+    }
+
+    static async importarMotivosDesconto(motivos) {
+        return FrenteLoja.importarMotivosDesconto(motivos);
+    }
+
+    static async importarMotivosDevolucao(motivos) {
+        return FrenteLoja.importarMotivosDevolucao(motivos);
+    }
+
+    static async importarMotivosCancelamento(motivos) {
+        return FrenteLoja.importarMotivosCancelamento(motivos);
+    }
+
+    // ESTOQUE
+
+    static async importarLocalEstoque(locais) {
+        return Estoque.importarLocalEstoque(locais);
+    }
+
+    static async importarTiposAjustes(tipos) {
+        return Estoque.importarTiposAjustes(tipos);
+    }
+
+    static async importarSaldoEstoque(saldos) {
+        return Estoque.importarSaldoEstoque(saldos);
+    }
+
+    // FISCAL / TRIBUTÁRIO
+
+    static async importarRegimeTributario(regimes) {
+        return Fiscal.importarRegimeTributario(regimes);
+    }
+
+    static async importarSituacoesFiscais(situacoes) {
+        return Fiscal.importarSituacoesFiscais(situacoes);
+    }
+
+    static async importarTiposOperacoes(tipos) {
+        return Fiscal.importarTiposOperacoes(tipos);
+    }
+
+    static async importarImpostosFederais(impostos) {
+        return Fiscal.importarImpostosFederais(impostos);
+    }
+
+    static async importarTabelasTributarias(tabelas) {
+        return Fiscal.importarTabelasTributarias(tabelas);
+    }
+
+    static async importarCenariosFiscais(cenarios) {
+        return Fiscal.importarCenariosFiscais(cenarios);
+    }
+
+    // PESSOAS
+
+    static async importarLojas(lojas) {
+        return Pessoa.importarLojas(lojas);
+    }
+
+    static async importarClientes(clientes) {
+        return Pessoa.importarClientes(clientes);
+    }
+
+    static async importarFornecedores(fornecedores) {
+        return Pessoa.importarFornecedores(fornecedores);
+    }
+
+    // ESTATÍSTICAS
+
+    static async obterEstatisticas() {
+        try {
+            const tabelas = [
+                'secoes', 'grupos', 'subgrupos', 'marcas', 'familias', 'produtos', 
+                'produto_min_max', 'produto_regimes', 'produto_componentes', 'produto_impostos_federais', 'produto_auxiliares', 'produto_fornecedores',
+                'categorias', 'agentes', 'contas_correntes', 'especies_documentos', 'historico_padrao', 
+                'formas_pagamento', 'pagamentos_pdv', 'recebimentos_pdv', 
+                'motivos_desconto', 'motivos_devolucao', 'motivos_cancelamento',
+                'regime_tributario', 'situacoes_fiscais', 'tipos_operacoes', 'impostos_federais', 
+                'tabelas_tributarias', 'cenarios_fiscais',
+                'local_estoque', 'tipos_ajustes', 'saldo_estoque',
+                'lojas', 'clientes', 'fornecedores',
+            ];
+
+            return tabelas.reduce((acc, tabela) => {
+                acc[tabela] = dbSQLite.count(tabela);
+                return acc;
+            }, {});
+
+        } catch (error) {
+            console.error('❌ Erro ao obter estatísticas:', error.message);
+            return {};
+        }
+    }
+}
+
+module.exports = ImportacaoService;
