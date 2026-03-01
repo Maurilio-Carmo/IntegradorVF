@@ -2,7 +2,7 @@
 import { Injectable }        from '@nestjs/common';
 import { SqliteService }     from '../database/sqlite.service';
 import { FirebirdService }   from '../database/firebird.service';
-import { ComparatorService } from '../comparator/comparator.service';
+import { ComparatorService, CompareResult } from '../comparator/comparator.service';
 import { AppLoggerService }  from '../logger/logger.service';
 import { CompararDto }       from './dto/comparar.dto';
 
@@ -43,7 +43,7 @@ export class FirebirdSyncService {
    * Compara o dataset do SQLite com o do Firebird para um domínio.
    * Retorna { toCreate, toUpdate, toDelete, unchanged, summary }.
    */
-  async comparar(dominio: string, dto: CompararDto) {
+  async comparar(dominio: string, dto: CompararDto): Promise<CompareResult> {
     const tabelaFB     = dto.tabelaFirebird ?? dominio.toUpperCase();
     const sqliteData   = this.sqlite.query(`SELECT * FROM ${dominio}`);
     const firebirdData = await this.firebird.query(`SELECT * FROM ${tabelaFB}`);

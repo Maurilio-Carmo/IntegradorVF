@@ -182,7 +182,7 @@ export class SincronizacaoService {
   }
 
   private validarDominio(dominio: string) {
-    if (!DOMINIOS_SET.has(dominio)) {
+    if (!DOMINIOS_SET.has(dominio as typeof DOMINIOS_VALIDOS[number])) {
       throw new BadRequestException(`Domínio inválido: "${dominio}"`);
     }
   }

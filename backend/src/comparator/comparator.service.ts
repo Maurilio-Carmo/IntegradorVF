@@ -114,14 +114,14 @@ export class ComparatorService {
 
 // ─── Interfaces ───────────────────────────────────────────────────────────────
 
-interface CompareOptions {
+export interface CompareOptions {
   keyField?:       string;
   compareFields?:  string[];
   caseSensitive?:  boolean;
   trimStrings?:    boolean;
 }
 
-interface CompareResult {
+export interface CompareResult {
   summary:   Record<string, number>;
   toCreate:  any[];
   toUpdate:  any[];

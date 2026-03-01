@@ -16,7 +16,7 @@ import { ApiTags, ApiOperation, ApiHeader }   from '@nestjs/swagger';
 export class ProxyController {
   private readonly log = new Logger(ProxyController.name);
 
-  @All('*')
+  @All('*path')
   @ApiOperation({ summary: 'Proxy transparente → API Varejo Fácil' })
   @ApiHeader({ name: 'x-api-url', required: true, description: 'URL base da API VF' })
   @ApiHeader({ name: 'x-api-key', required: true, description: 'Token de autenticação' })

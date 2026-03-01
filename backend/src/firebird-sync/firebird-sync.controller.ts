@@ -1,8 +1,9 @@
 // backend/src/firebird-sync/firebird-sync.controller.ts
 import { Controller, Get, Post, Param, Body, HttpCode } from '@nestjs/common';
-import { ApiTags, ApiOperation }                         from '@nestjs/swagger';
-import { FirebirdSyncService }                           from './firebird-sync.service';
-import { CompararDto }                                   from './dto/comparar.dto';
+import { CompareResult } from '../comparator/comparator.service';
+import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { FirebirdSyncService } from './firebird-sync.service';
+import { CompararDto } from './dto/comparar.dto';
 
 /**
  * Endpoints de integração SQLite ↔ Firebird 2.5.
@@ -31,7 +32,7 @@ export class FirebirdSyncController {
   comparar(
     @Param('dominio') dominio: string,
     @Body()           dto: CompararDto,
-  ) {
+  ): Promise<CompareResult> {
     return this.service.comparar(dominio, dto);
   }
 

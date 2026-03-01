@@ -6,13 +6,14 @@ import {
   Logger,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import Database          from 'better-sqlite3';
+import * as BetterSqlite3 from 'better-sqlite3';
 import * as path         from 'path';
 import * as fs           from 'fs';
 
+const Database = (BetterSqlite3 as any).default ?? BetterSqlite3;
 @Injectable()
 export class SqliteService implements OnModuleInit, OnModuleDestroy {
-  private db!: Database.Database;
+  private db!: BetterSqlite3.Database;
   private readonly log = new Logger(SqliteService.name);
 
   constructor(private readonly config: ConfigService) {}
@@ -39,7 +40,7 @@ export class SqliteService implements OnModuleInit, OnModuleDestroy {
   }
 
   /** Retorna a instância raw do banco */
-  getDb(): Database.Database {
+  getDb(): BetterSqlite3.Database {
     return this.db;
   }
 
@@ -49,7 +50,7 @@ export class SqliteService implements OnModuleInit, OnModuleDestroy {
   }
 
   /** INSERT / UPDATE / DELETE */
-  run(sql: string, params: unknown[] = []): Database.RunResult {
+  run(sql: string, params: unknown[] = []): BetterSqlite3.RunResult {
     return this.db.prepare(sql).run(...params);
   }
 
