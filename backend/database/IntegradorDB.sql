@@ -19,8 +19,16 @@ PRAGMA foreign_keys = ON;
 -- TABELAS
 -- =====================================================
 
--- SEÇÕES
+-- CREDENCIAIS
+CREATE TABLE credenciais (
+    id INTEGER PRIMARY KEY CHECK (id = 1) DEFAULT 1,
+    loja_id INTEGER NOT NULL,
+    url_api TEXT NOT NULL,
+    token_api TEXT NOT NULL,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
 
+-- SEÇÕES
 CREATE TABLE secoes (
     secao_id INTEGER PRIMARY KEY,
     descricao_old TEXT,
@@ -32,7 +40,6 @@ CREATE TABLE secoes (
 );
 
 -- GRUPOS
-
 CREATE TABLE grupos (
     grupo_id INTEGER PRIMARY KEY,
     secao_id INTEGER NOT NULL,
@@ -49,7 +56,6 @@ CREATE TABLE grupos (
 CREATE INDEX idx_grupos_grupo ON grupos(secao_id, grupo_id);
 
 -- SUBGRUPOS
-
 CREATE TABLE subgrupos (
     subgrupo_id INTEGER PRIMARY KEY,
     secao_id INTEGER NOT NULL,
@@ -67,7 +73,6 @@ CREATE TABLE subgrupos (
 CREATE INDEX idx_subgrupos_subgrupo ON subgrupos(secao_id, grupo_id, subgrupo_id);
 
 -- MARCAS
-
 CREATE TABLE marcas (
     marca_id INTEGER PRIMARY KEY,
     descricao_old TEXT,
@@ -79,7 +84,6 @@ CREATE TABLE marcas (
 );
 
 -- FAMILIAS
-
 CREATE TABLE familias (
     familia_id INTEGER PRIMARY KEY,
     descricao_old TEXT,
@@ -91,7 +95,6 @@ CREATE TABLE familias (
 );
 
 -- PRODUTOS
-
 CREATE TABLE produtos (
 	produto_id INTEGER PRIMARY KEY,
 	descricao TEXT NOT NULL,
@@ -157,7 +160,6 @@ CREATE INDEX idx_produtos_familia ON produtos(familia_id);
 CREATE INDEX idx_produtos_marca ON produtos(marca_id);
 
 -- PRODUTOS COMPONENTES
-
 CREATE TABLE produto_componentes (
     id INTEGER PRIMARY KEY,
     produto_id INTEGER NOT NULL,
@@ -174,7 +176,6 @@ CREATE TABLE produto_componentes (
 );
 
 -- PRODUTO MINIMO E MAXIMO
-
 CREATE TABLE produto_min_max (
     produto_id INTEGER NOT NULL,
     loja_id INTEGER NOT NULL,
@@ -191,7 +192,6 @@ CREATE TABLE produto_min_max (
 CREATE INDEX idx_produto_estoque_loja ON produto_min_max(loja_id);
 
 -- REGIME TRIBUTÁRIO DO PRODUTO
-
 CREATE TABLE produto_regimes (
     produto_id INTEGER NOT NULL,
     loja_id INTEGER NOT NULL,
@@ -205,7 +205,6 @@ CREATE TABLE produto_regimes (
 );
 
 -- IMPOSTOS FEDERAIS DO PRODUTO
-
 CREATE TABLE produto_impostos_federais (
     produto_id INTEGER NOT NULL,
     imposto_id TEXT NOT NULL,
@@ -218,7 +217,6 @@ CREATE TABLE produto_impostos_federais (
 );
 
 -- CÓDIGOS AUXILIARES
-
 CREATE TABLE produto_auxiliares (
     codigo_id TEXT PRIMARY KEY,
     produto_id INTEGER NOT NULL,
@@ -234,7 +232,6 @@ CREATE TABLE produto_auxiliares (
 );
 
 -- PRODUTOS FORNECEDORES
-
 CREATE TABLE produto_fornecedores (
     id INTEGER PRIMARY KEY,
     produto_id INTEGER NOT NULL,
@@ -253,7 +250,6 @@ CREATE TABLE produto_fornecedores (
 );
 
 -- FORMAS DE PAGAMENTO
-
 CREATE TABLE formas_pagamento (
     forma_pagamento_id          INTEGER PRIMARY KEY,
     descricao                   TEXT,
@@ -274,7 +270,6 @@ CREATE TABLE formas_pagamento (
 );
 
 -- PAGAMENTOS PDV
-
 CREATE TABLE pagamentos_pdv (
     pagamento_id INTEGER PRIMARY KEY,
     descricao TEXT,
@@ -291,7 +286,6 @@ CREATE TABLE pagamentos_pdv (
 );
 
 -- RECEBIMENTOS PDV
-
 CREATE TABLE recebimentos_pdv (
     recebimento_id INTEGER PRIMARY KEY,
     descricao TEXT,
@@ -312,7 +306,6 @@ CREATE TABLE recebimentos_pdv (
 );
 
 -- MOTIVOS DE DESCONTO
-
 CREATE TABLE motivos_desconto (
 	 motivo_id INTEGER PRIMARY KEY,
 	 descricao TEXT,
@@ -327,7 +320,6 @@ CREATE TABLE motivos_desconto (
 );
 
 -- MOTIVOS DE DEVOLUÇÃO
-
 CREATE TABLE motivos_devolucao (
     motivo_id INTEGER PRIMARY KEY,
     descricao TEXT,
@@ -338,7 +330,6 @@ CREATE TABLE motivos_devolucao (
 );
 
 -- MOTIVOS DE CANCELAMENTO
-
 CREATE TABLE motivos_cancelamento (
 	 motivo_id INTEGER PRIMARY KEY,
 	 descricao TEXT,
@@ -351,7 +342,6 @@ CREATE TABLE motivos_cancelamento (
 );
 
 -- AGENTES
-
 CREATE TABLE agentes (
 	 agente_id INTEGER PRIMARY KEY,
 	 nome TEXT,
@@ -379,7 +369,6 @@ CREATE TABLE agentes (
 );
 
 -- CATEGORIAS
-
 CREATE TABLE categorias (
     categoria_id INTEGER PRIMARY KEY,
     descricao TEXT,
@@ -396,7 +385,6 @@ CREATE TABLE categorias (
 );
 
 -- CONTAS CORRENTES
-
 CREATE TABLE contas_correntes (
     conta_id INTEGER PRIMARY KEY,
     descricao TEXT,
@@ -423,7 +411,6 @@ CREATE TABLE contas_correntes (
 );
 
 -- ESPÉCIES DE DOCUMENTO
-
 CREATE TABLE especies_documentos (
     especie_id INTEGER PRIMARY KEY,
     descricao TEXT,
@@ -450,7 +437,6 @@ CREATE TABLE especies_documentos (
 );
 
 -- HISTÓRICO PADRÃO
-
 CREATE TABLE historico_padrao (
     historico_id INTEGER PRIMARY KEY,
     descricao TEXT,
@@ -481,7 +467,6 @@ CREATE TABLE local_estoque (
 );
 
 -- TIPOS DE AJUSTES
-
 CREATE TABLE tipos_ajustes (
     ajuste_id INTEGER PRIMARY KEY,
     descricao TEXT,
@@ -495,7 +480,6 @@ CREATE TABLE tipos_ajustes (
 );
 
 -- SALDO DE ESTOQUE
-
 CREATE TABLE saldo_estoque (
     saldo_id INTEGER PRIMARY KEY,
     loja_id INTEGER NOT NULL,
@@ -515,7 +499,6 @@ CREATE TABLE saldo_estoque (
 );
 
 -- REGIME TRIBUTÁRIO
-
 CREATE TABLE regime_tributario (
     regime_id INTEGER PRIMARY KEY,
     descricao TEXT,
@@ -529,7 +512,6 @@ CREATE TABLE regime_tributario (
 );
 
 -- SITUAÇÕES FISCAIS
-
 CREATE TABLE situacoes_fiscais (
     situacao_id INTEGER PRIMARY KEY,
     descricao TEXT,
@@ -542,7 +524,6 @@ CREATE TABLE situacoes_fiscais (
 );
 
 -- IMPOSTOS FEDERAIS
-
 CREATE TABLE impostos_federais (
     imposto_id INTEGER PRIMARY KEY,
     descricao TEXT,
@@ -564,7 +545,6 @@ CREATE TABLE impostos_federais (
 );
 
 -- TIPOS DE OPERAÇÕES
-
 CREATE TABLE tipos_operacoes (
     operacao_id INTEGER PRIMARY KEY,
     descricao TEXT,
@@ -599,7 +579,6 @@ CREATE TABLE tipos_operacoes (
 );
 
 -- TABELAS TRIBUTÁRIAS
-
 CREATE TABLE IF NOT EXISTS tabelas_tributarias (
     tabela_id INTEGER NOT NULL,
     tipo_operacao TEXT NOT NULL CHECK(tipo_operacao IN ('ENTRADA','SAIDA')),
@@ -619,7 +598,6 @@ CREATE TABLE IF NOT EXISTS tabelas_tributarias (
 );
 
 -- TABELAS TRIBUTÁRIAS DESTINO
-
 CREATE TABLE IF NOT EXISTS tabelas_tributarias_destino (
     tabela_id INTEGER NOT NULL,
     tipo_operacao TEXT NOT NULL,
@@ -660,7 +638,6 @@ CREATE TABLE IF NOT EXISTS tabelas_tributarias_destino (
 );
 
 -- CENARIOS FISCAIS
-
 CREATE TABLE cenarios_fiscais (
     cenario_id INTEGER PRIMARY KEY,
     descricao TEXT,
@@ -673,7 +650,6 @@ CREATE TABLE cenarios_fiscais (
 );
 
 -- CENARIOS FISCAIS NCMs
-
 CREATE TABLE cenarios_fiscais_ncms (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     codigo_ncm INTEGER NOT NULL,
@@ -688,7 +664,6 @@ CREATE TABLE cenarios_fiscais_ncms (
 CREATE UNIQUE INDEX IF NOT EXISTS uq_cf_ncm ON cenarios_fiscais_ncms(codigo_cenario_fiscal, codigo_ncm);
 
 -- CENARIOS FISCAIS LOJAS
-
 CREATE TABLE cenarios_fiscais_lojas (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     codigo_loja INTEGER NOT NULL,
@@ -704,7 +679,6 @@ CREATE TABLE cenarios_fiscais_lojas (
 CREATE UNIQUE INDEX IF NOT EXISTS uq_cf_loja ON cenarios_fiscais_lojas(codigo_cenario_fiscal, codigo_loja);
 
 -- CENARIOS FISCAIS UFs DESTINO
-
 CREATE TABLE cenarios_fiscais_destino (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     uf_destino TEXT NOT NULL,
@@ -718,7 +692,6 @@ CREATE TABLE cenarios_fiscais_destino (
 CREATE UNIQUE INDEX IF NOT EXISTS uq_cf_destino ON cenarios_fiscais_destino(codigo_cenario_fiscal, uf_destino);
 
 -- LOJAS
-
 CREATE TABLE lojas (
 	loja_id INTEGER PRIMARY KEY,
 	nome TEXT,
@@ -750,7 +723,6 @@ CREATE TABLE lojas (
 );
 
 -- CLIENTES
-
 CREATE TABLE clientes (
     cliente_id INTEGER PRIMARY KEY,
     tipo_de_pessoa TEXT CHECK(tipo_de_pessoa IN ('FISICA','JURIDICA','ESTRANGEIRO')),
@@ -795,7 +767,6 @@ CREATE TABLE clientes (
 );
 
 -- FORNECEDORES
-
 CREATE TABLE fornecedores (
     fornecedor_id INTEGER PRIMARY KEY,
     tipo_pessoa TEXT CHECK(tipo_pessoa IN ('FISICA','JURIDICA','ESTRANGEIRO')),
@@ -842,7 +813,6 @@ CREATE TABLE fornecedores (
 );
 
 -- LOG DE SINCRONIZAÇÃO
-
 CREATE TABLE log_sincronizacao (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     entidade TEXT NOT NULL,
@@ -861,6 +831,12 @@ CREATE INDEX idx_log_data ON log_sincronizacao(data_execucao);
 -- =====================================================
 -- TRIGGERS 
 -- =====================================================
+
+CREATE TRIGGER trg_credenciais_updated_at
+AFTER UPDATE ON credenciais
+BEGIN
+    UPDATE credenciais SET updated_at = CURRENT_TIMESTAMP WHERE loja_id = NEW.loja_id;
+END;
 
 CREATE TRIGGER trg_secoes_updated_at
 AFTER UPDATE ON secoes
