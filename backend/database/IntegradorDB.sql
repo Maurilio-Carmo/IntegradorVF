@@ -16,67 +16,6 @@ PRAGMA foreign_keys = ON;
 -- =====================================================
 
 -- =====================================================
--- DROP
--- =====================================================
-
--- PRODUTO
-DROP TABLE IF EXISTS secoes;
-DROP TABLE IF EXISTS grupos;
-DROP TABLE IF EXISTS subgrupos;
-DROP TABLE IF EXISTS marcas;
-DROP TABLE IF EXISTS familias;
-DROP TABLE IF EXISTS produtos;
-DROP TABLE IF EXISTS produto_componentes;
-DROP TABLE IF EXISTS produto_min_max;
-DROP TABLE IF EXISTS produto_regimes;
-DROP TABLE IF EXISTS produto_impostos_federais;
-DROP TABLE IF EXISTS produto_auxiliares;
-DROP TABLE IF EXISTS produto_fornecedores;
-
--- FRENTE DE LOJA
-DROP TABLE IF EXISTS formas_pagamento;
-DROP TABLE IF EXISTS pagamentos_pdv;
-DROP TABLE IF EXISTS recebimentos_pdv;
-DROP TABLE IF EXISTS motivos_desconto;
-DROP TABLE IF EXISTS motivos_devolucao;
-DROP TABLE IF EXISTS motivos_cancelamento;
-
--- FINANCEIRO
-DROP TABLE IF EXISTS agentes;
-DROP TABLE IF EXISTS categorias;
-DROP TABLE IF EXISTS contas_correntes;
-DROP TABLE IF EXISTS especies_documentos;
-DROP TABLE IF EXISTS historico_padrao;
-DROP TABLE IF EXISTS limites_credito;
-DROP TABLE IF EXISTS contas_pagar;
-DROP TABLE IF EXISTS contas_receber;
-
--- ESTOQUE
-DROP TABLE IF EXISTS local_estoque;
-DROP TABLE IF EXISTS tipos_ajustes;
-DROP TABLE IF EXISTS saldo_estoque;
-
--- FISCAL
-DROP TABLE IF EXISTS regime_tributario;
-DROP TABLE IF EXISTS situacoes_fiscais;
-DROP TABLE IF EXISTS impostos_federais;
-DROP TABLE IF EXISTS tipos_operacoes;
-DROP TABLE IF EXISTS tabelas_tributarias_destino;
-DROP TABLE IF EXISTS tabelas_tributarias;
-DROP TABLE IF EXISTS cenarios_fiscais_destino;
-DROP TABLE IF EXISTS cenarios_fiscais_lojas;
-DROP TABLE IF EXISTS cenarios_fiscais_ncms;
-DROP TABLE IF EXISTS cenarios_fiscais;
-
--- PESSOA
-DROP TABLE IF EXISTS lojas;
-DROP TABLE IF EXISTS clientes;
-DROP TABLE IF EXISTS fornecedores;
-
--- ADM
-DROP TABLE IF EXISTS log_sincronizacao;
-
--- =====================================================
 -- TABELAS
 -- =====================================================
 
@@ -923,245 +862,210 @@ CREATE INDEX idx_log_data ON log_sincronizacao(data_execucao);
 -- TRIGGERS 
 -- =====================================================
 
-DROP TRIGGER IF EXISTS trg_secoes_updated_at;
 CREATE TRIGGER trg_secoes_updated_at
 AFTER UPDATE ON secoes
 BEGIN
     UPDATE secoes SET updated_at = CURRENT_TIMESTAMP WHERE secao_id = NEW.secao_id;
 END;
 
-DROP TRIGGER IF EXISTS trg_grupos_updated_at;
 CREATE TRIGGER trg_grupos_updated_at
 AFTER UPDATE ON grupos
 BEGIN
     UPDATE grupos SET updated_at = CURRENT_TIMESTAMP WHERE grupo_id = NEW.grupo_id;
 END;
 
-DROP TRIGGER IF EXISTS trg_subgrupos_updated_at;
 CREATE TRIGGER trg_subgrupos_updated_at
 AFTER UPDATE ON subgrupos
 BEGIN
     UPDATE subgrupos SET updated_at = CURRENT_TIMESTAMP WHERE subgrupo_id = NEW.subgrupo_id;
 END;
 
-DROP TRIGGER IF EXISTS trg_marcas_updated_at;
 CREATE TRIGGER trg_marcas_updated_at
 AFTER UPDATE ON marcas
 BEGIN
     UPDATE marcas SET updated_at = CURRENT_TIMESTAMP WHERE marca_id = NEW.marca_id;
 END;
 
-DROP TRIGGER IF EXISTS trg_familias_updated_at;
 CREATE TRIGGER trg_familias_updated_at
 AFTER UPDATE ON familias
 BEGIN
     UPDATE familias SET updated_at = CURRENT_TIMESTAMP WHERE familia_id = NEW.familia_id;
 END;
 
-DROP TRIGGER IF EXISTS trg_produtos_updated_at;
 CREATE TRIGGER trg_produtos_updated_at
 AFTER UPDATE ON produtos
 BEGIN
     UPDATE produtos SET updated_at = CURRENT_TIMESTAMP WHERE produto_id = NEW.produto_id;
 END;
 
-DROP TRIGGER IF EXISTS trg_produto_componentes_updated_at;
 CREATE TRIGGER trg_produto_componentes_updated_at
 AFTER UPDATE ON produto_componentes
 BEGIN
     UPDATE produto_componentes SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
 END;
 
-DROP TRIGGER IF EXISTS trg_produto_min_max_updated_at;
 CREATE TRIGGER trg_produto_min_max_updated_at
 AFTER UPDATE ON produto_min_max
 BEGIN
     UPDATE produto_min_max SET updated_at = CURRENT_TIMESTAMP WHERE produto_id = NEW.produto_id AND loja_id = NEW.loja_id;
 END;
 
-DROP TRIGGER IF EXISTS trg_produto_regimes_updated_at;
 CREATE TRIGGER trg_produto_regimes_updated_at
 AFTER UPDATE ON produto_regimes
 BEGIN
     UPDATE produto_regimes SET updated_at = CURRENT_TIMESTAMP WHERE produto_id = NEW.produto_id AND loja_id = NEW.loja_id;
 END;
 
-DROP TRIGGER IF EXISTS trg_produto_impostos_federais_updated_at;
 CREATE TRIGGER trg_produto_impostos_federais_updated_at
 AFTER UPDATE ON produto_impostos_federais
 BEGIN
     UPDATE produto_impostos_federais SET updated_at = CURRENT_TIMESTAMP WHERE produto_id = NEW.produto_id AND imposto_id = NEW.imposto_id;
 END;
 
-DROP TRIGGER IF EXISTS trg_produto_auxiliares_updated_at;
 CREATE TRIGGER trg_produto_auxiliares_updated_at
 AFTER UPDATE ON produto_auxiliares
 BEGIN
     UPDATE produto_auxiliares SET updated_at = CURRENT_TIMESTAMP WHERE codigo_id = NEW.codigo_id;
 END;
 
-DROP TRIGGER IF EXISTS trg_produto_fornecedores_updated_at;
 CREATE TRIGGER trg_produto_fornecedores_updated_at
 AFTER UPDATE ON produto_fornecedores
 BEGIN
     UPDATE produto_fornecedores SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
 END;
 
-DROP TRIGGER IF EXISTS trg_formas_pagamento_updated_at;
 CREATE TRIGGER trg_formas_pagamento_updated_at
 AFTER UPDATE ON formas_pagamento
 BEGIN
     UPDATE formas_pagamento SET updated_at = CURRENT_TIMESTAMP WHERE forma_pagamento_id = NEW.forma_pagamento_id;
 END;
 
-DROP TRIGGER IF EXISTS trg_pagamentos_pdv_updated_at;
 CREATE TRIGGER trg_pagamentos_pdv_updated_at
 AFTER UPDATE ON pagamentos_pdv
 BEGIN
     UPDATE pagamentos_pdv SET updated_at = CURRENT_TIMESTAMP WHERE pagamento_id = NEW.pagamento_id;
 END;
 
-DROP TRIGGER IF EXISTS trg_recebimentos_pdv_updated_at;
 CREATE TRIGGER trg_recebimentos_pdv_updated_at
 AFTER UPDATE ON recebimentos_pdv
 BEGIN
     UPDATE recebimentos_pdv SET updated_at = CURRENT_TIMESTAMP WHERE recebimento_id = NEW.recebimento_id;
 END;
 
-DROP TRIGGER IF EXISTS trg_motivos_desconto_updated_at;
 CREATE TRIGGER trg_motivos_desconto_updated_at
 AFTER UPDATE ON motivos_desconto
 BEGIN
     UPDATE motivos_desconto SET updated_at = CURRENT_TIMESTAMP WHERE motivo_id = NEW.motivo_id;
 END;
 
-DROP TRIGGER IF EXISTS trg_motivos_devolucao_updated_at;
 CREATE TRIGGER trg_motivos_devolucao_updated_at
 AFTER UPDATE ON motivos_devolucao
 BEGIN
     UPDATE motivos_devolucao SET updated_at = CURRENT_TIMESTAMP WHERE motivo_id = NEW.motivo_id;
 END;
 
-DROP TRIGGER IF EXISTS trg_motivos_cancelamento_updated_at;
 CREATE TRIGGER trg_motivos_cancelamento_updated_at
 AFTER UPDATE ON motivos_cancelamento
 BEGIN
     UPDATE motivos_cancelamento SET updated_at = CURRENT_TIMESTAMP WHERE motivo_id = NEW.motivo_id;
 END;
 
-DROP TRIGGER IF EXISTS trg_agentes_updated_at;
 CREATE TRIGGER trg_agentes_updated_at
 AFTER UPDATE ON agentes
 BEGIN
     UPDATE agentes SET updated_at = CURRENT_TIMESTAMP WHERE agente_id = NEW.agente_id;
 END;
 
-DROP TRIGGER IF EXISTS trg_categorias_updated_at;
 CREATE TRIGGER trg_categorias_updated_at
 AFTER UPDATE ON categorias
 BEGIN
     UPDATE categorias SET updated_at = CURRENT_TIMESTAMP WHERE categoria_id = NEW.categoria_id;
 END;
 
-DROP TRIGGER IF EXISTS trg_contas_correntes_updated_at;
 CREATE TRIGGER trg_contas_correntes_updated_at
 AFTER UPDATE ON contas_correntes
 BEGIN
     UPDATE contas_correntes SET updated_at = CURRENT_TIMESTAMP WHERE conta_id = NEW.conta_id;
 END;
 
-DROP TRIGGER IF EXISTS trg_especies_documentos_updated_at;
 CREATE TRIGGER trg_especies_documentos_updated_at
 AFTER UPDATE ON especies_documentos
 BEGIN
     UPDATE especies_documentos SET updated_at = CURRENT_TIMESTAMP WHERE especie_id = NEW.especie_id;
 END;
 
-DROP TRIGGER IF EXISTS trg_historico_padrao_updated_at;
 CREATE TRIGGER trg_historico_padrao_updated_at
 AFTER UPDATE ON historico_padrao
 BEGIN
     UPDATE historico_padrao SET updated_at = CURRENT_TIMESTAMP WHERE historico_id = NEW.historico_id;
 END;
 
-DROP TRIGGER IF EXISTS trg_local_estoque_updated_at;
 CREATE TRIGGER trg_local_estoque_updated_at
 AFTER UPDATE ON local_estoque
 BEGIN
     UPDATE local_estoque SET updated_at = CURRENT_TIMESTAMP WHERE local_id = NEW.local_id;
 END;
 
-DROP TRIGGER IF EXISTS trg_tipos_ajustes_updated_at;
 CREATE TRIGGER trg_tipos_ajustes_updated_at
 AFTER UPDATE ON tipos_ajustes
 BEGIN
     UPDATE tipos_ajustes SET updated_at = CURRENT_TIMESTAMP WHERE ajuste_id = NEW.ajuste_id;
 END;
 
-DROP TRIGGER IF EXISTS trg_saldo_estoque_updated_at;
 CREATE TRIGGER trg_saldo_estoque_updated_at
 AFTER UPDATE ON saldo_estoque
 BEGIN
     UPDATE saldo_estoque SET updated_at = CURRENT_TIMESTAMP WHERE saldo_id = NEW.saldo_id;
 END;
 
-DROP TRIGGER IF EXISTS trg_regime_tributario_updated_at;
 CREATE TRIGGER trg_regime_tributario_updated_at
 AFTER UPDATE ON regime_tributario
 BEGIN
     UPDATE regime_tributario SET updated_at = CURRENT_TIMESTAMP WHERE regime_id = NEW.regime_id;
 END;
 
-DROP TRIGGER IF EXISTS trg_situacoes_fiscais_updated_at;
 CREATE TRIGGER trg_situacoes_fiscais_updated_at
 AFTER UPDATE ON situacoes_fiscais
 BEGIN
     UPDATE situacoes_fiscais SET updated_at = CURRENT_TIMESTAMP WHERE situacao_id = NEW.situacao_id;
 END;
 
-DROP TRIGGER IF EXISTS trg_impostos_federais_updated_at;
 CREATE TRIGGER trg_impostos_federais_updated_at
 AFTER UPDATE ON impostos_federais
 BEGIN
     UPDATE impostos_federais SET updated_at = CURRENT_TIMESTAMP WHERE imposto_id = NEW.imposto_id;
 END;
 
-DROP TRIGGER IF EXISTS trg_tipos_operacoes_updated_at;
 CREATE TRIGGER trg_tipos_operacoes_updated_at
 AFTER UPDATE ON tipos_operacoes
 BEGIN
     UPDATE tipos_operacoes SET updated_at = CURRENT_TIMESTAMP WHERE operacao_id = NEW.operacao_id;
 END;
 
-DROP TRIGGER IF EXISTS trg_tabelas_tributarias_updated_at;
 CREATE TRIGGER trg_tabelas_tributarias_updated_at
 AFTER UPDATE ON tabelas_tributarias
 BEGIN
     UPDATE tabelas_tributarias SET updated_at = CURRENT_TIMESTAMP WHERE tabela_id = NEW.tabela_id AND tipo_operacao = NEW.tipo_operacao;
 END;
 
-DROP TRIGGER IF EXISTS trg_tabelas_tributarias_destino_updated_at;
 CREATE TRIGGER trg_tabelas_tributarias_destino_updated_at
 AFTER UPDATE ON tabelas_tributarias_destino
 BEGIN
     UPDATE tabelas_tributarias_destino SET updated_at = CURRENT_TIMESTAMP WHERE tabela_id = NEW.tabela_id AND classificacao_pessoa = NEW.classificacao_pessoa AND uf_destino = NEW.uf_destino AND uf_destino = NEW.uf_destino;
 END;
 
-DROP TRIGGER IF EXISTS trg_lojas_updated_at;
 CREATE TRIGGER trg_lojas_updated_at
 AFTER UPDATE ON lojas
 BEGIN
     UPDATE lojas SET updated_at = CURRENT_TIMESTAMP WHERE loja_id = NEW.loja_id;
 END;
 
-DROP TRIGGER IF EXISTS trg_clientes_updated_at;
 CREATE TRIGGER trg_clientes_updated_at
 AFTER UPDATE ON clientes
 BEGIN
     UPDATE clientes SET updated_at = CURRENT_TIMESTAMP WHERE cliente_id = NEW.cliente_id;
 END;
 
-DROP TRIGGER IF EXISTS trg_fornecedores_updated_at;
 CREATE TRIGGER trg_fornecedores_updated_at
 AFTER UPDATE ON fornecedores
 BEGIN
@@ -1173,7 +1077,6 @@ END;
 -- =====================================================
 
 -- View: Produto com hierarquia mercadológica completa
-DROP VIEW IF EXISTS vw_produtos_completo;
 CREATE VIEW vw_produtos_completo AS
 SELECT
     p.produto_id,
@@ -1200,7 +1103,6 @@ LEFT JOIN familias f ON p.familia_id = f.familia_id
 LEFT JOIN marcas m ON p.marca_id = m.marca_id;
 
 -- View: Hierarquia mercadológica (seção → grupo → subgrupo)
-DROP VIEW IF EXISTS vw_hierarquia_mercadologica;
 CREATE VIEW vw_hierarquia_mercadologica AS
 SELECT
     s.secao_id,
@@ -1216,8 +1118,7 @@ FROM secoes s
 LEFT JOIN grupos g ON s.secao_id = g.secao_id
 LEFT JOIN subgrupos sg ON g.grupo_id = sg.grupo_id;
 
--- View auxiliar: saldo com descrições
-DROP VIEW IF EXISTS vw_saldo_estoque_completo;
+-- VIEW auxiliar: saldo com descrições
 CREATE VIEW vw_saldo_estoque_completo AS
 SELECT
     se.saldo_id,
@@ -1238,7 +1139,6 @@ LEFT JOIN produtos p ON se.produto_id = p.produto_id
 LEFT JOIN local_estoque le ON se.local_id = le.local_id;
 
 -- VIEW: Tabelas Tributárias - Entrada
-DROP VIEW IF EXISTS vw_tabelas_tributarias_entrada;
 CREATE VIEW vw_tabelas_tributarias_entrada AS
 SELECT tt.uf_origem, tt.regime_estadual_id,
        tt.situacao_fiscal_id, tt.figura_fiscal_id, ttd.*
@@ -1248,7 +1148,6 @@ JOIN tabelas_tributarias_destino ttd
 WHERE tt.tipo_operacao = 'ENTRADA';
 
 -- VIEW: Tabelas Tributárias - Saída
-DROP VIEW IF EXISTS vw_tabelas_tributarias_saida;
 CREATE VIEW vw_tabelas_tributarias_saida AS
 SELECT tt.uf_origem, tt.regime_estadual_id,
        tt.situacao_fiscal_id, tt.figura_fiscal_id, ttd.*
@@ -1258,7 +1157,6 @@ JOIN tabelas_tributarias_destino ttd
 WHERE tt.tipo_operacao = 'SAIDA';
 
 -- View: Relatório geral de sincronização por entidade
-DROP VIEW IF EXISTS vw_relatorio_sincronizacao;
 CREATE VIEW vw_relatorio_sincronizacao AS
 SELECT 'Seções'                   AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM secoes UNION ALL
 SELECT 'Grupos'                   AS entidade, COUNT(*) AS total, SUM(status='U') AS pendentes, SUM(status='C') AS sincronizados, SUM(status='D') AS deletados, SUM(status='E') AS erros FROM grupos UNION ALL
