@@ -13,7 +13,7 @@
 import { API } from '../../config/constants.js';
 import { ENDPOINT_MAP } from './endpoint-map.js';
 
-const BATCH_SIZE = 1000;
+const BATCH_SIZE = 5000;
 
 export class DatabaseClient {
     constructor(baseURL = null) {

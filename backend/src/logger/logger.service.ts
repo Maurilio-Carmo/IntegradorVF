@@ -5,7 +5,7 @@ import { SqliteService } from '../database/sqlite.service';
 export type LogLevel = 'info' | 'warn' | 'error' | 'success';
 
 @Injectable()
-export class AppLoggerService implements OnModuleInit {
+export class  AppLoggerService implements OnModuleInit {
   private readonly nestLogger = new Logger('AppLogger');
 
   constructor(private readonly sqlite: SqliteService) {}
