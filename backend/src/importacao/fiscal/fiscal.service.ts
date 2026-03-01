@@ -1,14 +1,20 @@
 // backend/src/importacao/fiscal/fiscal.service.ts
 import { Injectable } from '@nestjs/common';
+import { FiscalRepository } from '../repositories/fiscal.repository';
 
-const ImportacaoService = require('../../services/importacao-service');
-
+/**
+ * FiscalService
+ * Delega para FiscalRepository.
+ * Sem bridge CJS — NestJS puro.
+ */
 @Injectable()
 export class FiscalService {
-  importarRegimeTributario(data: any[])    { return ImportacaoService.importarRegimeTributario(data); }
-  importarSituacoesFiscais(data: any[])    { return ImportacaoService.importarSituacoesFiscais(data); }
-  importarTiposOperacoes(data: any[])      { return ImportacaoService.importarTiposOperacoes(data); }
-  importarImpostosFederais(data: any[])    { return ImportacaoService.importarImpostosFederais(data); }
-  importarTabelasTributarias(data: any[])  { return ImportacaoService.importarTabelasTributarias(data); }
-  importarCenariosFiscais(data: any[])     { return ImportacaoService.importarCenariosFiscais(data); }
+  constructor(private readonly fiscal: FiscalRepository) {}
+
+  importarRegimeTributario(data: any[])   { return this.fiscal.importarRegimeTributario(data); }
+  importarSituacoesFiscais(data: any[])   { return this.fiscal.importarSituacoesFiscais(data); }
+  importarTiposOperacoes(data: any[])     { return this.fiscal.importarTiposOperacoes(data); }
+  importarImpostosFederais(data: any[])   { return this.fiscal.importarImpostosFederais(data); }
+  importarTabelasTributarias(data: any[]) { return this.fiscal.importarTabelasTributarias(data); }
+  importarCenariosFiscais(data: any[])    { return this.fiscal.importarCenariosFiscais(data); }
 }

@@ -1,11 +1,17 @@
 // backend/src/importacao/estoque/estoque.service.ts
 import { Injectable } from '@nestjs/common';
+import { EstoqueRepository } from '../repositories/estoque.repository';
 
-const ImportacaoService = require('../../services/importacao-service');
-
+/**
+ * EstoqueService
+ * Delega para EstoqueRepository.
+ * Sem bridge CJS — NestJS puro.
+ */
 @Injectable()
 export class EstoqueService {
-  importarLocalEstoque(data: any[]) { return ImportacaoService.importarLocalEstoque(data); }
-  importarTiposAjustes(data: any[]) { return ImportacaoService.importarTiposAjustes(data); }
-  importarSaldoEstoque(data: any[]) { return ImportacaoService.importarSaldoEstoque(data); }
+  constructor(private readonly estoque: EstoqueRepository) {}
+
+  importarLocalEstoque(data: any[]) { return this.estoque.importarLocalEstoque(data); }
+  importarTiposAjustes(data: any[]) { return this.estoque.importarTiposAjustes(data); }
+  importarSaldoEstoque(data: any[]) { return this.estoque.importarSaldoEstoque(data); }
 }

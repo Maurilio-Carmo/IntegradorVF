@@ -1,14 +1,20 @@
 // backend/src/importacao/pdv/pdv.service.ts
 import { Injectable } from '@nestjs/common';
+import { FrenteLojaRepository } from '../repositories/frente-loja.repository';
 
-const ImportacaoService = require('../../services/importacao-service');
-
+/**
+ * PdvService
+ * Delega para FrenteLojaRepository.
+ * Sem bridge CJS — NestJS puro.
+ */
 @Injectable()
 export class PdvService {
-  importarFormasPagamento(data: any[])     { return ImportacaoService.importarFormasPagamento(data); }
-  importarPagamentosPdv(data: any[])       { return ImportacaoService.importarPagamentosPDV(data); }
-  importarRecebimentosPdv(data: any[])     { return ImportacaoService.importarRecebimentosPDV(data); }
-  importarMotivosDesconto(data: any[])     { return ImportacaoService.importarMotivosDesconto(data); }
-  importarMotivosDevolucao(data: any[])    { return ImportacaoService.importarMotivosDevolucao(data); }
-  importarMotivosCancelamento(data: any[]) { return ImportacaoService.importarMotivosCancelamento(data); }
+  constructor(private readonly frenteLoja: FrenteLojaRepository) {}
+
+  importarFormasPagamento(data: any[])     { return this.frenteLoja.importarFormasPagamento(data); }
+  importarPagamentosPDV(data: any[])       { return this.frenteLoja.importarPagamentosPDV(data); }
+  importarRecebimentosPDV(data: any[])     { return this.frenteLoja.importarRecebimentosPDV(data); }
+  importarMotivosDesconto(data: any[])     { return this.frenteLoja.importarMotivosDesconto(data); }
+  importarMotivosDevolucao(data: any[])    { return this.frenteLoja.importarMotivosDevolucao(data); }
+  importarMotivosCancelamento(data: any[]) { return this.frenteLoja.importarMotivosCancelamento(data); }
 }

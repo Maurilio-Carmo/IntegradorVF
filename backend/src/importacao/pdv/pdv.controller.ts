@@ -24,14 +24,14 @@ export class PdvController {
   @HttpCode(200)
   @ApiOperation({ summary: 'Importa pagamentos do PDV → SQLite' })
   importarPagamentosPdv(@Body() body: ImportarArrayDto) {
-    return this.service.importarPagamentosPdv(body.data);
+    return this.service.importarPagamentosPDV(body.data);
   }
 
   @Post('importar-recebimentos-pdv')
   @HttpCode(200)
   @ApiOperation({ summary: 'Importa recebimentos do PDV → SQLite' })
   importarRecebimentosPdv(@Body() body: ImportarArrayDto) {
-    return this.service.importarRecebimentosPdv(body.data);
+    return this.service.importarRecebimentosPDV(body.data);
   }
 
   @Post('importar-motivos-desconto')
