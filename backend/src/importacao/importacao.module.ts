@@ -18,10 +18,22 @@ import { EstoqueService }        from './estoque/estoque.service';
 import { PdvService }            from './pdv/pdv.service';
 import { PessoaService }         from './pessoa/pessoa.service';
 
+// Repositories NestJS
+import { MercadologiaRepository } from './repositories/mercadologia.repository';
+import { ProdutoRepository }      from './repositories/produto.repository';
+import { FinanceiroRepository }   from './repositories/financeiro.repository';
+import { FrenteLojaRepository }   from './repositories/frente-loja.repository';
+import { EstoqueRepository }      from './repositories/estoque.repository';
+import { FiscalRepository }       from './repositories/fiscal.repository';
+import { PessoaRepository }       from './repositories/pessoa.repository';
+
 /**
  * Módulo de Importação — agrupa todos os sub-domínios:
  * produto, financeiro, fiscal, estoque, pdv, pessoa.
+ *
  * Cada sub-módulo tem controller + service independentes.
+ * Os repositories são @Injectable() e injetam SqliteService diretamente,
+ * eliminando as bridges CJS (importacao-service.js + repositories/*.js).
  */
 @Module({
   controllers: [
@@ -34,12 +46,22 @@ import { PessoaService }         from './pessoa/pessoa.service';
     PessoaController,
   ],
   providers: [
+    // Services (consomem os repositories abaixo)
     ProdutoService,
     FinanceiroService,
     FiscalService,
     EstoqueService,
     PdvService,
     PessoaService,
+
+    // Repositories NestJS — porta direta dos CJS
+    MercadologiaRepository,
+    ProdutoRepository,
+    FinanceiroRepository,
+    FrenteLojaRepository,
+    EstoqueRepository,
+    FiscalRepository,
+    PessoaRepository,
   ],
 })
 export class ImportacaoModule {}
