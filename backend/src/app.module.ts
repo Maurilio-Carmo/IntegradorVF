@@ -1,7 +1,6 @@
 // backend/src/app.module.ts
 import { Module }                from '@nestjs/common';
 import { ConfigModule }          from '@nestjs/config';
-import { ServeStaticModule }     from '@nestjs/serve-static';
 import * as path                 from 'path';
 
 // Infraestrutura (globais — injetáveis em qualquer módulo)
@@ -25,13 +24,6 @@ import { HealthModule }          from './health/health.module';
     ConfigModule.forRoot({
       envFilePath: ['.env', 'config/.env'],
       isGlobal:    true,
-    }),
-
-    // Frontend estático
-    ServeStaticModule.forRoot({
-      rootPath: path.join(process.cwd(), 'frontend'),
-      exclude: ['/api*', '/docs*', '/health'],
-      serveStaticOptions: { index: 'index.html'},
     }),
 
     // Infraestrutura
