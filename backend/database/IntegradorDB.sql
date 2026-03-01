@@ -740,6 +740,7 @@ CREATE TABLE cenarios_fiscais_ncms (
     codigo_ncm INTEGER NOT NULL,
     descricao_ncm TEXT,
     codigo_cenario_fiscal INTEGER NOT NULL,
+    status TEXT CHECK(status IN ('C','U','D','E','S')) DEFAULT 'U',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (codigo_cenario_fiscal) REFERENCES cenarios_fiscais(cenario_id) ON DELETE CASCADE
@@ -755,6 +756,7 @@ CREATE TABLE cenarios_fiscais_lojas (
     descricao_loja TEXT,
     uf_origem TEXT,
     codigo_cenario_fiscal INTEGER NOT NULL,
+    status TEXT CHECK(status IN ('C','U','D','E','S')) DEFAULT 'U',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (codigo_cenario_fiscal) REFERENCES cenarios_fiscais(cenario_id) ON DELETE CASCADE
@@ -768,6 +770,7 @@ CREATE TABLE cenarios_fiscais_destino (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     uf_destino TEXT NOT NULL,
     codigo_cenario_fiscal INTEGER NOT NULL,
+    status TEXT CHECK(status IN ('C','U','D','E','S')) DEFAULT 'U',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (codigo_cenario_fiscal) REFERENCES cenarios_fiscais(cenario_id) ON DELETE CASCADE
@@ -1213,7 +1216,7 @@ FROM secoes s
 LEFT JOIN grupos g ON s.secao_id = g.secao_id
 LEFT JOIN subgrupos sg ON g.grupo_id = sg.grupo_id;
 
--- VIEW auxiliar: saldo com descrições
+-- View auxiliar: saldo com descrições
 DROP VIEW IF EXISTS vw_saldo_estoque_completo;
 CREATE VIEW vw_saldo_estoque_completo AS
 SELECT
@@ -1234,16 +1237,20 @@ FROM saldo_estoque se
 LEFT JOIN produtos p ON se.produto_id = p.produto_id
 LEFT JOIN local_estoque le ON se.local_id = le.local_id;
 
-CREATE VIEW IF NOT EXISTS vw_tabelas_tributarias_entrada AS
-SELECT tt.decreto, tt.id_externo, tt.uf_origem, tt.regime_estadual_id,
+-- VIEW: Tabelas Tributárias - Entrada
+DROP VIEW IF EXISTS vw_tabelas_tributarias_entrada;
+CREATE VIEW vw_tabelas_tributarias_entrada AS
+SELECT tt.uf_origem, tt.regime_estadual_id,
        tt.situacao_fiscal_id, tt.figura_fiscal_id, ttd.*
 FROM tabelas_tributarias tt
 JOIN tabelas_tributarias_destino ttd
     ON tt.tabela_id = ttd.tabela_id AND tt.tipo_operacao = ttd.tipo_operacao
 WHERE tt.tipo_operacao = 'ENTRADA';
 
-CREATE VIEW IF NOT EXISTS vw_tabelas_tributarias_saida AS
-SELECT tt.decreto, tt.id_externo, tt.uf_origem, tt.regime_estadual_id,
+-- VIEW: Tabelas Tributárias - Saída
+DROP VIEW IF EXISTS vw_tabelas_tributarias_saida;
+CREATE VIEW vw_tabelas_tributarias_saida AS
+SELECT tt.uf_origem, tt.regime_estadual_id,
        tt.situacao_fiscal_id, tt.figura_fiscal_id, ttd.*
 FROM tabelas_tributarias tt
 JOIN tabelas_tributarias_destino ttd
