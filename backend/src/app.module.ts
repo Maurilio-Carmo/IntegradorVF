@@ -21,26 +21,24 @@ import { HealthModule }          from './health/health.module';
 
 @Module({
   imports: [
-    // ── Configuração ────────────────────────────────────────────────────────
-    // Lê .env na raiz e config/.env — disponível globalmente (sem reimportar)
+    // Configuração
     ConfigModule.forRoot({
       envFilePath: ['.env', 'config/.env'],
       isGlobal:    true,
     }),
 
-    // ── Frontend estático ────────────────────────────────────────────────────
-    // Serve /frontend em / ; exclui rotas de API para evitar conflito
+    // Frontend estático
     ServeStaticModule.forRoot({
       rootPath: path.join(process.cwd(), 'frontend'),
-      exclude:  ['/api/(.*)', '/docs/(.*)', '/health'],
-      serveStaticOptions: { index: 'index.html', fallthrough: false },
+      exclude: ['/api*', '/docs*', '/health'],
+      serveStaticOptions: { index: 'index.html'},
     }),
 
-    // ── Infraestrutura ───────────────────────────────────────────────────────
-    DatabaseModule,   // @Global() → SqliteService + FirebirdService disponíveis em todo lugar
-    LoggerModule,     // @Global() → AppLoggerService disponível em todo lugar
+    // Infraestrutura
+    DatabaseModule,
+    LoggerModule,
 
-    // ── Domínios ─────────────────────────────────────────────────────────────
+    // Domínios
     HealthModule,
     ImportacaoModule,
     ProxyModule,

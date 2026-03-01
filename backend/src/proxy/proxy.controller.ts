@@ -1,20 +1,22 @@
 // backend/src/proxy/proxy.controller.ts
 import { All, Controller, Req, Res, Logger } from '@nestjs/common';
-import { Request, Response }                  from 'express';
-import { ApiTags, ApiOperation, ApiHeader }   from '@nestjs/swagger';
+import { Request, Response } from 'express';
+import { ApiTags, ApiOperation, ApiHeader } from '@nestjs/swagger';
 
 /**
  * Proxy transparente — repassa qualquer método/path para a API Varejo Fácil.
  * Requer headers:
- *   x-api-url  → URL base da API (ex: https://api.varejofa.com.br)
+ *   x-api-url  → URL base da API (ex: https://api.varejofa.com)
  *   x-api-key  → token de autenticação
  *
- * Exemplo: GET /api/vf/produtos → GET https://api.varejofa.com.br/produtos
+ * Exemplo: GET /api/vf/administracao/licenciamento
+ *       →  GET https://api.varejofa.com/api/v1/administracao/licenciamento
  */
 @ApiTags('Proxy API Varejo Fácil')
 @Controller('api/vf')
 export class ProxyController {
   private readonly log = new Logger(ProxyController.name);
+  private static readonly CONTROLLER_PREFIX = '/api/vf/';
 
   @All('*path')
   @ApiOperation({ summary: 'Proxy transparente → API Varejo Fácil' })
@@ -32,9 +34,11 @@ export class ProxyController {
       });
     }
 
-    // Extrai path após /api/vf/ e monta URL completa
-    const pathParam = req.url.replace(/^\/?/, '');
-    const fullUrl   = `${apiUrl.replace(/\/$/, '')}/${pathParam}`;
+    const withoutPrefix = req.url.startsWith(ProxyController.CONTROLLER_PREFIX)
+      ? req.url.slice(ProxyController.CONTROLLER_PREFIX.length)
+      : req.url.replace(/^\//, '');
+
+    const fullUrl = `${apiUrl.replace(/\/$/, '')}/${withoutPrefix}`;
 
     try {
       const opts: RequestInit = {
