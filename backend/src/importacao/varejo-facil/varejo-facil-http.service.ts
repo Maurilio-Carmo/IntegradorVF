@@ -3,7 +3,7 @@ import { Injectable }       from '@nestjs/common';
 import { CredencialVF }     from '../credenciais/credencial.service';
 import { AppLoggerService }  from '../../logger/logger.service';
 
-export type ApiConfig = CredencialVF; // urlApi + tokenApi + lojaId
+export type ApiConfig = CredencialVF;
 
 export interface PagedResponse<T> {
   items:  T[];
@@ -11,18 +11,6 @@ export interface PagedResponse<T> {
   offset: number;
 }
 
-/**
- * VarejoFacilHttpService
- *
- * Cliente HTTP que roda no Node.js para buscar dados na API Varejo Fácil.
- * Move para o servidor toda a lógica que antes era feita pelo browser:
- *   - Paginação automática (fetchAll)
- *   - Autenticação via token (x-api-key)
- *   - Retry em falhas transitórias
- *
- * Isso é o que permite que os jobs de importação rodem no backend
- * e sobrevivam a recarregamentos de página.
- */
 @Injectable()
 export class VarejoFacilHttpService {
 
@@ -33,17 +21,6 @@ export class VarejoFacilHttpService {
 
   constructor(private readonly logger: AppLoggerService) {}
 
-  // ─── API Pública ──────────────────────────────────────────────────────────
-
-  /**
-   * Busca uma página de dados da API VF.
-   *
-   * @param config   Credenciais { urlApi, tokenApi }
-   * @param endpoint Caminho relativo, ex: 'produto/marcas'
-   * @param start    Offset de paginação
-   * @param count    Registros por página
-   * @param sort     Campo de ordenação (default: 'id')
-   */
   async fetchPage<T = any>(
     config:   ApiConfig,
     endpoint: string,
@@ -51,7 +28,7 @@ export class VarejoFacilHttpService {
     count     = this.PAGE_SIZE,
     sort      = 'id',
   ): Promise<PagedResponse<T>> {
-    const base  = this._normalizeUrl(config.urlApi);
+    const base  = this._baseUrl(config.urlApi);         // ← sempre termina em /api/v1
     const url   = `${base}/${endpoint}?start=${start}&count=${count}&sort=${sort}`;
     const raw   = await this._fetch(url, config.tokenApi);
     const items: T[] = raw.items ?? raw.data ?? (Array.isArray(raw) ? raw : []);
@@ -59,13 +36,6 @@ export class VarejoFacilHttpService {
     return { items, total, offset: start };
   }
 
-  /**
-   * Busca TODOS os registros com paginação automática.
-   * O callback `onPage` é chamado a cada página — ideal para salvar
-   * no SQLite de forma incremental sem carregar tudo na memória.
-   *
-   * @returns Total de registros buscados
-   */
   async fetchAll<T = any>(
     config:   ApiConfig,
     endpoint: string,
@@ -80,7 +50,6 @@ export class VarejoFacilHttpService {
       const page = await this.fetchPage<T>(config, endpoint, offset, this.PAGE_SIZE, sort);
 
       if (page.items.length === 0) break;
-
       if (page.total > 0) totalConhecido = page.total;
 
       await onPage(page.items, offset, totalConhecido);
@@ -92,26 +61,14 @@ export class VarejoFacilHttpService {
       if (page.items.length < this.PAGE_SIZE) break;
 
       await this._delay(this.DELAY_MS);
-
     } while (true);
 
-    this.logger.info(
-      `fetchAll [${endpoint}]: ${totalFetched} registros`,
-      'VarejoFacilHttp',
-    );
-
+    this.logger.info(`fetchAll [${endpoint}]: ${totalFetched} registros`, 'VarejoFacilHttp');
     return totalFetched;
   }
 
-  /**
-   * Caso especial: busca fornecedores de um produto específico.
-   * Retorna [] se o produto não tiver fornecedores (404 não é erro crítico).
-   */
-  async fetchFornecedoresProduto(
-    config:    ApiConfig,
-    produtoId: number,
-  ): Promise<any[]> {
-    const base = this._normalizeUrl(config.urlApi);
+  async fetchFornecedoresProduto(config: ApiConfig, produtoId: number): Promise<any[]> {
+    const base = this._baseUrl(config.urlApi);           // ← corrigido também aqui
     const url  = `${base}/produto/produtos/${produtoId}/fornecedores`;
     try {
       const raw = await this._fetch(url, config.tokenApi);
@@ -124,11 +81,24 @@ export class VarejoFacilHttpService {
 
   // ─── Privado ──────────────────────────────────────────────────────────────
 
-  private _normalizeUrl(urlApi: string): string {
-    return urlApi
+  /**
+   * Normaliza a URL e GARANTE que termina em /api/v1.
+   *
+   * Exemplos:
+   *   "https://superios.varejofacil.com"        → "https://superios.varejofacil.com/api/v1"
+   *   "https://superios.varejofacil.com/"       → "https://superios.varejofacil.com/api/v1"
+   *   "https://superios.varejofacil.com/api/v1" → "https://superios.varejofacil.com/api/v1"
+   *
+   * CORREÇÃO: o método anterior só removia /api/v1 sem recolocá-lo,
+   * fazendo a URL ficar como https://superios.varejofacil.com/pessoa/lojas
+   * em vez de https://superios.varejofacil.com/api/v1/pessoa/lojas.
+   */
+  private _baseUrl(urlApi: string): string {
+    const clean = urlApi
       .trim()
-      .replace(/\/$/, '')
-      .replace(/\/api\/v1$/, '');
+      .replace(/\/$/, '')          // remove barra final
+      .replace(/\/api\/v1$/, '');  // remove /api/v1 se já existir (evita duplicar)
+    return `${clean}/api/v1`;      // sempre recoloca /api/v1
   }
 
   private async _fetch(url: string, tokenApi: string, attempt = 1): Promise<any> {
@@ -147,10 +117,19 @@ export class VarejoFacilHttpService {
         throw new Error(`HTTP ${res.status}: ${text}`);
       }
 
+      const contentType = res.headers.get('content-type') ?? '';
+      if (!contentType.includes('application/json')) {
+        const preview = (await res.text()).slice(0, 120);
+        throw new Error(
+          `A API retornou HTML em vez de JSON (${res.status}). ` +
+          `Verifique se a URL está correta: ${url} — Preview: ${preview}`
+        );
+      }
+
       return await res.json();
 
     } catch (err: any) {
-      const status    = parseInt(err.message?.match(/HTTP (\d+)/)?.[1] ?? '0');
+      const status = parseInt(err.message?.match(/HTTP (\d+)/)?.[1] ?? '0');
       const retryable = [408, 429, 500, 502, 503, 504];
 
       if (attempt < this.MAX_RETRIES && (retryable.includes(status) || status === 0)) {

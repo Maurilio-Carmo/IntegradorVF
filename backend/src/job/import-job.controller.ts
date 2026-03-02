@@ -1,40 +1,63 @@
-// backend/src/import-job/import-job.controller.ts
+// backend/src/job/import-job.controller.ts
 import {
   Controller, Get, Post, Delete,
   Param, Body, Res, HttpCode,
   NotFoundException,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
-import { Response } from 'express';
-import { ImportJobService, ImportJob } from './import-job.service';
+import { ApiTags, ApiOperation, ApiBody } from '@nestjs/swagger';
+import { IsString, IsNotEmpty } from 'class-validator';
+import { Response }             from 'express';
+import { ImportJobService, ImportJob }  from './import-job.service';
+import { ImportJobExecutorService }     from './import-job-executor.service';
+
+class IniciarJobDto {
+  @IsString()
+  @IsNotEmpty()
+  dominio: string;
+  // 'produto' | 'financeiro' | 'frenteLoja' | 'estoque' | 'fiscal' | 'pessoa' | 'tudo'
+  // Nota: campo `step` é recebido mas ignorado — executor.iniciar() roda o domínio completo.
+  // Suporte a etapas individuais pode ser adicionado ao ImportJobExecutorService no futuro.
+}
 
 /**
- * ─────────────────────────────────────────────────────────────────────────────
  * ImportJobController
  *
  * Endpoints:
  *
- *  GET  /api/import-job/active
- *       Retorna lista de jobs em andamento.
- *       Usado pelo frontend ao inicializar para detectar importações ativas.
- *
- *  GET  /api/import-job/:jobId
- *       Retorna snapshot de um job (estado atual sem streaming).
- *       Permite que o frontend reconstrua a UI antes de conectar ao SSE.
- *
- *  GET  /api/import-job/:jobId/events   ← SSE
- *       Stream de eventos do job. Ao conectar, envia snapshot imediatamente.
- *       Mantém conexão aberta até job terminar ou cliente desconectar.
- *
- *  DELETE /api/import-job/:jobId
- *       Cancela um job em andamento.
- * ─────────────────────────────────────────────────────────────────────────────
+ *  POST   /api/import-job/start          ← NOVO — inicia job de importação
+ *  GET    /api/import-job/active         — lista jobs em andamento
+ *  GET    /api/import-job/:jobId         — snapshot de um job
+ *  GET    /api/import-job/:jobId/events  — stream SSE de progresso
+ *  DELETE /api/import-job/:jobId         — cancela um job
  */
 @ApiTags('Import · Jobs')
 @Controller('api/import-job')
 export class ImportJobController {
 
-  constructor(private readonly jobService: ImportJobService) {}
+  constructor(
+    private readonly jobService: ImportJobService,
+    private readonly executor:   ImportJobExecutorService,
+  ) {}
+
+  // ─── Iniciar job ──────────────────────────────────────────────────────────
+
+  /**
+   * Inicia um novo job de importação no servidor.
+   *
+   * O job roda de forma assíncrona — retorna { jobId } imediatamente
+   * para que o frontend abra a conexão SSE e acompanhe o progresso.
+   *
+   * Body: { dominio: string }
+   * Response: { jobId: string }
+   */
+  @Post('start')
+  @HttpCode(201)
+  @ApiOperation({ summary: 'Inicia job de importação (progresso via SSE)' })
+  @ApiBody({ type: IniciarJobDto })
+  async start(@Body() body: IniciarJobDto): Promise<{ jobId: string }> {
+    const jobId = await this.executor.iniciar(body.dominio);
+    return { jobId };
+  }
 
   // ─── Jobs Ativos ──────────────────────────────────────────────────────────
 
@@ -52,9 +75,7 @@ export class ImportJobController {
   // ─── Snapshot ─────────────────────────────────────────────────────────────
 
   @Get(':jobId')
-  @ApiOperation({
-    summary: 'Retorna o estado atual de um job (sem streaming)',
-  })
+  @ApiOperation({ summary: 'Retorna o estado atual de um job (sem streaming)' })
   getJob(@Param('jobId') jobId: string): ImportJob {
     const job = this.jobService.getJob(jobId);
     if (!job) throw new NotFoundException(`Job não encontrado: ${jobId}`);
@@ -63,22 +84,6 @@ export class ImportJobController {
 
   // ─── SSE ──────────────────────────────────────────────────────────────────
 
-  /**
-   * Abre um stream SSE para acompanhar o progresso de um job.
-   *
-   * Eventos emitidos:
-   *   job:snapshot   — snapshot completo enviado ao conectar (para reconexão)
-   *   job:started    — job iniciou
-   *   step:progress  — progresso de uma etapa { step, processed, total, pct }
-   *   step:completed — etapa concluída         { step, total }
-   *   step:error     — etapa falhou            { step, errorMsg }
-   *   job:completed  — job concluído           { jobId }
-   *   job:error      — job falhou              { jobId, errorMsg }
-   *   job:cancelled  — job cancelado           { jobId }
-   *
-   * O frontend usa estes eventos para atualizar barras de progresso e labels
-   * sem manter nenhum estado no browser — ao recarregar, basta reconectar.
-   */
   @Get(':jobId/events')
   @ApiOperation({
     summary: 'Stream SSE de progresso do job',

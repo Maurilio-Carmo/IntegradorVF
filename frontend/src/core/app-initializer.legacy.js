@@ -12,8 +12,6 @@ import EventHandlers from '../ui/event-handlers.js';
 import Importacao from '../features/import/index.js';
 import Tabs from '../ui/tabs/tabs-manager.js';
 import UI from '../ui/ui.js';
-import JobClient from '../features/import/job-client.js';     // NOVO
-import JobProgress from '../features/import/job-progress.js'; // NOVO
 
 export const AppInitializer = {
     /**
@@ -77,11 +75,7 @@ export const AppInitializer = {
             await this.initStatistics();
             console.log('✅ Estatísticas carregadas');
 
-            // 8. Reconectar jobs de importação ativos no servidor
-            await this.reconnectActiveJobs();
-            console.log('✅ Verificação de jobs ativos concluída');
-
-            // 9. Finalização
+            // 8. Finalização
             this.onInitComplete();
 
             console.log('✅ Aplicação inicializada com sucesso!');
@@ -182,28 +176,6 @@ export const AppInitializer = {
         } catch (error) {
             console.error('⚠️ Erro ao carregar estatísticas:', error);
             UI.log('⚠️ Não foi possível carregar estatísticas do banco', 'warning');
-        }
-    },
-
-    /**
-     * Verificar jobs de importação ativos no servidor e reconectar a UI.
-     *
-     * Se o usuário recarregar a página durante uma importação, o processo
-     * continua rodando no backend. Este passo detecta isso e reconecta
-     * o stream SSE para que a UI volte a exibir o progresso corretamente.
-     */
-    async reconnectActiveJobs() {
-        try {
-            const activeJobs = await JobClient.reconnectIfActive();
-
-            if (activeJobs.length === 0) return;
-
-            console.log(`🔄 ${activeJobs.length} job(s) ativo(s) — reconectando UI...`);
-            JobProgress.restoreActiveJobs(activeJobs);
-            UI.log(`🔄 ${activeJobs.length} importação(ões) reconectada(s) automaticamente.`, 'info');
-        } catch (err) {
-            // Não bloqueia o boot se a verificação falhar
-            console.warn('⚠️ Falha ao verificar jobs ativos:', err.message);
         }
     },
 

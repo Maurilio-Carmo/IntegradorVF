@@ -1,216 +1,151 @@
-// frontend/src/ui/tabs/import-button-manager.js
+// frontend/src/ui/tabs/button-manager.js
+// ─── VERSÃO REFATORADA ────────────────────────────────────────────────────────
+//
+// O que mudou:
+//   - Os botões "Importar Tudo" agora passam tabPanel e bulkBtn para
+//     Importacao.importarTudo(), que usa JobClient + JobProgress internamente.
+//   - Os botões individuais continuam chamando Importacao.importarXxx(el),
+//     mas agora esses métodos disparam jobs no backend (via JobClient).
+//   - Removida a lógica de verificação de config aqui — feita no backend.
+//   - Botões são desabilitados durante importação e reabilitados via SSE.
+//
+// ─────────────────────────────────────────────────────────────────────────────
 
-/**
- * Gerenciador de Botões de Importação
- * Responsabilidade única: mapear cliques de botão → métodos de importação
- */
-
-import Config     from '../../services/config.js';
 import Importacao from '../../features/import/index.js';
 import UI         from '../ui.js';
 
 export class ImportButtonManager {
 
     constructor() {
+        /**
+         * Mapa de data-action → nome do método em Importacao.
+         * Adicione novas entradas aqui ao expandir o sistema.
+         */
         this.actionMap = this._buildActionMap();
     }
 
-    /**
-     * Inicializar todos os botões
-     */
+    // ─── Inicialização ────────────────────────────────────────────────────────
+
     init() {
         this._setupIndividualButtons();
         this._setupBulkButtons();
         console.log(`✅ ImportButtonManager inicializado (${Object.keys(this.actionMap).length} ações)`);
     }
 
-    // Mapeamento
+    // ─── Mapeamento action → método ───────────────────────────────────────────
 
     _buildActionMap() {
         return {
             // PRODUTO
-            'importar-mercadologia':         'importarMercadologia',
-            'importar-marcas':               'importarMarcas',
-            'importar-familias':             'importarFamilias',
-            'importar-produtos':             'importarProdutos',
-            'importar-produto-auxiliares':   'importarProdutoAuxiliares',
-            'importar-produto-fornecedores': 'importarProdutoFornecedores',
+            'importar-mercadologia':          'importarMercadologia',
+            'importar-marcas':                'importarMarcas',
+            'importar-familias':              'importarFamilias',
+            'importar-produtos':              'importarProdutos',
+            'importar-produto-auxiliares':    'importarProdutoAuxiliares',
+            'importar-produto-fornecedores':  'importarProdutoFornecedores',
 
             // FINANCEIRO
-            'importar-categorias':           'importarCategorias',
-            'importar-agentes':              'importarAgentes',
-            'importar-contas-correntes':     'importarContasCorrentes',
-            'importar-especies-documento':   'importarEspeciesDocumento',
-            'importar-historico-padrao':     'importarHistoricoPadrao',
+            'importar-categorias':            'importarCategorias',
+            'importar-agentes':               'importarAgentes',
+            'importar-contas-correntes':      'importarContasCorrentes',
+            'importar-especies-documento':    'importarEspeciesDocumento',
+            'importar-historico-padrao':      'importarHistoricoPadrao',
+            'importar-formas-pagamento':      'importarFormasPagamento',
 
             // PDV / FRENTE DE LOJA
-            'importar-formas-pagamento':     'importarFormasPagamento',
-            'importar-pagamentos-pdv':       'importarPagamentosPDV',
-            'importar-recebimentos-pdv':     'importarRecebimentosPDV',
-            'importar-motivos-desconto':     'importarMotivosDesconto',
-            'importar-motivos-devolucao':    'importarMotivosDevolucao',
-            'importar-motivos-cancelamento': 'importarMotivosCancelamento',
+            'importar-forma-pagamento-pdv':   'importarFormaPagamentoPDV',
+            'importar-motivo-cancelamento':   'importarMotivoCancelamento',
+            'importar-perguntas-respostas':   'importarPerguntasRespostas',
 
             // ESTOQUE
-            'importar-locais-estoque':       'importarLocalEstoque',
-            'importar-tipos-ajustes':        'importarTiposAjustes',
-            'importar-saldo-estoque':        'importarSaldoEstoque',
+            'importar-local-estoque':         'importarLocalEstoque',
+            'importar-tipos-ajustes':         'importarTiposAjustes',
+            'importar-saldo-estoque':         'importarSaldoEstoque',
 
             // FISCAL
-            'importar-regime-tributario':            'importarRegimeTributario',
-            'importar-situacoes-fiscais':            'importarSituacoesFiscais',
-            'importar-tipos-operacoes':              'importarTiposOperacoes',
-            'importar-impostos-federais':            'importarImpostosFederais',
-            'importar-tabelas-tributarias':          'importarTabelasTributarias',
-            'importar-cenarios-fiscais':             'importarCenariosFiscais',
+            'importar-impostos-federais':     'importarImpostosFederais',
+            'importar-regime-tributario':     'importarRegimeTributario',
+            'importar-situacoes-fiscais':     'importarSituacoesFiscais',
+            'importar-tipos-operacoes':       'importarTiposOperacoes',
+            'importar-tabelas-tributarias':   'importarTabelasTributarias',
+            'importar-cenarios-fiscais':      'importarCenariosFiscais',
 
             // PESSOA
-            'importar-lojas':                'importarLojas',
-            'importar-clientes':             'importarClientes',
-            'importar-fornecedores':         'importarFornecedores',
+            'importar-lojas':                 'importarLojas',
+            'importar-clientes':              'importarClientes',
+            'importar-fornecedores':          'importarFornecedores',
         };
     }
 
-    _buildBulkMap() {
-        return {
-            'btnImportarTudoProduto': [
-                'importarMercadologia',
-                'importarMarcas',
-                'importarFamilias',
-                'importarProdutos',
-                'importarProdutoAuxiliares',
-                'importarProdutoFornecedores'
-            ],
-            'btnImportarTudoFinanceiro': [
-                'importarCategorias',
-                'importarAgentes',
-                'importarContasCorrentes',
-                'importarEspeciesDocumento',
-                'importarHistoricoPadrao'
-            ],
-            'btnImportarTudoFrenteLoja': [
-                'importarFormasPagamento',
-                'importarPagamentosPDV',
-                'importarRecebimentosPDV',
-                'importarMotivosDesconto',
-                'importarMotivosDevolucao',
-                'importarMotivosCancelamento'
-            ],
-            'btnImportarTudoEstoque': [
-                'importarLocalEstoque',
-                'importarTiposAjustes',
-                'importarSaldoEstoque'
-            ],
-            'btnImportarTudoFiscal': [
-                'importarRegimeTributario',
-                'importarSituacoesFiscais',
-                'importarTiposOperacoes',
-                'importarImpostosFederais',
-                'importarTabelasTributarias',
-                'importarCenariosFiscais'
-            ],
-            'btnImportarTudoPessoa': [
-                'importarLojas',
-                'importarClientes',
-                'importarFornecedores'
-            ],
-        };
-    }
+    // ─── Botões individuais ───────────────────────────────────────────────────
 
-    // Setup de listeners
-
+    /**
+     * Usa event delegation no document para capturar cliques em botões com
+     * data-action dentro de qualquer .import-item — funciona mesmo após
+     * re-render de componentes.
+     */
     _setupIndividualButtons() {
-        Object.entries(this.actionMap).forEach(([action, method]) => {
-            const btn = document.querySelector(`[data-action="${action}"]`);
-            if (btn) {
-                btn.addEventListener('click', () => this._handleIndividual(method, btn));
-            }
-        });
-    }
+        document.addEventListener('click', async (e) => {
+            const btn = e.target.closest('[data-action]');
+            if (!btn) return;
 
-    _setupBulkButtons() {
-        Object.entries(this._buildBulkMap()).forEach(([btnId, methods]) => {
-            const btn = document.getElementById(btnId);
-            if (btn) {
-                btn.addEventListener('click', () => this._handleBulk(btn, methods));
-            }
-        });
-    }
+            const action    = btn.dataset.action;
+            const methodName = this.actionMap[action];
+            if (!methodName || typeof Importacao[methodName] !== 'function') return;
 
-    // Handlers
+            // O .import-item é o container visual (pai do botão)
+            const uiElement = btn.closest('.import-item');
+            if (!uiElement) return;
 
-    async _handleIndividual(method, button) {
-        if (!this._checkConfig()) return;
-
-        const item = button.closest('.import-item');
-        if (!item) {
-            UI.alerts.error('Elemento de importação não encontrado');
-            return;
-        }
-
-        UI.buttons.setLoading(button, true, '⏳ Importando...');
-
-        try {
-            if (typeof Importacao[method] !== 'function') {
-                throw new Error(`Método "${method}" não encontrado`);
-            }
-            await Importacao[method](item);
-        } catch (error) {
-            UI.alerts.error(`Erro: ${error.message}`);
-        } finally {
-            UI.buttons.setLoading(button, false);
-        }
-    }
-
-    async _handleBulk(button, methods) {
-        if (!this._checkConfig()) return;
-
-        UI.buttons.setLoading(button, true, '⏳ Importando tudo...');
-
-        let success = 0;
-        let errors  = 0;
-
-        for (const method of methods) {
-            // Localizar card correspondente na UI
-            const action = this._methodToAction(method);
-            const btn    = action ? document.querySelector(`[data-action="${action}"]`) : null;
-            const item   = btn?.closest('.import-item') || null;
+            // Previne duplo clique — o JobProgress reabilita ao terminar
+            if (btn.disabled) return;
 
             try {
-                if (typeof Importacao[method] !== 'function') {
-                    throw new Error(`Método "${method}" não encontrado`);
-                }
-                await Importacao[method](item);
-                success++;
-            } catch (error) {
-                console.error(`❌ Bulk import falhou em "${method}":`, error.message);
-                errors++;
+                await Importacao[methodName](uiElement);
+            } catch (err) {
+                // Erro já logado dentro do Importacao / JobProgress
+                console.error(`❌ Ação "${action}" falhou:`, err);
             }
-        }
-
-        UI.buttons.reset(button);
-
-        if (errors === 0) {
-            UI.alerts.success(`✅ ${success} importações concluídas com sucesso`);
-        } else {
-            UI.alerts.warning(`⚠️ ${success} OK — ${errors} com erro`);
-        }
+        });
     }
 
-    // Helpers
+    // ─── Botões "Importar Tudo" ───────────────────────────────────────────────
 
-    _checkConfig() {
-        if (!Config.estaConfigurado()) {
-            UI.alerts.warning('Configure a API antes de importar');
-            UI.modals.showConfig();
-            return false;
-        }
-        return true;
-    }
+    /**
+     * Mapeia cada botão "Importar Tudo" ao domínio correspondente.
+     * Passa tabPanel e bulkBtn para que JobProgress possa atualizar
+     * cada import-item individualmente.
+     */
+    _setupBulkButtons() {
+        const bulkMap = {
+            'btnImportarTudoProduto':    'produto',
+            'btnImportarTudoFinanceiro': 'financeiro',
+            'btnImportarTudoFrenteLoja': 'frenteLoja',
+            'btnImportarTudoEstoque':    'estoque',
+            'btnImportarTudoFiscal':     'fiscal',
+            'btnImportarTudoPessoa':     'pessoa',
+        };
 
-    _methodToAction(method) {
-        return Object.keys(this.actionMap)
-            .find(action => this.actionMap[action] === method) || null;
+        Object.entries(bulkMap).forEach(([btnId, dominio]) => {
+            // Usa delegation para funcionar com componentes carregados dinamicamente
+            document.addEventListener('click', async (e) => {
+                const btn = e.target.closest(`#${btnId}`);
+                if (!btn || btn.disabled) return;
+
+                // O painel da aba é o data-panel correspondente ao domínio
+                // Converte camelCase para kebab-case (frenteLoja → frente-loja)
+                const panelId  = dominio.replace(/([A-Z])/g, '-$1').toLowerCase();
+                const tabPanel = document.querySelector(`.tab-panel[data-panel="${panelId}"]`)
+                              ?? document.querySelector(`.tab-panel[data-panel="${dominio}"]`);
+
+                try {
+                    await Importacao.importarTudo(dominio, tabPanel, btn);
+                } catch (err) {
+                    console.error(`❌ Importar Tudo (${dominio}) falhou:`, err);
+                    UI.log(`❌ Falha ao importar ${dominio}: ${err.message}`, 'error');
+                }
+            });
+        });
     }
 }
 

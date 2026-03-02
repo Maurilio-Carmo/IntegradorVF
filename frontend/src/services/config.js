@@ -2,19 +2,49 @@
 
 /**
  * Módulo de Configuração
- * Gerencia credenciais e configurações da API
+ * Gerencia credenciais localmente (localStorage) e no backend (SQLite via API).
+ *
+ * CORREÇÃO: o método salvar() agora envia os campos com os nomes corretos
+ * que o backend espera:
+ *   backend DTO → { lojaId: number, urlApi: string, tokenApi: string }
+ *   frontend antes enviava → { loja, apiUrl, apiKey }  ← causava 400
  */
 
 const Config = {
     storageKey: 'varejoFacilConfig',
 
     /**
-     * Salvar configurações no localStorage
+     * Salvar configurações no localStorage E persistir no backend.
      * @param {Object} dados - { apiUrl, apiKey, loja }
      */
-    salvar(dados) {
+    async salvar(dados) {
+        // 1. Salva localmente (nomenclatura interna do frontend)
         localStorage.setItem(this.storageKey, JSON.stringify(dados));
-        console.log('✅ Configuração salva');
+        console.log('✅ Configuração salva localmente');
+
+        // 2. Persiste no backend com os nomes de campo corretos do DTO
+        try {
+            const res = await fetch('/api/credencial', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    lojaId:   Number(dados.loja),   // backend: lojaId  (number)
+                    urlApi:   dados.apiUrl,          // backend: urlApi
+                    tokenApi: dados.apiKey,          // backend: tokenApi
+                }),
+            });
+
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                console.error('❌ Config.salvar:', err);
+                throw new Error(err.message ?? `HTTP ${res.status}`);
+            }
+
+            console.log('✅ Credenciais persistidas no backend');
+        } catch (error) {
+            // Lança para que config-manager.js possa tratar e exibir alerta
+            throw error;
+        }
     },
 
     /**
@@ -32,32 +62,36 @@ const Config = {
      */
     estaConfigurado() {
         const config = this.carregar();
-        // IMPORTANTE: Usar 'loja' pois é assim que salvamos no localStorage
         const configurado = config && config.apiUrl && config.apiKey && config.loja;
-        
+
         console.log('🔍 Verificando configuração:', {
-            existe: !!config,
-            temUrl: !!config?.apiUrl,
-            temKey: !!config?.apiKey,
-            temLoja: !!config?.loja,
+            existe:    !!config,
+            temUrl:    !!config?.apiUrl,
+            temKey:    !!config?.apiKey,
+            temLoja:   !!config?.loja,
             resultado: configurado
         });
-        
+
         return configurado;
     },
 
     /**
-     * Limpar configurações do localStorage
+     * Limpar configurações do localStorage e do backend
      */
-    limpar() {
+    async limpar() {
         localStorage.removeItem(this.storageKey);
-        console.log('🗑️ Configuração limpa');
+        console.log('🗑️ Configuração local removida');
+
+        try {
+            await fetch('/api/credencial', { method: 'DELETE' });
+            console.log('🗑️ Credenciais removidas do backend');
+        } catch (err) {
+            console.warn('⚠️ Erro ao limpar credenciais no backend:', err.message);
+        }
     },
 
     /**
      * Validar formato da URL
-     * @param {string} url
-     * @returns {boolean}
      */
     validarUrl(url) {
         try {
@@ -70,8 +104,6 @@ const Config = {
 
     /**
      * Validar formato da API Key
-     * @param {string} apiKey
-     * @returns {boolean}
      */
     validarApiKey(apiKey) {
         return apiKey && apiKey.length >= 10;
@@ -79,8 +111,6 @@ const Config = {
 
     /**
      * Validar código da loja
-     * @param {string} loja
-     * @returns {boolean}
      */
     validarLoja(loja) {
         const lojaNum = parseInt(loja);
@@ -89,10 +119,6 @@ const Config = {
 
     /**
      * Validar todas as configurações
-     * @param {string} apiUrl
-     * @param {string} apiKey
-     * @param {string} loja
-     * @returns {Object} { valido: boolean, erros: string[] }
      */
     validar(apiUrl, apiKey, loja) {
         const erros = [];
@@ -116,5 +142,4 @@ const Config = {
     }
 };
 
-// Exportar para uso global
 export default Config;

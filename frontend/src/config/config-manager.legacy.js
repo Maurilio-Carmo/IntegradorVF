@@ -41,33 +41,22 @@ export const ConfigManager = {
      * Salvar configuração
      */
     async salvar(apiUrl, apiKey, loja) {
-        // Normaliza loja: aceita string ou número
-        const lojaNum = parseInt(loja, 10);
-
-        // Valida cada campo individualmente para mensagem precisa
-        if (!apiUrl || !apiUrl.trim()) {
-            UI.mostrarAlerta('Preencha o campo URL da API', 'error');
-            return { success: false, error: 'URL da API não preenchida' };
-        }
-        if (!apiKey || !apiKey.trim()) {
-            UI.mostrarAlerta('Preencha o campo API Key', 'error');
-            return { success: false, error: 'API Key não preenchida' };
-        }
-        if (isNaN(lojaNum) || lojaNum <= 0) {
-            UI.mostrarAlerta('Preencha o Código da Loja com um número válido', 'error');
-            return { success: false, error: 'Código da loja inválido' };
+        // Validar campos
+        if (!apiUrl || !apiKey || !loja) {
+            UI.mostrarAlerta('Preencha todos os campos', 'error');
+            return { success: false, error: 'Campos obrigatórios não preenchidos' };
         }
 
         // Validar formato
-        const validacao = Config.validar(apiUrl.trim(), apiKey.trim(), lojaNum);
+        const validacao = Config.validar(apiUrl, apiKey, loja);
         if (!validacao.valido) {
             UI.mostrarAlerta(validacao.erros.join('\n'), 'error');
             return { success: false, error: validacao.erros.join(', ') };
         }
 
         // Salvar no localStorage
-        Config.salvar({ apiUrl: apiUrl.trim(), apiKey: apiKey.trim(), loja: lojaNum });
-        API.configurar(apiUrl.trim(), apiKey.trim(), lojaNum);
+        Config.salvar({ apiUrl, apiKey, loja });
+        API.configurar(apiUrl, apiKey, loja);
 
         // Testar conexão automaticamente
         const btnTestar = document.getElementById('btnTestarConexao');
@@ -108,23 +97,14 @@ export const ConfigManager = {
      * Testar conexão com a API
      */
     async testar(apiUrl, apiKey, loja) {
-        const lojaNum = parseInt(loja, 10);
-
-        if (!apiUrl || !apiUrl.trim()) {
-            UI.mostrarAlerta('Preencha o campo URL da API antes de testar', 'error');
-            return { success: false, error: 'URL da API não preenchida' };
-        }
-        if (!apiKey || !apiKey.trim()) {
-            UI.mostrarAlerta('Preencha o campo API Key antes de testar', 'error');
-            return { success: false, error: 'API Key não preenchida' };
-        }
-        if (isNaN(lojaNum) || lojaNum <= 0) {
-            UI.mostrarAlerta('Preencha o Código da Loja antes de testar', 'error');
-            return { success: false, error: 'Código da loja inválido' };
+        // Validar campos
+        if (!apiUrl || !apiKey || !loja) {
+            UI.mostrarAlerta('Preencha todos os campos antes de testar', 'error');
+            return { success: false, error: 'Campos obrigatórios não preenchidos' };
         }
 
         // Configurar temporariamente
-        API.configurar(apiUrl.trim(), apiKey.trim(), lojaNum);
+        API.configurar(apiUrl, apiKey, loja);
 
         const btnTestar = document.getElementById('btnTestarConexao');
         this.setBotaoCarregando(btnTestar, true);
@@ -175,29 +155,30 @@ export const ConfigManager = {
      * Preencher formulário com configuração
      */
     preencherFormulario(config) {
-        const urlInput  = document.getElementById('apiUrl');
-        const keyInput  = document.getElementById('apiKey');
-        const lojaInput = document.getElementById('apiLoja');
+        const form = document.getElementById('formConfig');
+        if (!form) return;
 
-        if (urlInput)  urlInput.value  = config.apiUrl  || '';
-        if (keyInput)  keyInput.value  = config.apiKey  || '';
-        if (lojaInput) lojaInput.value = config.loja    || '';
+        const urlInput = form.querySelector('#apiUrl');
+        const keyInput = form.querySelector('#apiKey');
+        const lojaInput = form.querySelector('#apiLoja');
+
+        if (urlInput) urlInput.value = config.apiUrl || '';
+        if (keyInput) keyInput.value = config.apiKey || '';
+        if (lojaInput) lojaInput.value = config.loja || '';
     },
 
     /**
      * Obter dados do formulário
-     * 
-     * CORREÇÃO: usa document.getElementById diretamente em vez de
-     * form.querySelector('#id'), evitando falhas com type="number"
-     * em alguns browsers que retornam '' para o .value mesmo com valor visível.
      */
     obterDadosFormulario() {
-        const apiUrl  = document.getElementById('apiUrl')?.value?.trim()  ?? '';
-        const apiKey  = document.getElementById('apiKey')?.value?.trim()  ?? '';
-        const lojaRaw = document.getElementById('apiLoja')?.value?.trim() ?? '';
+        const form = document.getElementById('formConfig');
+        if (!form) return null;
 
-        // Retorna loja como string — salvar() faz o parseInt internamente
-        return { apiUrl, apiKey, loja: lojaRaw };
+        return {
+            apiUrl: form.querySelector('#apiUrl')?.value.trim() || '',
+            apiKey: form.querySelector('#apiKey')?.value.trim() || '',
+            loja: parseInt(form.querySelector('#apiLoja')?.value) || 0
+        };
     },
 
     /**
