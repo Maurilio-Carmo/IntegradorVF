@@ -36,8 +36,11 @@ export class MercadologiaRepository {
   importarSecoes(secoes: any[]) {
     return this.upsert(
       secoes,
-      `INSERT INTO secoes (secao_id, descricao_old, status)
-       VALUES (@secao_id, @descricao_old, 'U')
+      `INSERT INTO secoes (
+        secao_id, descricao_old, status
+      ) VALUES (
+        @secao_id, @descricao_old, 'U'
+      )
        ON CONFLICT(secao_id) DO UPDATE SET
          descricao_old = excluded.descricao_old,
          updated_at    = CURRENT_TIMESTAMP
@@ -54,16 +57,18 @@ export class MercadologiaRepository {
   importarGrupos(grupos: any[]) {
     return this.upsert(
       grupos,
-      `INSERT INTO grupos (grupo_id, secao_id, descricao_old, status)
-       VALUES (@grupo_id, @secao_id, @descricao_old, 'U')
-       ON CONFLICT(grupo_id) DO UPDATE SET
-         secao_id      = excluded.secao_id,
+      `INSERT INTO grupos (
+        secao_id, grupo_id, descricao_old, status
+      ) VALUES (
+        @secao_id, @grupo_id, @descricao_old, 'U'
+      )
+       ON CONFLICT(secao_id, grupo_id) DO UPDATE SET
          descricao_old = excluded.descricao_old,
          updated_at    = CURRENT_TIMESTAMP
        WHERE status NOT IN ('C', 'D')`,
       (g) => ({
-        grupo_id:     g.id        ?? null,
-        secao_id:     g.secaoId   ?? null,
+        secao_id:     g.secaoId    ?? null,
+        grupo_id:     g.id         ?? null,
         descricao_old: g.descricao ?? null,
       }),
     );
@@ -74,18 +79,19 @@ export class MercadologiaRepository {
   importarSubgrupos(subgrupos: any[]) {
     return this.upsert(
       subgrupos,
-      `INSERT INTO subgrupos (subgrupo_id, secao_id, grupo_id, descricao_old, status)
-       VALUES (@subgrupo_id, @secao_id, @grupo_id, @descricao_old, 'U')
-       ON CONFLICT(subgrupo_id) DO UPDATE SET
-         secao_id      = excluded.secao_id,
-         grupo_id      = excluded.grupo_id,
+      `INSERT INTO subgrupos (
+        secao_id, grupo_id, subgrupo_id, descricao_old, status
+      ) VALUES (
+        @secao_id, @grupo_id, @subgrupo_id, @descricao_old, 'U'
+      )
+       ON CONFLICT(secao_id, grupo_id, subgrupo_id) DO UPDATE SET
          descricao_old = excluded.descricao_old,
          updated_at    = CURRENT_TIMESTAMP
        WHERE status NOT IN ('C', 'D')`,
       (s) => ({
-        subgrupo_id:   s.id        ?? null,
         secao_id:      s.secaoId   ?? null,
         grupo_id:      s.grupoId   ?? null,
+        subgrupo_id:   s.id        ?? null,
         descricao_old: s.descricao ?? null,
       }),
     );

@@ -74,22 +74,22 @@ export class FinanceiroRepository {
     return this.upsert(
       agentes,
       `INSERT INTO agentes (
-         agente_id, nome, fantasia, codigo_do_banco, tipo,
+         agente_id, nome, fantasia, codigo_banco, tipo,
          documento, tipo_contribuinte, inscricao_estadual,
          telefone1, holding_id,
          cep, logradouro, numero, bairro,
-         municipio, ibge, uf, pais, tipo_de_endereco, status
+         municipio, ibge, uf, pais, tipo_endereco, status
        ) VALUES (
-         @agente_id, @nome, @fantasia, @codigo_do_banco, @tipo,
+         @agente_id, @nome, @fantasia, @codigo_banco, @tipo,
          @documento, @tipo_contribuinte, @inscricao_estadual,
          @telefone1, @holding_id,
          @cep, @logradouro, @numero, @bairro,
-         @municipio, @ibge, @uf, @pais, @tipo_de_endereco, @status
+         @municipio, @ibge, @uf, @pais, @tipo_endereco, @status
        )
        ON CONFLICT(agente_id) DO UPDATE SET
          nome               = excluded.nome,
          fantasia           = excluded.fantasia,
-         codigo_do_banco    = excluded.codigo_do_banco,
+         codigo_banco       = excluded.codigo_banco,
          tipo               = excluded.tipo,
          documento          = excluded.documento,
          tipo_contribuinte  = excluded.tipo_contribuinte,
@@ -104,14 +104,14 @@ export class FinanceiroRepository {
          ibge               = excluded.ibge,
          uf                 = excluded.uf,
          pais               = excluded.pais,
-         tipo_de_endereco   = excluded.tipo_de_endereco,
+         tipo_endereco      = excluded.tipo_endereco,
          updated_at         = CURRENT_TIMESTAMP
        WHERE status NOT IN ('C', 'D')`,
       (a) => ({
         agente_id:          a.id                                              ?? null,
         nome:               a.nome                                            ?? null,
         fantasia:           a.fantasia                                        ?? null,
-        codigo_do_banco:    a.codigoDoBanco                                   ?? null,
+        codigo_banco:    a.codigoDoBanco                                   ?? null,
         tipo:               a.tipo                                            ?? null,
         documento:          a.numeroDoDocumento                               ?? null,
         tipo_contribuinte:  a.tipoContribuinte                                ?? null,
@@ -126,7 +126,7 @@ export class FinanceiroRepository {
         ibge:               a.endereco?.codigoIbge                           ?? null,
         uf:                 a.endereco?.uf                                    ?? null,
         pais:               a.endereco?.codigoDoPais                         ?? null,
-        tipo_de_endereco:   a.endereco?.tipoDeEndereco                       ?? null,
+        tipo_endereco:   a.endereco?.tipoDeEndereco                       ?? null,
         status:             'U',
       }),
     );
@@ -142,13 +142,13 @@ export class FinanceiroRepository {
          compoe_fluxo_caixa, lancamento_consolidado,
          loja_id, nome_loja, agente_financeiro_id,
          nome_banco, codigo_banco, agencia, conta,
-         local_de_pagamento, identificacao_ofx, status
+         local_pagamento, identificacao_ofx, status
        ) VALUES (
          @conta_id, @descricao, @tipo, @ativa,
          @compoe_fluxo_caixa, @lancamento_consolidado,
          @loja_id, @nome_loja, @agente_financeiro_id,
          @nome_banco, @codigo_banco, @agencia, @conta,
-         @local_de_pagamento, @identificacao_ofx, @status
+         @local_pagamento, @identificacao_ofx, @status
        )
        ON CONFLICT(conta_id) DO UPDATE SET
          descricao              = excluded.descricao,
@@ -163,7 +163,7 @@ export class FinanceiroRepository {
          codigo_banco           = excluded.codigo_banco,
          agencia                = excluded.agencia,
          conta                  = excluded.conta,
-         local_de_pagamento     = excluded.local_de_pagamento,
+         local_pagamento        = excluded.local_pagamento,
          identificacao_ofx      = excluded.identificacao_ofx,
          updated_at             = CURRENT_TIMESTAMP
        WHERE status NOT IN ('C', 'D')`,
@@ -181,7 +181,7 @@ export class FinanceiroRepository {
         codigo_banco:           c.codigoBanco                                               ?? null,
         agencia:                c.agencia                                                   ?? null,
         conta:                  c.conta                                                     ?? null,
-        local_de_pagamento:     c.localDePagamento                                          ?? null,
+        local_pagamento:        c.localDePagamento                                          ?? null,
         identificacao_ofx:      c.identificacaoContaCorrenteOFX                             ?? null,
         status:                 'U',
       }),
@@ -224,8 +224,8 @@ export class FinanceiroRepository {
          quantidade_vias           = excluded.quantidade_vias,
          quantidade_autenticacoes  = excluded.quantidade_autenticacoes,
          especie_pdv               = excluded.especie_pdv,
-         controla_limite_credito   = excluded.controla_limite_credito,
-         tipo                      = excluded.tipo,
+         controla_limite           = excluded.controla_limite,
+         tipo_limite               = excluded.tipo_limite,
          updated_at                = CURRENT_TIMESTAMP
        WHERE status NOT IN ('C', 'D')`,
       (e) => ({
@@ -245,8 +245,8 @@ export class FinanceiroRepository {
         quantidade_vias:             e.quantidadeDeVias                   ?? null,
         quantidade_autenticacoes:    e.quantidadeDeAutenticacoes          ?? null,
         especie_pdv:                 e.especiePDV                         ?? null,
-        controla_limite_credito:     M.bool(e.controlaLimiteDeCredito),
-        tipo:                        e.tipo                               ?? null,
+        controla_limite:             M.bool(e.controlaLimiteDeCredito),
+        tipo_limite:                 e.tipoLimite                         ?? null,
         status:                      'U',
       }),
     );

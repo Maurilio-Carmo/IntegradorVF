@@ -371,35 +371,47 @@ export class FiscalRepository {
       const db = this.sqlite.getDb();
 
       const stmtCenario = db.prepare(`
-        INSERT INTO cenarios_fiscais (cenario_id, descricao, cst, c_class_trib, status)
-        VALUES (@cenario_id, @descricao, @cst, @c_class_trib, @status)
+        INSERT INTO cenarios_fiscais (
+          cenario_id, descricao, cst, cclasstrib, status
+        ) VALUES (
+          @cenario_id, @descricao, @cst, @cclasstrib, @status
+        )
         ON CONFLICT(cenario_id) DO UPDATE SET
           descricao    = excluded.descricao,
           cst          = excluded.cst,
-          c_class_trib = excluded.c_class_trib,
+          cclasstrib   = excluded.cclasstrib,
           updated_at   = CURRENT_TIMESTAMP
         WHERE status NOT IN ('C', 'D')
       `);
 
       const stmtNcm = db.prepare(`
-        INSERT INTO cenarios_fiscais_ncms (codigo_ncm, descricao_ncm, codigo_cenario_fiscal)
-        VALUES (@codigo_ncm, @descricao_ncm, @codigo_cenario_fiscal)
-        ON CONFLICT(codigo_cenario_fiscal, codigo_ncm) DO UPDATE SET
+        INSERT INTO cenarios_fiscais_ncms (
+          cenario_id, codigo_ncm, descricao_ncm
+        ) VALUES (
+          @cenario_id, @codigo_ncm, @descricao_ncm
+        )
+        ON CONFLICT(cenario_id, codigo_ncm) DO UPDATE SET
           descricao_ncm = excluded.descricao_ncm
       `);
 
       const stmtLoja = db.prepare(`
-        INSERT INTO cenarios_fiscais_lojas (codigo_loja, descricao_loja, uf_origem, codigo_cenario_fiscal)
-        VALUES (@codigo_loja, @descricao_loja, @uf_origem, @codigo_cenario_fiscal)
-        ON CONFLICT(codigo_cenario_fiscal, codigo_loja) DO UPDATE SET
+        INSERT INTO cenarios_fiscais_lojas (
+          cenario_id, loja_id, descricao_loja, uf_origem
+        ) VALUES (
+          @cenario_id, @loja_id, @descricao_loja, @uf_origem
+        )
+        ON CONFLICT(cenario_id, loja_id) DO UPDATE SET
           descricao_loja = excluded.descricao_loja,
           uf_origem      = excluded.uf_origem
       `);
 
       const stmtUf = db.prepare(`
-        INSERT INTO cenarios_fiscais_destino (uf_destino, codigo_cenario_fiscal)
-        VALUES (@uf_destino, @codigo_cenario_fiscal)
-        ON CONFLICT(codigo_cenario_fiscal, uf_destino) DO NOTHING
+        INSERT INTO cenarios_fiscais_destino (
+          cenario_id, uf_destino
+        ) VALUES (
+          @cenario_id, @uf_destino
+        )
+        ON CONFLICT(cenario_id, uf_destino) DO NOTHING
       `);
 
       this.sqlite.transaction(() => {
@@ -410,31 +422,31 @@ export class FiscalRepository {
             cenario_id:   cenarioId,
             descricao:    c.descricao  ?? null,
             cst:          c.cst        ?? null,
-            c_class_trib: c.cClassTrib ?? null,
+            cclasstrib:   c.cclassTrib ?? null,
             status:       'U',
           });
 
           for (const n of (c.ncms ?? [])) {
             stmtNcm.run({
+              cenario_id:            n.codigoCenarioFiscal,
               codigo_ncm:            n.codigoNcm           ?? null,
               descricao_ncm:         n.descricaoNcm        ?? null,
-              codigo_cenario_fiscal: n.codigoCenarioFiscal ?? cenarioId,
             });
           }
 
           for (const l of (c.lojas ?? [])) {
             stmtLoja.run({
-              codigo_loja:           l.codigoLoja          ?? null,
+              cenario_id:            l.codigoCenarioFiscal,
+              loja_id:               l.codigoLoja          ?? null,
               descricao_loja:        l.descricaoLoja       ?? null,
               uf_origem:             l.ufOrigem            ?? null,
-              codigo_cenario_fiscal: l.codigoCenarioFiscal ?? cenarioId,
             });
           }
 
           for (const u of (c.ufsDestino ?? [])) {
             stmtUf.run({
+              cenario_id:            u.codigoCenarioFiscal,
               uf_destino:            u.ufDestino           ?? null,
-              codigo_cenario_fiscal: u.codigoCenarioFiscal ?? cenarioId,
             });
           }
         }

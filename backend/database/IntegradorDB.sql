@@ -41,23 +41,6 @@ CREATE TABLE secoes (
 
 -- GRUPOS
 CREATE TABLE grupos (
-    grupo_id INTEGER PRIMARY KEY,
-    secao_id INTEGER NOT NULL,
-    descricao_old TEXT,
-    descricao_new TEXT,
-    status TEXT CHECK (status IN ('C','U','D','E','S')) DEFAULT 'U',
-    retorno TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    
-    FOREIGN KEY (secao_id) REFERENCES secoes(secao_id) ON UPDATE CASCADE ON DELETE CASCADE
-);
-
-CREATE INDEX idx_grupos_grupo ON grupos(secao_id, grupo_id);
-
--- SUBGRUPOS
-CREATE TABLE subgrupos (
-    subgrupo_id INTEGER PRIMARY KEY,
     secao_id INTEGER NOT NULL,
     grupo_id INTEGER NOT NULL,
     descricao_old TEXT,
@@ -67,7 +50,26 @@ CREATE TABLE subgrupos (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     
-    FOREIGN KEY (grupo_id) REFERENCES grupos(grupo_id) ON UPDATE CASCADE ON DELETE CASCADE
+    PRIMARY KEY (secao_id, grupo_id),
+    FOREIGN KEY (secao_id) REFERENCES secoes(secao_id) ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+CREATE INDEX idx_grupos_grupo ON grupos(secao_id, grupo_id);
+
+-- SUBGRUPOS
+CREATE TABLE subgrupos (
+    secao_id INTEGER NOT NULL,
+    grupo_id INTEGER NOT NULL,
+    subgrupo_id INTEGER NOT NULL,
+    descricao_old TEXT,
+    descricao_new TEXT,
+    status TEXT CHECK (status IN ('C','U','D','E','S')) DEFAULT 'U',
+    retorno TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    
+    PRIMARY KEY (secao_id, grupo_id, subgrupo_id),
+    FOREIGN KEY (secao_id, grupo_id) REFERENCES grupos(secao_id, grupo_id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE INDEX idx_subgrupos_subgrupo ON subgrupos(secao_id, grupo_id, subgrupo_id);
@@ -346,7 +348,7 @@ CREATE TABLE agentes (
 	 agente_id INTEGER PRIMARY KEY,
 	 nome TEXT,
 	 fantasia TEXT,
-	 codigo_do_banco TEXT,
+	 codigo_banco TEXT,
 	 tipo TEXT CHECK(tipo IN ('FISICA','JURIDICA')),
 	 documento TEXT,
 	 tipo_contribuinte TEXT CHECK(tipo_contribuinte IN ('CONTRIBUINTE','NAO_CONTRIBUINTE','ISENTO')),
@@ -361,7 +363,7 @@ CREATE TABLE agentes (
 	 ibge TEXT,
 	 uf TEXT,
 	 pais TEXT,
-	 tipo_de_endereco TEXT,
+	 tipo_endereco TEXT,
 	 status TEXT CHECK(status IN ('C','U','D','E','S')) DEFAULT 'U',
      retorno TEXT,
 	 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -399,7 +401,7 @@ CREATE TABLE contas_correntes (
     codigo_banco TEXT,
     agencia TEXT,
     conta TEXT,
-    local_de_pagamento TEXT,
+    local_pagamento TEXT,
     identificacao_ofx TEXT CHECK(identificacao_ofx IN ('AGENCIA_NUMERO','NUMERO')),
     status TEXT CHECK(status IN ('C','U','D','E','S')) DEFAULT 'U',
     retorno TEXT,
@@ -428,8 +430,8 @@ CREATE TABLE especies_documentos (
     quantidade_vias INTEGER,
     quantidade_autenticacoes INTEGER,
     especie_pdv TEXT CHECK(especie_pdv IN ('DINHEIRO','CHEQUE','CARTAO_CREDITO','CARTAO_DEBITO','VALE_ALIMENTACAO','VALE_REFEICAO','VALE_PRESENTE','VALE_COMBUSTIVEL','CREDIARIO','CONVENIO','FATURA','CARTAO_INTERNO','VALE_COMPRA','OUTROS','OUTRAS_MOEDAS','BOLETO_BANCARIO','DEPOSITO_BANCARIO','PAGAMENTO_INSTANTANEO_PIX_DINAMICO','RESGATE_FIDELIDADE','CREDITO_ANTECIPADO','TRANSF_BANCARIA_CARTEIRA_DIGIT','PAGAMENTO_INSTANTANEO_PIX_ESTATICO','CREDITO_LOJA','PAGAMENTO_ELETRONICO_NAO_INFORMADO')),
-    controla_limite_credito INTEGER DEFAULT 0,
-    tipo TEXT CHECK(tipo IN ('AVULSO','CONVENIO')),
+    controla_limite INTEGER DEFAULT 0,
+    tipo_limite TEXT CHECK(tipo_limite IN ('AVULSO','CONVENIO')),
     status TEXT CHECK(status IN ('C','U','D','E','S')) DEFAULT 'U',
     retorno TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -501,14 +503,16 @@ CREATE TABLE saldo_estoque (
 -- REGIME TRIBUTÁRIO
 CREATE TABLE regime_tributario (
     regime_id INTEGER PRIMARY KEY,
+    loja_id INTEGER NOT NULL,
     descricao TEXT,
     classificacao TEXT CHECK(classificacao IN ('N','E','A','S')),
-    loja INTEGER DEFAULT 0,
     fornecedor INTEGER DEFAULT 0,
     status TEXT CHECK(status IN ('C','U','D','E','S')) DEFAULT 'U',
     retorno TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (loja_id) REFERENCES lojas(loja_id) ON DELETE CASCADE
 );
 
 -- SITUAÇÕES FISCAIS
@@ -642,7 +646,7 @@ CREATE TABLE cenarios_fiscais (
     cenario_id INTEGER PRIMARY KEY,
     descricao TEXT,
     cst INTEGER,
-    c_class_trib INTEGER,
+    cclasstrib INTEGER,
     status TEXT CHECK(status IN ('C','U','D','E','S')) DEFAULT 'U',
     retorno TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -652,44 +656,45 @@ CREATE TABLE cenarios_fiscais (
 -- CENARIOS FISCAIS NCMs
 CREATE TABLE cenarios_fiscais_ncms (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    cenario_id INTEGER NOT NULL,
     codigo_ncm INTEGER NOT NULL,
     descricao_ncm TEXT,
-    codigo_cenario_fiscal INTEGER NOT NULL,
     status TEXT CHECK(status IN ('C','U','D','E','S')) DEFAULT 'U',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 
-    FOREIGN KEY (codigo_cenario_fiscal) REFERENCES cenarios_fiscais(cenario_id) ON DELETE CASCADE
+    FOREIGN KEY (cenario_id) REFERENCES cenarios_fiscais(cenario_id) ON DELETE CASCADE
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS uq_cf_ncm ON cenarios_fiscais_ncms(codigo_cenario_fiscal, codigo_ncm);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_cf_ncm ON cenarios_fiscais_ncms(cenario_id, codigo_ncm);
 
 -- CENARIOS FISCAIS LOJAS
 CREATE TABLE cenarios_fiscais_lojas (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    codigo_loja INTEGER NOT NULL,
+    cenario_id INTEGER NOT NULL,
+    loja_id INTEGER NOT NULL,
     descricao_loja TEXT,
     uf_origem TEXT,
-    codigo_cenario_fiscal INTEGER NOT NULL,
     status TEXT CHECK(status IN ('C','U','D','E','S')) DEFAULT 'U',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 
-    FOREIGN KEY (codigo_cenario_fiscal) REFERENCES cenarios_fiscais(cenario_id) ON DELETE CASCADE
+    FOREIGN KEY (cenario_id) REFERENCES cenarios_fiscais(cenario_id) ON DELETE CASCADE,
+    FOREIGN KEY (loja_id) REFERENCES lojas(loja_id) ON DELETE CASCADE
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS uq_cf_loja ON cenarios_fiscais_lojas(codigo_cenario_fiscal, codigo_loja);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_cf_loja ON cenarios_fiscais_lojas(cenario_id, loja_id);
 
 -- CENARIOS FISCAIS UFs DESTINO
 CREATE TABLE cenarios_fiscais_destino (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    cenario_id INTEGER NOT NULL,
     uf_destino TEXT NOT NULL,
-    codigo_cenario_fiscal INTEGER NOT NULL,
     status TEXT CHECK(status IN ('C','U','D','E','S')) DEFAULT 'U',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 
-    FOREIGN KEY (codigo_cenario_fiscal) REFERENCES cenarios_fiscais(cenario_id) ON DELETE CASCADE
+    FOREIGN KEY (cenario_id) REFERENCES cenarios_fiscais(cenario_id) ON DELETE CASCADE
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS uq_cf_destino ON cenarios_fiscais_destino(codigo_cenario_fiscal, uf_destino);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_cf_destino ON cenarios_fiscais_destino(cenario_id, uf_destino);
 
 -- LOJAS
 CREATE TABLE lojas (
