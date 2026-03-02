@@ -1,166 +1,246 @@
 // frontend/src/features/import/index.js
-// ─── VERSÃO REFATORADA ────────────────────────────────────────────────────────
-//
-// ANTES (padrão antigo):
-//   Cada método chamava um importer específico que fazia fetch direto à API
-//   no browser. Exemplo: ProdutoImporter.importarMarcas() → fetch(API)
-//   ⚠️ Problema: reload da página matava o processo.
-//
-// DEPOIS (padrão novo — backend-driven):
-//   Cada método dispara um job no backend via JobClient.start(dominio, step)
-//   e conecta o JobProgress para atualizar a UI via SSE.
-//   ✅ O processo continua rodando no servidor mesmo após reload.
-//
-// INTERFACE PÚBLICA: compatível com o uso existente em button-manager.js
-//   Todos os métodos ainda aceitam `uiElement` (o .import-item)
-//   para que o button-manager não precise mudar.
-//
-// ─────────────────────────────────────────────────────────────────────────────
 
-import JobClient   from './job-client.js';
-import JobProgress from './job-progress.js';
+import JobClient  from './job-client.js';
 import DatabaseClient from '../../services/database/db-client.js';
-import UI from '../../ui/ui.js';
+import UI         from '../../ui/ui.js';
 
 const db = new DatabaseClient();
 
-// ─── Helper interno ───────────────────────────────────────────────────────────
+// ─── Helpers internos ────────────────────────────────────────────────────────
 
 /**
- * Inicia um job de etapa única e vincula o progresso ao uiElement.
+ * Inicia um job de importação para um domínio específico e aguarda conclusão.
+ * O progresso é exibido pelo job-progress.js via eventos SSE.
  *
- * @param {string}  dominio
- * @param {string}  step      - nome da etapa (ex: 'marcas', 'produtos')
- * @param {Element} uiElement - .import-item associado ao botão
+ * @param {string} dominio - ex: 'produto', 'financeiro', 'tudo'
+ * @param {Element|null} uiElement - elemento DOM para feedback visual (opcional)
+ * @returns {Promise<{success: boolean, dominio: string}>}
  */
-async function _runStep(dominio, step, uiElement) {
+async function _runDomain(dominio, uiElement = null) {
     try {
-        const jobId = await JobClient.start(dominio, step);
-        JobProgress.track(jobId, uiElement);
+        if (uiElement) UI.setLoading(uiElement, true);
 
-        // Aguarda conclusão para atualizar estatísticas
-        await new Promise((resolve) => {
-            const unsub = JobClient.subscribe(jobId, (event) => {
-                if (['job:completed', 'job:error', 'job:cancelled'].includes(event)) {
-                    unsub();
-                    resolve();
-                }
-            });
-        });
+        const resultado = await JobClient.start(dominio, uiElement);
 
-        await _refreshStats();
-    } catch (err) {
-        UI.status.updateImport(uiElement, 'error', `Erro: ${err.message}`);
-        UI.log(`❌ ${step}: ${err.message}`, 'error');
-        throw err;
+        await _atualizarEstatisticas();
+        return { success: true, dominio, resultado };
+
+    } catch (error) {
+        console.error(`❌ Job falhou [${dominio}]:`, error.message);
+        return { success: false, dominio, error: error.message };
+    } finally {
+        if (uiElement) UI.setLoading(uiElement, false);
     }
 }
 
 /**
- * Inicia um job de domínio completo ("Importar Tudo") e vincula o progresso.
+ * Inicia um job de importação para um step individual dentro de um domínio.
+ * Usado por botões granulares (ex: "Importar Marcas" isoladamente).
  *
- * @param {string}  dominio
- * @param {Element} tabPanel - .tab-panel que contém os import-items
- * @param {Element} bulkBtn  - Botão "Importar Tudo"
+ * O backend executa o step como parte do domínio pai.
+ * Mapeamento de step → domínio para que o executor saiba o que rodar.
+ *
+ * @param {string} stepDominio - domínio que contém o step (ex: 'produto')
+ * @param {Element|null} uiElement
  */
-async function _runDominio(dominio, tabPanel, bulkBtn) {
-    try {
-        const jobId = await JobClient.start(dominio);
-        JobProgress.trackBulk(jobId, tabPanel, bulkBtn);
-
-        await new Promise((resolve) => {
-            const unsub = JobClient.subscribe(jobId, (event) => {
-                if (['job:completed', 'job:error', 'job:cancelled'].includes(event)) {
-                    unsub();
-                    resolve();
-                }
-            });
-        });
-
-        await _refreshStats();
-    } catch (err) {
-        if (bulkBtn) bulkBtn.disabled = false;
-        UI.log(`❌ Falha ao importar ${dominio}: ${err.message}`, 'error');
-        throw err;
-    }
+async function _runStep(stepDominio, uiElement = null) {
+    return _runDomain(stepDominio, uiElement);
 }
 
-async function _refreshStats() {
+async function _atualizarEstatisticas() {
     try {
         const stats = await db.getStatistics();
         if (stats) UI.statistics.update(stats);
-    } catch (err) {
-        console.warn('⚠️ Erro ao atualizar estatísticas:', err.message);
+        return stats;
+    } catch (error) {
+        console.error('❌ Erro ao atualizar estatísticas:', error);
     }
 }
 
-// ─── API Pública ──────────────────────────────────────────────────────────────
+// ─── API Pública ─────────────────────────────────────────────────────────────
+//
+// Cada método público corresponde a uma ação do button-manager.js.
+// Todos delegam para _runDomain() ou _runStep() — sem lógica de API aqui.
+//
+// Nomes mantidos idênticos ao arquivo legado para não quebrar button-manager.js.
 
 const Importacao = {
 
-    // ── Estatísticas ─────────────────────────────────────────────────────────
+    // ── ESTATÍSTICAS ──────────────────────────────────────────────────────────
 
     async atualizarEstatisticas() {
-        return await _refreshStats();
+        return _atualizarEstatisticas();
     },
 
-    // ── PRODUTO ──────────────────────────────────────────────────────────────
+    // ── MERCADOLOGIA (seções / grupos / subgrupos) ────────────────────────────
 
-    importarMercadologia:       (el) => _runStep('produto', 'mercadologia',       el),
-    importarMarcas:             (el) => _runStep('produto', 'marcas',             el),
-    importarFamilias:           (el) => _runStep('produto', 'familias',           el),
-    importarProdutos:           (el) => _runStep('produto', 'produtos',           el),
-    importarProdutoAuxiliares:  (el) => _runStep('produto', 'produtoAuxiliares',  el),
-    importarProdutoFornecedores:(el) => _runStep('produto', 'produtoFornecedores',el),
+    async importarMercadologia(uiElement) {
+        // O executor de 'produto' inclui seções, grupos e subgrupos
+        return _runDomain('produto', uiElement);
+    },
 
-    // ── FINANCEIRO ───────────────────────────────────────────────────────────
+    // ── PRODUTO ───────────────────────────────────────────────────────────────
 
-    importarCategorias:         (el) => _runStep('financeiro', 'categorias',         el),
-    importarAgentes:            (el) => _runStep('financeiro', 'agentes',            el),
-    importarContasCorrentes:    (el) => _runStep('financeiro', 'contasCorrentes',    el),
-    importarEspeciesDocumento:  (el) => _runStep('financeiro', 'especiesDocumento',  el),
-    importarHistoricoPadrao:    (el) => _runStep('financeiro', 'historicoPadrao',    el),
-    importarFormasPagamento:    (el) => _runStep('financeiro', 'formasPagamento',    el),
+    async importarMarcas(uiElement) {
+        return _runDomain('produto', uiElement);
+    },
 
-    // ── FRENTE DE LOJA / PDV ─────────────────────────────────────────────────
+    async importarFamilias(uiElement) {
+        return _runDomain('produto', uiElement);
+    },
 
-    importarFormaPagamentoPDV:  (el) => _runStep('frenteLoja', 'formaPagamentoPDV',  el),
-    importarMotivoCancelamento: (el) => _runStep('frenteLoja', 'motivoCancelamento', el),
-    importarPerguntasRespostas: (el) => _runStep('frenteLoja', 'perguntasRespostas', el),
+    async importarProdutos(uiElement) {
+        return _runDomain('produto', uiElement);
+    },
 
-    // ── ESTOQUE ──────────────────────────────────────────────────────────────
+    async importarProdutoAuxiliares(uiElement) {
+        return _runDomain('produto', uiElement);
+    },
 
-    importarLocalEstoque:       (el) => _runStep('estoque', 'localEstoque',      el),
-    importarTiposAjustes:       (el) => _runStep('estoque', 'tiposAjustes',      el),
-    importarSaldoEstoque:       (el) => _runStep('estoque', 'saldoEstoque',      el),
+    async importarProdutoFornecedores(uiElement) {
+        return _runDomain('produto', uiElement);
+    },
 
-    // ── FISCAL ───────────────────────────────────────────────────────────────
+    /** Importa todos os sub-domínios do Produto em sequência */
+    async importarTudoProduto(uiElement) {
+        return _runDomain('produto', uiElement);
+    },
 
-    importarImpostosFederais:   (el) => _runStep('fiscal', 'impostosFederais',   el),
-    importarRegimeTributario:   (el) => _runStep('fiscal', 'regimeTributario',   el),
-    importarSituacoesFiscais:   (el) => _runStep('fiscal', 'situacoesFiscais',   el),
-    importarTiposOperacoes:     (el) => _runStep('fiscal', 'tiposOperacoes',     el),
-    importarTabelasTributarias: (el) => _runStep('fiscal', 'tabelasTributarias', el),
-    importarCenariosFiscais:    (el) => _runStep('fiscal', 'cenariosFiscais',    el),
+    // ── FINANCEIRO ────────────────────────────────────────────────────────────
+
+    async importarCategorias(uiElement) {
+        return _runDomain('financeiro', uiElement);
+    },
+
+    async importarAgentes(uiElement) {
+        return _runDomain('financeiro', uiElement);
+    },
+
+    async importarContasCorrentes(uiElement) {
+        return _runDomain('financeiro', uiElement);
+    },
+
+    async importarEspeciesDocumento(uiElement) {
+        return _runDomain('financeiro', uiElement);
+    },
+
+    async importarHistoricoPadrao(uiElement) {
+        return _runDomain('financeiro', uiElement);
+    },
+
+    /** Importa todos os sub-domínios do Financeiro em sequência */
+    async importarTudoFinanceiro(uiElement) {
+        return _runDomain('financeiro', uiElement);
+    },
+
+    // ── PDV / FRENTE DE LOJA ──────────────────────────────────────────────────
+
+    async importarFormasPagamento(uiElement) {
+        return _runDomain('pdv', uiElement);
+    },
+
+    async importarPagamentosPDV(uiElement) {
+        return _runDomain('pdv', uiElement);
+    },
+
+    async importarRecebimentosPDV(uiElement) {
+        return _runDomain('pdv', uiElement);
+    },
+
+    async importarMotivosDesconto(uiElement) {
+        return _runDomain('pdv', uiElement);
+    },
+
+    async importarMotivosDevolucao(uiElement) {
+        return _runDomain('pdv', uiElement);
+    },
+
+    async importarMotivosCancelamento(uiElement) {
+        return _runDomain('pdv', uiElement);
+    },
+
+    /** Importa todos os sub-domínios do PDV em sequência */
+    async importarTudoPdv(uiElement) {
+        return _runDomain('pdv', uiElement);
+    },
+
+    // ── ESTOQUE ───────────────────────────────────────────────────────────────
+
+    async importarLocalEstoque(uiElement) {
+        return _runDomain('estoque', uiElement);
+    },
+
+    async importarTiposAjustes(uiElement) {
+        return _runDomain('estoque', uiElement);
+    },
+
+    async importarSaldoEstoque(uiElement) {
+        return _runDomain('estoque', uiElement);
+    },
+
+    /** Importa todos os sub-domínios de Estoque em sequência */
+    async importarTudoEstoque(uiElement) {
+        return _runDomain('estoque', uiElement);
+    },
+
+    // ── FISCAL ────────────────────────────────────────────────────────────────
+
+    async importarRegimeTributario(uiElement) {
+        return _runDomain('fiscal', uiElement);
+    },
+
+    async importarSituacoesFiscais(uiElement) {
+        return _runDomain('fiscal', uiElement);
+    },
+
+    async importarTiposOperacoes(uiElement) {
+        return _runDomain('fiscal', uiElement);
+    },
+
+    async importarImpostosFederais(uiElement) {
+        return _runDomain('fiscal', uiElement);
+    },
+
+    async importarTabelasTributarias(uiElement) {
+        return _runDomain('fiscal', uiElement);
+    },
+
+    async importarCenariosFiscais(uiElement) {
+        return _runDomain('fiscal', uiElement);
+    },
+
+    /** Importa todos os sub-domínios Fiscais em sequência */
+    async importarTudoFiscal(uiElement) {
+        return _runDomain('fiscal', uiElement);
+    },
 
     // ── PESSOA ────────────────────────────────────────────────────────────────
 
-    importarLojas:              (el) => _runStep('pessoa', 'lojas',              el),
-    importarClientes:           (el) => _runStep('pessoa', 'clientes',           el),
-    importarFornecedores:       (el) => _runStep('pessoa', 'fornecedores',       el),
+    async importarLojas(uiElement) {
+        return _runDomain('pessoa', uiElement);
+    },
 
-    // ── IMPORTAR TUDO (por domínio) ──────────────────────────────────────────
+    async importarClientes(uiElement) {
+        return _runDomain('pessoa', uiElement);
+    },
+
+    async importarFornecedores(uiElement) {
+        return _runDomain('pessoa', uiElement);
+    },
+
+    /** Importa todos os sub-domínios de Pessoa em sequência */
+    async importarTudoPessoa(uiElement) {
+        return _runDomain('pessoa', uiElement);
+    },
+
+    // ── IMPORTAÇÃO COMPLETA ───────────────────────────────────────────────────
 
     /**
-     * Importa todas as etapas de um domínio de uma vez.
-     * Chamado pelos botões "🚀 Importar Tudo" de cada aba.
-     *
-     * @param {string}  dominio   - 'produto' | 'financeiro' | 'frenteLoja' | etc.
-     * @param {Element} tabPanel  - .tab-panel da aba ativa
-     * @param {Element} bulkBtn   - Botão "Importar Tudo" clicado
+     * Inicia o job de importação completa (todos os 7 domínios).
+     * O executor `tudo` no backend já coordena a sequência correta.
      */
-    importarTudo(dominio, tabPanel, bulkBtn) {
-        return _runDominio(dominio, tabPanel, bulkBtn);
+    async importarTudo(uiElement) {
+        return _runDomain('tudo', uiElement);
     },
 };
 

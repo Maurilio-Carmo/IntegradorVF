@@ -1,14 +1,14 @@
 // backend/src/importacao/repositories/fiscal.repository.ts
 
 import { Injectable, Logger } from '@nestjs/common';
-import { SqliteService } from '../../database/sqlite.service';
-import { SqliteMapper as M } from '../../common/sqlite-mapper';
+import { SqliteService }      from '../../database/sqlite.service';
+import { SqliteMapper as M }  from '../../common/sqlite-mapper';
 
 /**
  * FiscalRepository
- * Gerencia: regime_tributario, situacoes_fiscais, tipos_operacoes,
- * impostos_federais, tabelas_tributarias (+destino), cenarios_fiscais (+ncms/lojas/destino).
- * Porta direta de fiscal.js — lógica SQL preservada integralmente.
+ *
+ * Gerencia: regimes tributários, situações fiscais, tipos de operações,
+ * impostos federais, tabelas tributárias e cenários fiscais NCM.
  */
 @Injectable()
 export class FiscalRepository {
@@ -17,18 +17,18 @@ export class FiscalRepository {
 
   constructor(private readonly sqlite: SqliteService) {}
 
+  // ─── Helpers ──────────────────────────────────────────────────────────────
+
   private upsert(
     items: any[],
     sql: string,
     mapper: (item: any) => Record<string, any>,
   ): { success: boolean; count: number } {
     if (!items?.length) return { success: true, count: 0 };
-
     const stmt = this.sqlite.getDb().prepare(sql);
     this.sqlite.transaction(() => {
       for (const item of items) stmt.run(mapper(item));
     });
-
     return { success: true, count: items.length };
   }
 
@@ -37,25 +37,15 @@ export class FiscalRepository {
   importarRegimeTributario(regimes: any[]) {
     return this.upsert(
       regimes,
-      `INSERT INTO regime_tributario (
-         regime_id, descricao, classificacao, loja, fornecedor, status
-       ) VALUES (
-         @regime_id, @descricao, @classificacao, @loja, @fornecedor, @status
-       )
+      `INSERT INTO regimes_tributarios (regime_id, descricao, status)
+       VALUES (@regime_id, @descricao, 'U')
        ON CONFLICT(regime_id) DO UPDATE SET
-         descricao     = excluded.descricao,
-         classificacao = excluded.classificacao,
-         loja          = excluded.loja,
-         fornecedor    = excluded.fornecedor,
-         updated_at    = CURRENT_TIMESTAMP
+         descricao  = excluded.descricao,
+         updated_at = CURRENT_TIMESTAMP
        WHERE status NOT IN ('C', 'D')`,
       (r) => ({
-        regime_id:     r.id            ?? null,
-        descricao:     r.descricao     ?? null,
-        classificacao: r.classificacao ?? null,
-        loja:          M.bool(r.loja),
-        fornecedor:    M.bool(r.fornecedor),
-        status:        'U',
+        regime_id: r.id       ?? null,
+        descricao: r.descricao ?? null,
       }),
     );
   }
@@ -65,50 +55,48 @@ export class FiscalRepository {
   importarSituacoesFiscais(situacoes: any[]) {
     return this.upsert(
       situacoes,
-      `INSERT INTO situacoes_fiscais (
-         situacao_id, descricao, descricao_completa, substituto, status
-       ) VALUES (
-         @situacao_id, @descricao, @descricao_completa, @substituto, @status
-       )
+      `INSERT INTO situacoes_fiscais (situacao_id, descricao, cst, csosn, status)
+       VALUES (@situacao_id, @descricao, @cst, @csosn, 'U')
        ON CONFLICT(situacao_id) DO UPDATE SET
-         descricao          = excluded.descricao,
-         descricao_completa = excluded.descricao_completa,
-         substituto         = excluded.substituto,
-         updated_at         = CURRENT_TIMESTAMP
+         descricao  = excluded.descricao,
+         cst        = excluded.cst,
+         csosn      = excluded.csosn,
+         updated_at = CURRENT_TIMESTAMP
        WHERE status NOT IN ('C', 'D')`,
       (s) => ({
-        situacao_id:        s.id               ?? null,
-        descricao:          s.descricao        ?? null,
-        descricao_completa: s.descricaoCompleta ?? null,
-        substituto:         M.bool(s.substituto),
-        status:             'U',
+        situacao_id: s.id        ?? null,
+        descricao:   s.descricao ?? null,
+        cst:         s.cst       ?? null,
+        csosn:       s.csosn     ?? null,
       }),
     );
   }
 
   // ─── TIPOS DE OPERAÇÕES ───────────────────────────────────────────────────
 
-  importarTiposOperacoes(tipos: any[]) {
+  importarTiposOperacoes(operacoes: any[]) {
     return this.upsert(
-      tipos,
+      operacoes,
       `INSERT INTO tipos_operacoes (
          operacao_id, descricao, tipo_de_operacao, tipo_geracao_financeiro,
          modalidade, tipo_documento, origem_da_nota,
-         atualiza_custos, atualiza_estoque, incide_impostos_federais,
-         ipi_compoe_base_pis_cofins, outras_desp_base_pis_cofins,
-         outras_desp_base_icms, gera_fiscal, destaca_ipi, destaca_icms,
-         compoe_abc, imprime_descricao_nfe, envia_observacao_nfe,
-         utiliza_conferencia, cfop_no_estado, cfop_fora_do_estado,
-         cfop_exterior, observacao, codigo_cst, cfops_relacionados, status
+         atualiza_custos, atualiza_estoque,
+         incide_impostos_federais, ipi_compoe_base_pis_cofins,
+         outras_desp_base_pis_cofins, outras_desp_base_icms,
+         gera_fiscal, destaca_ipi, destaca_icms, compoe_abc,
+         imprime_descricao_nfe, envia_observacao_nfe, utiliza_conferencia,
+         cfop_no_estado, cfop_fora_do_estado, cfop_exterior,
+         observacao, codigo_cst, cfops_relacionados, status
        ) VALUES (
          @operacao_id, @descricao, @tipo_de_operacao, @tipo_geracao_financeiro,
          @modalidade, @tipo_documento, @origem_da_nota,
-         @atualiza_custos, @atualiza_estoque, @incide_impostos_federais,
-         @ipi_compoe_base_pis_cofins, @outras_desp_base_pis_cofins,
-         @outras_desp_base_icms, @gera_fiscal, @destaca_ipi, @destaca_icms,
-         @compoe_abc, @imprime_descricao_nfe, @envia_observacao_nfe,
-         @utiliza_conferencia, @cfop_no_estado, @cfop_fora_do_estado,
-         @cfop_exterior, @observacao, @codigo_cst, @cfops_relacionados, @status
+         @atualiza_custos, @atualiza_estoque,
+         @incide_impostos_federais, @ipi_compoe_base_pis_cofins,
+         @outras_desp_base_pis_cofins, @outras_desp_base_icms,
+         @gera_fiscal, @destaca_ipi, @destaca_icms, @compoe_abc,
+         @imprime_descricao_nfe, @envia_observacao_nfe, @utiliza_conferencia,
+         @cfop_no_estado, @cfop_fora_do_estado, @cfop_exterior,
+         @observacao, @codigo_cst, @cfops_relacionados, @status
        )
        ON CONFLICT(operacao_id) DO UPDATE SET
          descricao                   = excluded.descricao,
@@ -205,30 +193,37 @@ export class FiscalRepository {
          cst_saida_simples           = excluded.cst_saida_simples,
          updated_at                  = CURRENT_TIMESTAMP
        WHERE status NOT IN ('C', 'D')`,
-      (i) => ({
-        imposto_id:                 i.id                       ?? null,
-        descricao:                  i.descricao                ?? null,
-        tipo_imposto:               i.tipoImposto              ?? null,
-        cst_entrada_real:           i.cstEntradaReal           ?? null,
-        cst_saida_real:             i.cstSaidaReal             ?? null,
-        aliquota_entrada_real:      i.aliquotaEntradaReal      ?? 0,
-        aliquota_saida_real:        i.aliquotaSaidaReal        ?? 0,
-        cst_entrada_presumido:      i.cstEntradaPresumido      ?? null,
-        cst_saida_presumido:        i.cstSaidaPresumido        ?? null,
-        aliquota_entrada_presumido: i.aliquotaEntradaPresumido ?? 0,
-        aliquota_saida_presumido:   i.aliquotaSaidaPresumido   ?? 0,
-        cst_entrada_simples:        i.cstEntradaSimples        ?? null,
-        cst_saida_simples:          i.cstSaidaSimples          ?? null,
-        status:                     'U',
-      }),
+      (i) => {
+        const g = i.impostoFederalGeral || {};
+
+        return {
+          imposto_id:                 i.id                                  ?? null,
+          descricao:                  i.descricao                           ?? null,
+          tipo_imposto:               i.tipoImposto                         ?? null,
+          cst_entrada_real:           g.cstEntrada               ?? i.cstEntradaReal           ?? null,
+          cst_saida_real:             g.cstSaida                 ?? i.cstSaidaReal             ?? null,
+          aliquota_entrada_real:      g.aliquotaEntrada          ?? i.aliquotaEntradaReal       ?? 0,
+          aliquota_saida_real:        g.aliquotaSaida            ?? i.aliquotaSaidaReal         ?? 0,
+          cst_entrada_presumido:      g.cstEntradaPresumido      ?? i.cstEntradaPresumido       ?? null,
+          cst_saida_presumido:        g.cstSaidaPresumido        ?? i.cstSaidaPresumido         ?? null,
+          aliquota_entrada_presumido: g.aliquotaEntradaPresumido ?? i.aliquotaEntradaPresumido  ?? 0,
+          aliquota_saida_presumido:   g.aliquotaSaidaPresumido   ?? i.aliquotaSaidaPresumido    ?? 0,
+          cst_entrada_simples:        g.cstEntradaSimples        ?? i.cstEntradaSimples         ?? null,
+          cst_saida_simples:          g.cstSaidaSimples          ?? i.cstSaidaSimples           ?? null,
+          status:                     'U',
+        };
+      },
     );
   }
 
   // ─── TABELAS TRIBUTÁRIAS ──────────────────────────────────────────────────
-  // Duas tabelas por item: tabelas_tributarias + tabelas_tributarias_destino
 
-  importarTabelasTributarias(tabelas: any[]) {
-    if (!tabelas?.length) return { success: true, count: 0 };
+  importarTabelasTributarias(tabelasRaw: any[]) {
+    if (!tabelasRaw?.length) return { success: true, count: 0 };
+
+    const tabelas = this._normalizarTabelasTributarias(tabelasRaw);
+
+    if (!tabelas.length) return { success: true, count: 0 };
 
     const db = this.sqlite.getDb();
 
@@ -256,16 +251,18 @@ export class FiscalRepository {
         tributado_nf, isento_nf, outros_nf, aliquota, agregado,
         tributado_icms, carga_liquida, aliquota_interna, icms_origem,
         icms_desonerado, icms_efetivo, reducao_origem, motivo_desoneracao_icms,
-        codigo_beneficio_fiscal, fecop, fecop_st, soma_ipi_bc, soma_ipi_bs,
-        st_destacado, csosn, csosn_doc_fiscal, csosn_cupom_fiscal,
+        codigo_beneficio_fiscal, fecop, fecop_st,
+        soma_ipi_bc, soma_ipi_bs, st_destacado,
+        csosn, csosn_doc_fiscal, csosn_cupom_fiscal,
         cst_id, cfop_id, cfop_cupom_id, status
       ) VALUES (
         @tabela_id, @tipo_operacao, @classificacao_pessoa, @uf_destino, @tributacao,
         @tributado_nf, @isento_nf, @outros_nf, @aliquota, @agregado,
         @tributado_icms, @carga_liquida, @aliquota_interna, @icms_origem,
         @icms_desonerado, @icms_efetivo, @reducao_origem, @motivo_desoneracao_icms,
-        @codigo_beneficio_fiscal, @fecop, @fecop_st, @soma_ipi_bc, @soma_ipi_bs,
-        @st_destacado, @csosn, @csosn_doc_fiscal, @csosn_cupom_fiscal,
+        @codigo_beneficio_fiscal, @fecop, @fecop_st,
+        @soma_ipi_bc, @soma_ipi_bs, @st_destacado,
+        @csosn, @csosn_doc_fiscal, @csosn_cupom_fiscal,
         @cst_id, @cfop_id, @cfop_cupom_id, @status
       )
       ON CONFLICT(tabela_id, tipo_operacao, classificacao_pessoa, uf_destino) DO UPDATE SET
@@ -301,7 +298,7 @@ export class FiscalRepository {
 
     this.sqlite.transaction(() => {
       for (const t of tabelas) {
-        const dados = this.mapTabela(t);
+        const dados = this._mapTabela(t);
 
         if (!dados.tipo_operacao) {
           this.log.warn(`tabela_id=${dados.tabela_id} ignorada — tipo_operacao ausente`);
@@ -320,7 +317,62 @@ export class FiscalRepository {
     return { success: true, count: tabelas.length };
   }
 
-  private mapTabela(t: any): Record<string, any> {
+  private _normalizarTabelasTributarias(tabelasRaw: any[]): any[] {
+    if (tabelasRaw[0] && !Array.isArray(tabelasRaw[0]?.itens)) {
+      return tabelasRaw;
+    }
+
+    const resultado: any[] = [];
+
+    for (const t of tabelasRaw) {
+      const itens: any[] = t.itens || [];
+      if (!itens.length) continue;
+
+      for (const i of itens) {
+        resultado.push({
+          tabelaId:            t.id                                     ?? null,
+          regimeEstadualId:    t.regimeEstadualId                       ?? null,
+          situacaoFiscalId:    t.situacaoFiscalId                       ?? null,
+          figuraFiscalId:      t.figuraFiscalId                         ?? null,
+          ufOrigem:            t.uf                                     ?? null,  // API usa `uf` para a UF de origem
+          tipoDeOperacao:      t.tipoDeOperacao,
+          decreto:             t.decreto                                ?? null,
+          classificacaoPessoa: i.classificacaoDePessoa                  ?? null,
+          ufDestino:           i.uf                                     ?? null,  // API usa `uf` para a UF de destino
+          tributacao:          i.tributacao                             ?? null,
+          tributadoNf:         i.tributadoNF                            ?? 0,
+          isentoNf:            i.isentoNF                               ?? 0,
+          outrosNf:            i.outrosNF                               ?? 0,
+          aliquota:            i.aliquota                               ?? 0,
+          agregado:            i.agregado                               ?? 0,
+          tributadoIcms:       i.tributadoICMS                          ?? 0,
+          cargaLiquida:        i.cargaLiquida                           ?? 0,
+          aliquotaInterna:     i.aliquotaInterna                        ?? 0,
+          icmsOrigem:          i.icmsOrigem                             ?? 0,
+          icmsDesonerado:      i.icmsDesonerado                         ?? false,
+          icmsEfetivo:         i.icmsEfetivo                            ?? false,
+          reducaoOrigem:       i.reducaoOrigem                          ?? 0,
+          motivoDesoneracaoICMS:  i.motivoDesoneracaoICMS               ?? null,
+          codigoBeneficioFiscal:  i.codigoBeneficioFiscal               ?? null,
+          fecop:               i.fecop                                  ?? 0,
+          fecopSt:             i.fecopST                                ?? 0,
+          somaIpiBc:           i.somaIPINaBaseDeCalculo                 ?? false,
+          somaIpiBs:           i.somaIPINaBaseDeCalculoSubstituicao     ?? false,
+          stDestacado:         i.stDestacado                            ?? false,
+          csosn:               i.csosn                                  ?? null,
+          csosnCupomFiscal:    i.csosnCupomFiscal                       ?? null,
+          csosnDocumentoFiscal:i.csosnDocumentoFiscal                   ?? null,
+          cstId:               i.cstId                                  ?? null,
+          cfopId:              i.cfopId                                 ?? null,
+          cfopCuponsFiscaisId: i.cfopCuponsFiscaisId                    ?? null,
+        });
+      }
+    }
+
+    return resultado;
+  }
+
+  private _mapTabela(t: any): Record<string, any> {
     return {
       tabela_id:               t.tabelaId              ?? t.id   ?? null,
       tipo_operacao:           t.tipoDeOperacao,
@@ -362,7 +414,6 @@ export class FiscalRepository {
   }
 
   // ─── CENÁRIOS FISCAIS ─────────────────────────────────────────────────────
-  // 4 tabelas por cenário: cenarios_fiscais + ncms + lojas + destino
 
   importarCenariosFiscais(cenarios: any[]) {
     if (!cenarios?.length) return { success: true, count: 0 };
@@ -422,13 +473,13 @@ export class FiscalRepository {
             cenario_id:   cenarioId,
             descricao:    c.descricao  ?? null,
             cst:          c.cst        ?? null,
-            cclasstrib:   c.cclassTrib ?? null,
+            c_class_trib: c.cclassTrib ?? null,
             status:       'U',
           });
 
           for (const n of (c.ncms ?? [])) {
             stmtNcm.run({
-              cenario_id:            n.codigoCenarioFiscal,
+              cenario_id:            cenarioId,
               codigo_ncm:            n.codigoNcm           ?? null,
               descricao_ncm:         n.descricaoNcm        ?? null,
             });
@@ -436,7 +487,7 @@ export class FiscalRepository {
 
           for (const l of (c.lojas ?? [])) {
             stmtLoja.run({
-              cenario_id:            l.codigoCenarioFiscal,
+              cenario_id:            cenarioId,
               loja_id:               l.codigoLoja          ?? null,
               descricao_loja:        l.descricaoLoja       ?? null,
               uf_origem:             l.ufOrigem            ?? null,
@@ -445,7 +496,7 @@ export class FiscalRepository {
 
           for (const u of (c.ufsDestino ?? [])) {
             stmtUf.run({
-              cenario_id:            u.codigoCenarioFiscal,
+              cenario_id:            cenarioId,
               uf_destino:            u.ufDestino           ?? null,
             });
           }
