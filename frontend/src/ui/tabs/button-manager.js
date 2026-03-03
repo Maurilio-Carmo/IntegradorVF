@@ -1,13 +1,30 @@
 // frontend/src/ui/tabs/button-manager.js
-// ─── VERSÃO REFATORADA ────────────────────────────────────────────────────────
+// ─── VERSÃO CORRIGIDA ─────────────────────────────────────────────────────────
 //
-// O que mudou:
-//   - Os botões "Importar Tudo" agora passam tabPanel e bulkBtn para
-//     Importacao.importarTudo(), que usa JobClient + JobProgress internamente.
-//   - Os botões individuais continuam chamando Importacao.importarXxx(el),
-//     mas agora esses métodos disparam jobs no backend (via JobClient).
-//   - Removida a lógica de verificação de config aqui — feita no backend.
-//   - Botões são desabilitados durante importação e reabilitados via SSE.
+// CORREÇÕES aplicadas neste arquivo (encontradas na revisão de continuidade):
+//
+// BUG 1 — PDV action map corrompido:
+//   ANTES (novo/errado):
+//     'importar-forma-pagamento-pdv'  → 'importarFormaPagamentoPDV'  ← GHOST
+//     'importar-motivo-cancelamento'  → 'importarMotivoCancelamento' ← GHOST (singular)
+//     'importar-perguntas-respostas'  → 'importarPerguntasRespostas' ← GHOST (não existe)
+//     (faltavam 5 ações PDV reais)
+//   DEPOIS (correto, espelha button-manager.legacy.js + index.js):
+//     'importar-formas-pagamento'     → 'importarFormasPagamento'
+//     'importar-pagamentos-pdv'       → 'importarPagamentosPDV'
+//     'importar-recebimentos-pdv'     → 'importarRecebimentosPDV'
+//     'importar-motivos-desconto'     → 'importarMotivosDesconto'
+//     'importar-motivos-devolucao'    → 'importarMotivosDevolucao'
+//     'importar-motivos-cancelamento' → 'importarMotivosCancelamento'
+//
+// BUG 2 — Estoque: HTML usa 'importar-locais-estoque' (plural), mapa usava singular:
+//   ANTES: 'importar-local-estoque'  → não batia com nenhum botão do HTML
+//   DEPOIS: 'importar-locais-estoque' → bate com data-action do HTML
+//
+// BUG 3 — _setupBulkButtons chamava Importacao.importarTudo(dominio, tabPanel, btn)
+//   index.js tem assinatura: importarTudo(uiElement) — o dominio ia como uiElement!
+//   SOLUÇÃO: cada botão bulk agora chama o método específico do domínio:
+//     importarTudoProduto / importarTudoFinanceiro / importarTudoPdv / etc.
 //
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -17,10 +34,6 @@ import UI         from '../ui.js';
 export class ImportButtonManager {
 
     constructor() {
-        /**
-         * Mapa de data-action → nome do método em Importacao.
-         * Adicione novas entradas aqui ao expandir o sistema.
-         */
         this.actionMap = this._buildActionMap();
     }
 
@@ -32,11 +45,16 @@ export class ImportButtonManager {
         console.log(`✅ ImportButtonManager inicializado (${Object.keys(this.actionMap).length} ações)`);
     }
 
-    // ─── Mapeamento action → método ───────────────────────────────────────────
+    // ─── Mapeamento data-action → método de Importacao ────────────────────────
+    //
+    // Regras:
+    //   - Chave: data-action exato do HTML (verificado em import-tabs.html)
+    //   - Valor: nome do método em Importacao (index.js)
+    //   - Qualquer divergência aqui causa clique silencioso sem efeito
 
     _buildActionMap() {
         return {
-            // PRODUTO
+            // ── PRODUTO ───────────────────────────────────────────────────────
             'importar-mercadologia':          'importarMercadologia',
             'importar-marcas':                'importarMarcas',
             'importar-familias':              'importarFamilias',
@@ -44,25 +62,32 @@ export class ImportButtonManager {
             'importar-produto-auxiliares':    'importarProdutoAuxiliares',
             'importar-produto-fornecedores':  'importarProdutoFornecedores',
 
-            // FINANCEIRO
+            // ── FINANCEIRO ────────────────────────────────────────────────────
             'importar-categorias':            'importarCategorias',
             'importar-agentes':               'importarAgentes',
             'importar-contas-correntes':      'importarContasCorrentes',
             'importar-especies-documento':    'importarEspeciesDocumento',
             'importar-historico-padrao':      'importarHistoricoPadrao',
+
+            // ── PDV / FRENTE DE LOJA ──────────────────────────────────────────
+            // CORRIGIDO: as 6 entradas abaixo substituem as 3 entradas fantasmas
+            // que existiam na versão anterior (forma-pagamento-pdv, motivo-cancelamento,
+            // perguntas-respostas — nenhuma delas existia em index.js)
             'importar-formas-pagamento':      'importarFormasPagamento',
+            'importar-pagamentos-pdv':        'importarPagamentosPDV',
+            'importar-recebimentos-pdv':      'importarRecebimentosPDV',
+            'importar-motivos-desconto':      'importarMotivosDesconto',
+            'importar-motivos-devolucao':     'importarMotivosDevolucao',
+            'importar-motivos-cancelamento':  'importarMotivosCancelamento',
 
-            // PDV / FRENTE DE LOJA
-            'importar-forma-pagamento-pdv':   'importarFormaPagamentoPDV',
-            'importar-motivo-cancelamento':   'importarMotivoCancelamento',
-            'importar-perguntas-respostas':   'importarPerguntasRespostas',
-
-            // ESTOQUE
-            'importar-local-estoque':         'importarLocalEstoque',
+            // ── ESTOQUE ───────────────────────────────────────────────────────
+            // CORRIGIDO: HTML usa 'importar-locais-estoque' (plural)
+            // A versão anterior tinha 'importar-local-estoque' (singular) — não batia
+            'importar-locais-estoque':        'importarLocalEstoque',
             'importar-tipos-ajustes':         'importarTiposAjustes',
             'importar-saldo-estoque':         'importarSaldoEstoque',
 
-            // FISCAL
+            // ── FISCAL ────────────────────────────────────────────────────────
             'importar-impostos-federais':     'importarImpostosFederais',
             'importar-regime-tributario':     'importarRegimeTributario',
             'importar-situacoes-fiscais':     'importarSituacoesFiscais',
@@ -70,7 +95,7 @@ export class ImportButtonManager {
             'importar-tabelas-tributarias':   'importarTabelasTributarias',
             'importar-cenarios-fiscais':      'importarCenariosFiscais',
 
-            // PESSOA
+            // ── PESSOA ────────────────────────────────────────────────────────
             'importar-lojas':                 'importarLojas',
             'importar-clientes':              'importarClientes',
             'importar-fornecedores':          'importarFornecedores',
@@ -89,7 +114,7 @@ export class ImportButtonManager {
             const btn = e.target.closest('[data-action]');
             if (!btn) return;
 
-            const action    = btn.dataset.action;
+            const action     = btn.dataset.action;
             const methodName = this.actionMap[action];
             if (!methodName || typeof Importacao[methodName] !== 'function') return;
 
@@ -103,7 +128,6 @@ export class ImportButtonManager {
             try {
                 await Importacao[methodName](uiElement);
             } catch (err) {
-                // Erro já logado dentro do Importacao / JobProgress
                 console.error(`❌ Ação "${action}" falhou:`, err);
             }
         });
@@ -112,37 +136,55 @@ export class ImportButtonManager {
     // ─── Botões "Importar Tudo" ───────────────────────────────────────────────
 
     /**
-     * Mapeia cada botão "Importar Tudo" ao domínio correspondente.
-     * Passa tabPanel e bulkBtn para que JobProgress possa atualizar
-     * cada import-item individualmente.
+     * Cada botão "Importar Tudo" dispara o job do domínio correspondente.
+     *
+     * CORRIGIDO: a versão anterior chamava Importacao.importarTudo(dominio, tabPanel, btn),
+     * mas index.js tem assinatura importarTudo(uiElement) — o dominio ia como uiElement
+     * (string passada onde se espera um elemento DOM).
+     *
+     * SOLUÇÃO: cada botão agora chama o método específico do domínio:
+     *   importarTudoProduto / importarTudoFinanceiro / importarTudoPdv / etc.
+     * Esses métodos existem em index.js e têm a assinatura correta (uiElement).
+     *
+     * O tabPanel é passado como uiElement para que o JobProgress consiga
+     * atualizar os import-items individuais dentro da aba.
      */
     _setupBulkButtons() {
+        // Mapeia: id do botão → método em Importacao (todos existem em index.js)
         const bulkMap = {
+            'btnImportarTudoProduto':    'importarTudoProduto',
+            'btnImportarTudoFinanceiro': 'importarTudoFinanceiro',
+            'btnImportarTudoFrenteLoja': 'importarTudoPdv',       // domínio interno: 'pdv'
+            'btnImportarTudoEstoque':    'importarTudoEstoque',
+            'btnImportarTudoFiscal':     'importarTudoFiscal',
+            'btnImportarTudoPessoa':     'importarTudoPessoa',
+        };
+
+        // Mapa auxiliar: id do botão → data-panel da aba correspondente
+        // Necessário porque frenteLoja ≠ frente-loja no HTML
+        const panelMap = {
             'btnImportarTudoProduto':    'produto',
             'btnImportarTudoFinanceiro': 'financeiro',
-            'btnImportarTudoFrenteLoja': 'frenteLoja',
+            'btnImportarTudoFrenteLoja': 'frente-loja',
             'btnImportarTudoEstoque':    'estoque',
             'btnImportarTudoFiscal':     'fiscal',
             'btnImportarTudoPessoa':     'pessoa',
         };
 
-        Object.entries(bulkMap).forEach(([btnId, dominio]) => {
-            // Usa delegation para funcionar com componentes carregados dinamicamente
+        Object.entries(bulkMap).forEach(([btnId, methodName]) => {
             document.addEventListener('click', async (e) => {
                 const btn = e.target.closest(`#${btnId}`);
                 if (!btn || btn.disabled) return;
 
-                // O painel da aba é o data-panel correspondente ao domínio
-                // Converte camelCase para kebab-case (frenteLoja → frente-loja)
-                const panelId  = dominio.replace(/([A-Z])/g, '-$1').toLowerCase();
-                const tabPanel = document.querySelector(`.tab-panel[data-panel="${panelId}"]`)
-                              ?? document.querySelector(`.tab-panel[data-panel="${dominio}"]`);
+                const panelId  = panelMap[btnId];
+                const tabPanel = document.querySelector(`.tab-panel[data-panel="${panelId}"]`);
 
                 try {
-                    await Importacao.importarTudo(dominio, tabPanel, btn);
+                    // tabPanel é o uiElement — JobProgress atualiza os import-items dentro dele
+                    await Importacao[methodName](tabPanel);
                 } catch (err) {
-                    console.error(`❌ Importar Tudo (${dominio}) falhou:`, err);
-                    UI.log(`❌ Falha ao importar ${dominio}: ${err.message}`, 'error');
+                    console.error(`❌ Importar Tudo (${btnId}) falhou:`, err);
+                    UI.log(`❌ Falha ao importar: ${err.message}`, 'error');
                 }
             });
         });

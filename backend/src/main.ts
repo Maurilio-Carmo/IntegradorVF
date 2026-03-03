@@ -43,7 +43,7 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('docs', app, document);
 
-  const frontendPath = path.join(process.cwd(), 'frontend');
+  const frontendPath = path.resolve(__dirname, '..', '..', 'frontend');
 
   expressApp.use(express.static(frontendPath));
   expressApp.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
