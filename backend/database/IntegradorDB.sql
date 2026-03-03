@@ -503,16 +503,14 @@ CREATE TABLE saldo_estoque (
 -- REGIME TRIBUTÁRIO
 CREATE TABLE regime_tributario (
     regime_id INTEGER PRIMARY KEY,
-    loja_id INTEGER NOT NULL,
     descricao TEXT,
     classificacao TEXT CHECK(classificacao IN ('N','E','A','S')),
+    loja INTEGER DEFAULT 0,
     fornecedor INTEGER DEFAULT 0,
     status TEXT CHECK(status IN ('C','U','D','E','S')) DEFAULT 'U',
     retorno TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-
-    FOREIGN KEY (loja_id) REFERENCES lojas(loja_id) ON DELETE CASCADE
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
 -- SITUAÇÕES FISCAIS

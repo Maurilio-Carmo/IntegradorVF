@@ -44,7 +44,7 @@ export const STATS_MAPPING = {
     tipos_operacoes:              'statTiposOperacoes',
     impostos_federais:            'statImpostosFederais',
     tabelas_tributarias:          'statTabelasTributarias',
-    cenarios_fiscais:              'statCenariosFiscais',
+    cenarios_fiscais:             'statCenariosFiscais',
 
     // ── Estoque ──────────────────────────────────────────────────────────────
     tipos_ajustes:                'statTiposAjustes',

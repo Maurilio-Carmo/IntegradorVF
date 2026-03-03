@@ -199,14 +199,14 @@ export class FinanceiroRepository {
          mora_diaria_por_atraso, dias_para_multa, tipo_valor_multa,
          valor_multa_por_atraso, emite_documento_vinculado,
          quantidade_vias, quantidade_autenticacoes,
-         especie_pdv, controla_limite_credito, tipo, status
+         especie_pdv, controla_limite, tipo_limite, status
        ) VALUES (
          @especie_id, @descricao, @sigla, @genero, @especie_nfe,
          @modalidade, @dias_para_juros, @tipo_valor_mora_diaria,
          @mora_diaria_por_atraso, @dias_para_multa, @tipo_valor_multa,
          @valor_multa_por_atraso, @emite_documento_vinculado,
          @quantidade_vias, @quantidade_autenticacoes,
-         @especie_pdv, @controla_limite_credito, @tipo, @status
+         @especie_pdv, @controla_limite, @tipo_limite, @status
        )
        ON CONFLICT(especie_id) DO UPDATE SET
          descricao                 = excluded.descricao,

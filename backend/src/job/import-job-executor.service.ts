@@ -21,10 +21,9 @@ interface StepDef {
   save: (data: any[]) => any;
 }
 
-// ✅ CORREÇÃO: interface declarada FORA da classe — resolve erro TS2345
 interface DominioDef {
   label:    string;
-  steps:    { name: string; label: string }[];  // mutável, não readonly
+  steps:    { name: string; label: string }[];
   executor: (jobId: string) => Promise<void>;
 }
 
@@ -49,7 +48,6 @@ export class ImportJobExecutorService {
   ) {}
 
   // ─── Mapa de domínios ─────────────────────────────────────────────────────
-  // ✅ Tipado com Record<string, DominioDef> → steps é mutável → sem erro TS2345
 
   private readonly DOMINIOS: Record<string, DominioDef> = {
 
@@ -94,8 +92,7 @@ export class ImportJobExecutorService {
       executor: (id) => this._executarPdv(id),
     },
 
-    // alias aceito do frontend (button-manager usa 'pdv' como domínio em alguns casos)
-    pdv: {
+    pdv: {  // alias aceito do frontend
       label: 'Importar Tudo — Frente de Loja',
       steps: [
         { name: 'pagamentosPDV',       label: 'Pagamentos PDV' },
@@ -142,58 +139,55 @@ export class ImportJobExecutorService {
     },
   };
 
-  // ─── Mapa global de steps individuais ────────────────────────────────────
-  // ✅ SEM ?lojaId= em nenhum endpoint → traz dados de TODAS as lojas
-  // ✅ Inclui aliases para nomes alternativos vindos do frontend
+  // ─── Mapa global de steps ─────────────────────────────────────────────────
 
   private get STEP_MAP(): Record<string, StepDef> {
     return {
 
       // ── PRODUTO ──────────────────────────────────────────────────────────
-      secoes:              { endpoint: 'produto/secoes',             save: d => this.mercadologia.importarSecoes(d) },
-      grupos:              { endpoint: 'produto/grupos',             save: d => this.mercadologia.importarGrupos(d) },
-      subgrupos:           { endpoint: 'produto/subgrupos',          save: d => this.mercadologia.importarSubgrupos(d) },
-      // alias: 'mercadologia' vem do card do frontend → roda seções como representante
-      mercadologia:        { endpoint: 'produto/secoes',             save: d => this.mercadologia.importarSecoes(d) },
-      marcas:              { endpoint: 'produto/marcas',             save: d => this.produto.importarMarcas(d) },
-      familias:            { endpoint: 'produto/familias',           save: d => this.produto.importarFamilias(d) },
-      // sem ?lojaId= → todas as lojas
-      produtos:            { endpoint: 'produto/produtos',           save: d => this.produto.importarProdutos(d) },
-      produtoAuxiliares:   { endpoint: 'produto/produto-auxiliares', save: d => this.produto.importarProdutoAuxiliares(d) },
+      secoes:            { endpoint: 'produto/secoes',            save: d => this.mercadologia.importarSecoes(d) },
+      grupos:            { endpoint: 'produto/secoes',            save: d => this.mercadologia.importarGrupos(d) },
+      subgrupos:         { endpoint: 'produto/secoes',            save: d => this.mercadologia.importarSubgrupos(d) },
+      mercadologia:      { endpoint: 'produto/secoes',            save: d => this.mercadologia.importarSecoes(d) },
+      marcas:            { endpoint: 'produto/marcas',            save: d => this.produto.importarMarcas(d) },
+      familias:          { endpoint: 'produto/familias',          save: d => this.produto.importarFamilias(d) },
+      produtos:          { endpoint: 'produto/produtos',          save: d => this.produto.importarProdutos(d) },
+      produtoAuxiliares: { endpoint: 'produto/codigos-auxiliares', save: d => this.produto.importarProdutoAuxiliares(d) },
 
       // ── FINANCEIRO ───────────────────────────────────────────────────────
-      categorias:          { endpoint: 'financeiro/categorias',         save: d => this.financeiro.importarCategorias(d) },
-      agentes:             { endpoint: 'financeiro/agentes',            save: d => this.financeiro.importarAgentes(d) },
-      contasCorrentes:     { endpoint: 'financeiro/contas-correntes',   save: d => this.financeiro.importarContasCorrentes(d) },
-      especiesDocumento:   { endpoint: 'financeiro/especies-documento', save: d => this.financeiro.importarEspeciesDocumento(d) },
-      historicoPadrao:     { endpoint: 'financeiro/historico-padrao',   save: d => this.financeiro.importarHistoricoPadrao(d) },
+      categorias:        { endpoint: 'financeiro/categorias',          save: d => this.financeiro.importarCategorias(d) },
+      agentes:           { endpoint: 'pessoa/agentes-financeiros',     save: d => this.financeiro.importarAgentes(d) },
+      contasCorrentes:   { endpoint: 'financeiro/contas-correntes',    save: d => this.financeiro.importarContasCorrentes(d) },
+      especiesDocumento: { endpoint: 'financeiro/especies-documentos', save: d => this.financeiro.importarEspeciesDocumento(d) },
+      historicoPadrao:   { endpoint: 'financeiro/historicos-padrao',   save: d => this.financeiro.importarHistoricoPadrao(d) },
+      //formasPagamento:   { endpoint: 'financeiro/formas-pagamento',    save: d => this.financeiro.importarFormasPagamento(d) },
 
       // ── PDV / FRENTE DE LOJA ─────────────────────────────────────────────
-      pagamentosPDV:       { endpoint: 'pdv/pagamentos',           save: d => this.frenteLoja.importarPagamentosPDV(d) },
-      recebimentosPDV:     { endpoint: 'pdv/recebimentos',         save: d => this.frenteLoja.importarRecebimentosPDV(d) },
-      motivosDesconto:     { endpoint: 'pdv/motivos-desconto',     save: d => this.frenteLoja.importarMotivosDesconto(d) },
-      motivosDevolucao:    { endpoint: 'pdv/motivos-devolucao',    save: d => this.frenteLoja.importarMotivosDevolucao(d) },
-      motivosCancelamento: { endpoint: 'pdv/motivos-cancelamento', save: d => this.frenteLoja.importarMotivosCancelamento(d) },
-      formaPagamentoPDV:   { endpoint: 'pdv/pagamentos',           save: d => this.frenteLoja.importarPagamentosPDV(d) },
-      motivoCancelamento:  { endpoint: 'pdv/motivos-cancelamento', save: d => this.frenteLoja.importarMotivosCancelamento(d) },
+      pagamentosPDV:       { endpoint: 'pdv/pagamentos',              save: d => this.frenteLoja.importarPagamentosPDV(d) },
+      recebimentosPDV:     { endpoint: 'pdv/recebimentos',            save: d => this.frenteLoja.importarRecebimentosPDV(d) },
+      motivosDesconto:     { endpoint: 'motivos-desconto',            save: d => this.frenteLoja.importarMotivosDesconto(d) },
+      motivosDevolucao:    { endpoint: 'financeiro/motivos-devolucao', save: d => this.frenteLoja.importarMotivosDevolucao(d) },
+      motivosCancelamento: { endpoint: 'motivos-cancelamento',        save: d => this.frenteLoja.importarMotivosCancelamento(d) },
+      formaPagamentoPDV:   { endpoint: 'pdv/pagamentos',              save: d => this.frenteLoja.importarPagamentosPDV(d) },
+      motivoCancelamento:  { endpoint: 'motivos-cancelamento',        save: d => this.frenteLoja.importarMotivosCancelamento(d) },
 
       // ── ESTOQUE ──────────────────────────────────────────────────────────
-      localEstoque:        { endpoint: 'estoque/locais',        save: d => this.estoque.importarLocalEstoque(d) },
-      tiposAjustes:        { endpoint: 'estoque/tipos-ajustes', save: d => this.estoque.importarTiposAjustes(d) },
-      saldoEstoque:        { endpoint: 'estoque/saldo',         save: d => this.estoque.importarSaldoEstoque(d) },
+      localEstoque: { endpoint: 'estoque/locais',       save: d => this.estoque.importarLocalEstoque(d) },
+      tiposAjustes: { endpoint: 'estoque/tipos-ajuste', save: d => this.estoque.importarTiposAjustes(d) },
+      saldoEstoque: { endpoint: 'estoque/saldos',       save: d => this.estoque.importarSaldoEstoque(d) },
 
       // ── FISCAL ───────────────────────────────────────────────────────────
-      regimeTributario:    { endpoint: 'fiscal/regime-tributario',   save: d => this.fiscal.importarRegimeTributario(d) },
-      situacoesFiscais:    { endpoint: 'fiscal/situacoes-fiscais',   save: d => this.fiscal.importarSituacoesFiscais(d) },
-      tiposOperacoes:      { endpoint: 'fiscal/tipos-operacoes',     save: d => this.fiscal.importarTiposOperacoes(d) },
-      impostosFederais:    { endpoint: 'fiscal/impostos-federais',   save: d => this.fiscal.importarImpostosFederais(d) },
-      tabelasTributarias:  { endpoint: 'fiscal/tabelas-tributarias', save: d => this.fiscal.importarTabelasTributarias(d) },
-      cenariosFiscais:     { endpoint: 'fiscal/cenarios-fiscais',    save: d => this.fiscal.importarCenariosFiscais(d) },
+      regimeTributario:   { endpoint: 'fiscal/regime-estadual-tributario', save: d => this.fiscal.importarRegimeTributario(d) },
+      situacoesFiscais:   { endpoint: 'fiscal/situacoes',                  save: d => this.fiscal.importarSituacoesFiscais(d) },
+      tiposOperacoes:     { endpoint: 'fiscal/operacoes',                  save: d => this.fiscal.importarTiposOperacoes(d) },
+      impostosFederais:   { endpoint: 'fiscal/impostos-federais',          save: d => this.fiscal.importarImpostosFederais(d) },
+      tabelasTributarias: { endpoint: 'fiscal/tabelas-tributarias',        save: d => this.fiscal.importarTabelasTributarias(d) },
+      cenariosFiscais:    { endpoint: 'fiscal/cenarios-fiscais-ncm',       save: d => this.fiscal.importarCenariosFiscais(d) },
 
       // ── PESSOA ───────────────────────────────────────────────────────────
-      lojas:               { endpoint: 'pessoa/lojas',        save: d => this.pessoa.importarLojas(d) },
-      clientes:            { endpoint: 'pessoa/clientes',     save: d => this.pessoa.importarClientes(d) },
-      fornecedores:        { endpoint: 'pessoa/fornecedores', save: d => this.pessoa.importarFornecedores(d) },
+      lojas:        { endpoint: 'pessoa/lojas',        save: d => this.pessoa.importarLojas(d) },
+      clientes:     { endpoint: 'pessoa/clientes',     save: d => this.pessoa.importarClientes(d) },
+      fornecedores: { endpoint: 'pessoa/fornecedores', save: d => this.pessoa.importarFornecedores(d) },
     };
   }
 
@@ -207,11 +201,6 @@ export class ImportJobExecutorService {
     }));
   }
 
-  /**
-   * Inicia um job de importação.
-   * @param dominio - Identificador do domínio
-   * @param step    - (opcional) Nome da etapa individual. Omitido = domínio completo.
-   */
   async iniciar(dominio: string, step?: string): Promise<string> {
 
     if (!this.credencial.estaConfigurado()) {
@@ -226,7 +215,7 @@ export class ImportJobExecutorService {
       if (!stepDef) {
         throw new BadRequestException(
           `Step desconhecido: "${step}" no domínio "${dominio}". ` +
-          `Verifique se o nome bate com as chaves do STEP_MAP.`,
+          `Valores válidos: ${Object.keys(this.STEP_MAP).join(', ')}`,
         );
       }
 
@@ -350,14 +339,12 @@ export class ImportJobExecutorService {
 
   // ─── Helpers privados ────────────────────────────────────────────────────
 
-  /** Cria job de 1 etapa, inicia e completa. */
   private async _runSingleStep(jobId: string, stepName: string, def: StepDef): Promise<void> {
     this.jobService.startJob(jobId);
     await this._step(jobId, stepName, this.credencial.carregar(), def);
     this.jobService.completeJob(jobId);
   }
 
-  /** Busca paginada na API VF → salva no SQLite → emite progresso via SSE. */
   private async _step(
     jobId:    string,
     stepName: string,
@@ -383,7 +370,6 @@ export class ImportJobExecutorService {
     }
   }
 
-  /** Etapa especial: itera produtos do SQLite e busca fornecedores um a um. */
   private async _stepFornecedoresProduto(jobId: string, cred: CredencialVF): Promise<void> {
     const stepName = 'produtoFornecedores';
     try {
@@ -417,7 +403,6 @@ export class ImportJobExecutorService {
     }
   }
 
-  /** Retorna label legível para exibição no job. */
   private _stepLabel(step: string): string {
     const labels: Record<string, string> = {
       secoes:              'Seções',

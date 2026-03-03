@@ -37,15 +37,24 @@ export class FiscalRepository {
   importarRegimeTributario(regimes: any[]) {
     return this.upsert(
       regimes,
-      `INSERT INTO regimes_tributarios (regime_id, descricao, status)
-       VALUES (@regime_id, @descricao, 'U')
+      `INSERT INTO regime_tributario (
+        regime_id, descricao, classificacao, loja, fornecedor, status
+      ) VALUES (
+        @regime_id, @descricao, @classificacao, @loja, @fornecedor, 'U'
+      )
        ON CONFLICT(regime_id) DO UPDATE SET
-         descricao  = excluded.descricao,
-         updated_at = CURRENT_TIMESTAMP
+         descricao     = excluded.descricao,
+         classificacao = excluded.classificacao,
+         loja          = excluded.loja,
+         fornecedor    = excluded.fornecedor, 
+         updated_at    = CURRENT_TIMESTAMP
        WHERE status NOT IN ('C', 'D')`,
       (r) => ({
-        regime_id: r.id       ?? null,
-        descricao: r.descricao ?? null,
+        regime_id:      r.id,
+        descricao:      r.descricao             ?? null,
+        classificacao:  r.classificacao         ?? null,
+        loja:           M.bool(r.loja),
+        fornecedor:     M.bool(r.fornecedor)
       }),
     );
   }
@@ -55,19 +64,22 @@ export class FiscalRepository {
   importarSituacoesFiscais(situacoes: any[]) {
     return this.upsert(
       situacoes,
-      `INSERT INTO situacoes_fiscais (situacao_id, descricao, cst, csosn, status)
-       VALUES (@situacao_id, @descricao, @cst, @csosn, 'U')
+      `INSERT INTO situacoes_fiscais (
+        situacao_id, descricao, descricao_completa, substituto, status
+      ) VALUES (
+        @situacao_id, @descricao, @descricao_completa, @substituto, 'U'
+      )
        ON CONFLICT(situacao_id) DO UPDATE SET
-         descricao  = excluded.descricao,
-         cst        = excluded.cst,
-         csosn      = excluded.csosn,
+         descricao          = excluded.descricao,
+         descricao_completa = excluded.descricao_completa,
+         substituto         = excluded.substituto,
          updated_at = CURRENT_TIMESTAMP
        WHERE status NOT IN ('C', 'D')`,
       (s) => ({
-        situacao_id: s.id        ?? null,
-        descricao:   s.descricao ?? null,
-        cst:         s.cst       ?? null,
-        csosn:       s.csosn     ?? null,
+        situacao_id:        s.id                ?? null,
+        descricao:          s.descricao         ?? null,
+        descricao_completa: s.descricaoCompleta ?? null,
+        substituto:         M.bool(s.substituto)
       }),
     );
   }
