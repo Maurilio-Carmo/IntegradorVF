@@ -1,61 +1,43 @@
 // frontend/src/services/database/db-client.js
-
-/**
- * DatabaseClient
- * Responsabilidade única: comunicar o frontend com o backend /api/importacao.
- *
- * Operações suportadas (espelham as rotas reais do backend):
- *   save()          → POST /api/importacao/<rota>
- *   getStatistics() → GET  /api/importacao/estatisticas
- *   healthCheck()   → GET  /health
- */
+//
+// ─── FASE 4 — SIMPLIFICAÇÃO (refactor/migrate-api-to-backend) ───────────────
+//
+// REMOVIDO nesta fase:
+//   - save(endpoint, data)   — enviava lotes de dados ao backend
+//   - _saveChunk()           — chamada HTTP POST /api/importacao/<rota>
+//   - _resolveEndpoint()     — resolvia chave → rota via ENDPOINT_MAP
+//   - _extractError()        — helper de erro HTTP
+//   - import ENDPOINT_MAP    — mapeamento de rotas (arquivo removido na Fase 3)
+//   - const BATCH_SIZE       — constante de lote
+//
+// MOTIVO:
+//   Com o novo fluxo, o frontend NUNCA envia dados ao backend diretamente.
+//   Toda a importação roda no backend via job executor.
+//   O DatabaseClient agora é apenas um cliente de leitura de status.
+//
+// MANTIDO:
+//   getStatistics() — contagem de registros por tabela (dashboard)
+//   healthCheck()   — ping ao /health (indicador de status no topo da UI)
+// ─────────────────────────────────────────────────────────────────────────────
 
 import { API } from '../../config/constants.js';
-import { ENDPOINT_MAP } from './endpoint-map.js';
-
-const BATCH_SIZE = 5000;
 
 export class DatabaseClient {
+
     constructor(baseURL = null) {
         this.baseURL = baseURL ?? `${API.PROXY_BASE}/api/importacao`;
     }
 
-    // PÚBLICO
-
-    /**
-     * Persiste um array de registros no backend.
-     * Conjuntos grandes são enviados automaticamente em lotes de BATCH_SIZE.
-     *
-     * @param {string} endpoint
-     * @param {Array}  data
-     * @returns {Promise<{ salvos: number }>}
-     */
-    async save(endpoint, data) {
-        if (!Array.isArray(data) || data.length <= BATCH_SIZE) {
-            return this._saveChunk(endpoint, data);
-        }
-
-        console.log(`📦 [db-client] ${data.length} registros → lotes de ${BATCH_SIZE}`);
-
-        let totalSalvos = 0;
-        for (let i = 0; i < data.length; i += BATCH_SIZE) {
-            const chunk  = data.slice(i, i + BATCH_SIZE);
-            const result = await this._saveChunk(endpoint, chunk);
-            totalSalvos += result?.salvos ?? chunk.length;
-            console.log(`   ✅ Lote ${Math.floor(i / BATCH_SIZE) + 1}: ${chunk.length} registros`);
-        }
-
-        return { salvos: totalSalvos };
-    }
-
     /**
      * Retorna a contagem de registros de cada tabela no SQLite.
-     * @returns {Promise<object|null>}
+     * Chamado pela UI para atualizar o painel de estatísticas.
+     *
+     * @returns {Promise<Record<string, number>|null>}
      */
     async getStatistics() {
         try {
             const response = await fetch(`${this.baseURL}/estatisticas`);
-            if (!response.ok) throw new Error('Erro ao buscar estatísticas');
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
             return await response.json();
         } catch (error) {
             console.error('[db-client] getStatistics:', error.message);
@@ -65,6 +47,8 @@ export class DatabaseClient {
 
     /**
      * Verifica se o backend está no ar.
+     * Usado pelo indicador de conexão na UI.
+     *
      * @returns {Promise<boolean>}
      */
     async healthCheck() {
@@ -75,52 +59,6 @@ export class DatabaseClient {
         } catch {
             return false;
         }
-    }
-
-    async _saveChunk(endpoint, data) {
-        const rota = this._resolveEndpoint(endpoint);
-
-        try {
-            const response = await fetch(`${this.baseURL}/${rota}`, {
-                method:  'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body:    JSON.stringify({ data }),
-            });
-
-            if (!response.ok) {
-                const err = await this._extractError(response);
-                throw new Error(err.message || `HTTP ${response.status}: ${response.statusText}`);
-            }
-
-            return await response.json();
-
-        } catch (error) {
-            console.error(`[db-client] save("${endpoint}") → /${rota}:`, error.message);
-            throw error;
-        }
-    }
-
-    /**
-     * Resolve nome curto → rota real do backend.
-     * Emite aviso se a chave não existir no mapa, mas não quebra.
-     */
-    _resolveEndpoint(endpoint) {
-        const rota = ENDPOINT_MAP[endpoint];
-        if (!rota) {
-            console.warn(
-                `[db-client] Endpoint "${endpoint}" não encontrado no ENDPOINT_MAP. ` +
-                'Verifique se a chave foi adicionada em endpoint-map.js.'
-            );
-        }
-        return rota ?? endpoint;
-    }
-
-    /**
-     * Extrai a mensagem de erro de uma resposta HTTP.
-     */
-    async _extractError(response) {
-        try   { return await response.json(); }
-        catch { return { message: response.statusText }; }
     }
 }
 
