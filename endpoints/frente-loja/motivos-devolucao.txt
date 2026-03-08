@@ -1,0 +1,69 @@
+GET
+/v1/financeiro/motivos-devolucao
+Buscar Motivos da devolução
+
+Parameters
+Name	Description
+q
+string
+(query)
+Queries. Fiql
+
+sort
+string
+(query)
+Ordenação. Sort
+
+start
+integer
+(query)
+Posição do primeiro elemento. EX:start=0
+
+count
+integer
+(query)
+Quantidade de registros. EX:count=100
+
+Responses
+Response content type
+
+application/json
+Code	Description
+200	
+Sucesso
+
+Example Value
+Model
+ResultListMotivoDaDevolucao{
+start:	integer *($int64)
+Posição do primeiro registro
+
+count:	integer *($int64)
+Quantidade de registros na coleção
+
+total:	integer *($int64)
+Quantidade total de itens
+
+items:	[MotivoDaDevolucao{
+	id:	integer *($int64)
+	Código
+
+	descricao:	string
+	Descrição do motivo da devolução
+
+	}]
+xml:Map { "name": "items" }
+description:Coleções de objetos
+*
+}
+400	
+Requisição inválida
+
+401	
+Não autorizado
+
+404	
+Não encontrado
+
+500	
+Erro inesperado

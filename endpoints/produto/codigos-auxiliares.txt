@@ -1,0 +1,80 @@
+GET
+/v1/produto/codigos-auxiliares
+Buscar Códigos Auxiliares
+
+Parameters
+Name	Description
+q
+string
+(query)
+Queries. Fiql
+
+sort
+string
+(query)
+Ordenação. Sort
+
+start
+integer
+(query)
+Posição do primeiro elemento. EX:start=0
+
+count
+integer
+(query)
+Quantidade de registros. EX:count=100
+
+Responses
+Response content type
+
+application/json
+Code	Description
+200	
+Sucesso
+
+Example Value
+Model
+ResultListCodigoAuxiliar{
+start:	integer *($int64)
+Posição do primeiro registro
+
+count:	integer *($int64)
+Quantidade de registros na coleção
+
+total:	integer *($int64)
+Quantidade total de itens
+
+items:	[CodigoAuxiliar{
+	id:	string *
+	Identificador único
+
+	tipo:	string
+	Informar tipo do código auxiliar
+
+	Enum:
+	[ LITERAL, EAN ]
+	fator:	number ($double)
+	Informar fator do código auxiliar
+
+	eanTributado:	boolean
+	Informa se o EAN é tributado.
+
+	produtoId:	integer ($int64)
+	Identificador único do produto
+
+	}]
+xml:Map { "name": "items" }
+description:Coleções de objetos
+*
+}
+400	
+Requisição inválida
+
+401	
+Não autorizado
+
+404	
+Não encontrado
+
+500	
+Erro inesperado

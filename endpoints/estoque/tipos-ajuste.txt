@@ -1,0 +1,80 @@
+GET
+/v1/estoque/tipos-ajuste
+Buscar Tipos de Ajuste
+
+Parameters
+Name	Description
+q
+string
+(query)
+Queries. Fiql
+
+sort
+string
+(query)
+Ordenação. Sort
+
+start
+integer
+(query)
+Posição do primeiro elemento. EX:start=0
+
+count
+integer
+(query)
+Quantidade de registros. EX:count=100
+
+Responses
+Response content type
+
+application/json
+Code	Description
+200	
+Sucesso
+
+Example Value
+Model
+ResultListTipoAjusteEstoque{
+start:	integer *($int64)
+Posição do primeiro registro
+
+count:	integer *($int64)
+Quantidade de registros na coleção
+
+total:	integer *($int64)
+Quantidade total de itens
+
+items:	[TipoAjusteEstoque{
+	id:	integer ($int64)
+	Identificador do recurso
+
+	descricao:	string *
+	Descrição do tipo
+
+	tipoDeOperacao:	string
+	Tipo de operação
+
+	Enum:
+	[ ENTRADA, SAIDA ]
+	tipoReservado:	string
+	Tipo reservado
+
+	Enum:
+	[ REQUISICAO, ESTORNO_DE_TRANSFERENCIA, INVENTARIO, NOTA_FISCAL, NOTA_FISCAL_CANCELAMENTO, NOTA_FISCAL_ESTORNO, NOTA_FISCAL_DEVOLUCAO, NOTA_FISCAL_TRANSFERENCIA, NOTA_FISCAL_EXCLUIR, VENDA, CANCELAMENTO, PRODUCAO, TROCA_E_DEVOLUCAO_DE_CUPOM, RENDIMENTO, RENDIMENTO_ESTORNO, AJUSTE_CUSTO, AJUSTE_MIGRACAO, MOVIMENTACAO_INICIAL, ZERA_ESTOQUE ]
+
+	}]
+xml:Map { "name": "items" }
+description:Coleções de objetos
+*
+}
+400	
+Requisição inválida
+
+401	
+Não autorizado
+
+404	
+Não encontrado
+
+500	
+Erro inesperado

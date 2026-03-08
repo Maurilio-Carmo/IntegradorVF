@@ -1,0 +1,179 @@
+GET
+/v1/pessoa/agentes-financeiros
+Buscar Agentes Financeiros
+
+Parameters
+Name	Description
+q
+string
+(query)
+Queries. Fiql
+
+sort
+string
+(query)
+Ordenação. Sort
+
+start
+integer
+(query)
+Posição do primeiro elemento. EX:start=0
+
+count
+integer
+(query)
+Quantidade de registros. EX:count=100
+
+Responses
+Response content type
+
+application/json
+Code	Description
+200	
+Sucesso
+
+Example Value
+Model
+ResultListAgenteFinanceiro{
+start:	integer *($int64)
+Posição do primeiro registro
+
+count:	integer *($int64)
+Quantidade de registros na coleção
+
+total:	integer *($int64)
+Quantidade total de itens
+
+items:	[AgenteFinanceiro{
+	tipoContribuinte:	string
+	Tipo de contribuinte
+
+	Enum:
+	[ CONTRIBUINTE, NAO_CONTRIBUINTE, ISENTO ]
+	cei:	string
+	Código específico do INSS
+
+	suframa:	string
+	Código da zona franca de Manaus
+
+	telefone1:	string
+	Primeiro número de telefone
+
+	telefone2:	string
+	Segundo número de telefone
+
+	orgaoExpedidor:	string
+	Orgão expedidor do documento
+
+	endereco:	Endereco{
+		restricoes:	string
+		Restrições
+
+		bairro:	string *
+		maxLength: 60
+		Bairro do endereço
+
+		complemento:	string
+		maxLength: 40
+		Complemento do endereço
+
+		municipio:	string
+		maxLength: 400
+		Municipio do endereço
+
+		dataDeSuspensao:	string ($date)
+		Data de suspensão do endereço
+
+		cep:	string *
+		maxLength: 10
+		CEP do endereço
+
+		codigoIbge:	integer *($int64)
+		Código do IBGE
+
+		uf:	string *
+		maxLength: 2
+		Estado do endereço
+
+		logradouro:	string *
+		maxLength: 100
+		Logradouro do endereço
+
+		numero:	string *
+		maxLength: 6
+		Número do endereço
+
+		pontoDeReferencia:	string
+		maxLength: 50
+		Ponto de referência do endereço
+
+		tipoDeEndereco:	string
+		Informar tipo de endereço
+
+		Enum:
+		[ PRINCIPAL, COBRANCA ]
+		codigoDoPais:	integer *($int32)
+		Informar código do país
+
+		}
+	fantasia:	string
+	Nome fantasia do agente financeiro
+
+	numeroDoDocumento:	string
+	Número do documento
+
+	inscricaoMunicipal:	string
+	Código de registro da empresa junto a prefeitura
+
+	homePage:	string
+	Home page
+
+	twitter:	string
+	Twitter utilizado
+
+	tipo:	string
+	Tipo de pessoa
+
+	Enum:
+	[ FISICA, JURIDICA, ESTRANGEIRO ]
+
+	comunicadorDeMensagensInstantaneas:	string
+	Aplicativo de comunicação instantânea do agente financeiro
+
+	codigoDoBanco:	string
+	Código do banco
+
+	nome:	string
+	Nome do agente financeiro
+
+	numeroDeIdentificacao:	string
+	Número de identificação
+
+	id:	integer ($int64)
+	Identificador único
+
+	email:	string
+	Email utilizado
+
+	fax:	string
+	Fax utilizado
+
+	holdingId:	integer ($int32)
+	Identificador único do holding do agente financeiro
+
+	}]
+xml:Map { "name": "items" }
+description:Coleções de objetos
+*
+}
+400	
+Requisição inválida
+
+401	
+Não autorizado
+
+404	
+Não encontrado
+
+500	
+Erro inesperado

@@ -1,0 +1,305 @@
+GET
+/v1/pessoa/clientes
+Buscar Clientes
+
+Parameters
+Name	Description
+q
+string
+(query)
+Queries. Fiql
+
+sort
+string
+(query)
+Ordenação. Sort
+
+start
+integer
+(query)
+Posição do primeiro elemento. EX:start=0
+
+count
+integer
+(query)
+Quantidade de registros. EX:count=100
+
+Responses
+Response content type
+
+application/json
+Code	Description
+200	
+Sucesso
+
+Example Value
+Model
+ResultListCliente{
+start:	integer *($int64)
+Posição do primeiro registro
+
+count:	integer *($int64)
+Quantidade de registros na coleção
+
+total:	integer *($int64)
+Quantidade total de itens
+
+items:	[Cliente{
+	comprovanteDeResidencia:	string
+	Comprovante de residência do cliente
+
+	redeSocial:	string
+	Rede social do cliente
+
+	referencias:	[Referencia{...}]
+	description:Referências do cliente
+	vendedorId:	integer ($int32)
+	Código do vendedor
+
+	pessoaParaContato:	string
+	Pessoa para contato
+
+	descontoConcedidoAoCliente:	number ($double)
+	Desconto concedido ao cliente
+
+	tempoDeTrabalhoNaEmpresaAtual:	string
+	Tempo de trabalho na empresa atual
+
+	tipoAliquotasEspecificas:	string
+	Tipo de alíquota específica do cliente
+
+	Enum:
+	[ GERAL, ATACADO, VAREJO, SIMPLES ]
+	chaveDaRetaguarda:	integer ($int32)
+	Chave de retaguarda
+
+	dataDeCadastro:	string ($date)
+	Data de Cadastro
+
+	tipoDeCliente:	string *
+	Tipo de cliente
+
+	Enum:
+	[ TITULAR, DEPENDENTE ]
+	tipoContribuinte:	string
+	Tipo de contribuinte
+
+	Enum:
+	[ CONTRIBUINTE, NAO_CONTRIBUINTE, ISENTO ]
+	cei:	string
+	Código referente ao INSS
+
+	suframa:	string
+	Código da Zona Franca de Manaus
+
+	atividade:	string
+	Atividade do cliente
+
+	telefone1:	string
+	Telefone principal
+
+	telefone2:	string
+	Telefone secundário
+
+	orgaoExpedidor:	string
+	Orgão expedidor do cliente
+
+	sexo:	string
+	Informar o sexo do cliente
+
+	Enum:
+	[ MASCULINO, FEMININO ]
+	enderecos:	[Endereco{
+		restricoes:	string
+		Restrições
+
+		bairro:	string *
+		maxLength: 60
+		Bairro do endereço
+
+		complemento:	string
+		maxLength: 40
+		Complemento do endereço
+
+		municipio:	string
+		maxLength: 400
+		Municipio do endereço
+
+		dataDeSuspensao:	string ($date)
+		Data de suspensão do endereço
+
+		cep:	string *
+		maxLength: 10
+		CEP do endereço
+
+		codigoIbge:	integer *($int64)
+		Código do IBGE
+
+		uf:	string *
+		maxLength: 2
+		Estado do endereço
+
+		logradouro:	string *
+		maxLength: 100
+		Logradouro do endereço
+
+		numero:	string *
+		maxLength: 6
+		Número do endereço
+
+		pontoDeReferencia:	string
+		maxLength: 50
+		Ponto de referência do endereço
+
+		tipoDeEndereco:	string
+		Informar tipo de endereço
+
+		Enum:
+		[ PRINCIPAL, COBRANCA ]
+		codigoDoPais:	integer *($int32)
+		Informar código do país
+
+		}]
+	description:Endereço do cliente
+	fantasia:	string *
+	Nome fantasia
+
+	ramoId:	integer ($int32)
+	Código do ramo
+
+	tipoDeResidencia:	string
+	Informar tipo de residência do cliente
+
+	Enum:
+	[ OUTRAS, ALUGADA, FINANCIADA, PROPRIA, DE_PARENTE ]
+	estadoCivil:	string
+	Informar o estado civil do cliente
+
+	Enum:
+	[ SOLTEIRO, CASADO, DIVORCIADO, VIUVO, OUTROS ]
+	dataDeBloqueio:	string ($date)
+	Data de bloqueio
+
+	statusId:	integer *($int32)
+	Informar o status do cliente
+
+	numeroDoDocumento:	string *
+	Número do documento
+
+	inscricaoMunicipal:	string
+	Inscrição municipal do cliente
+
+	dependentes:	[...]
+	homePage:	string
+	Página de internet do cliente
+
+	tabelaPrazo:	string
+	Informar o prazo
+
+	Enum:
+	[ DF, DD, PRZ, DFM, DFD, DFS, DFQ ]
+	comprovanteDeRenda:	string
+	Comprovante de renda do cliente
+
+	diaDeFechamento:	string
+	Dia do fechamento
+
+	tempoDeResidencia:	string
+	Tempo de residência do cliente
+
+	twitter:	string
+	Twitter do cliente
+
+	orgaoPublico:	string
+	Orgão público do cliente
+
+	prazo:	integer ($int32)
+	Prazo
+
+	lojaId:	integer ($int32)
+	Código da loja
+
+	senha:	string
+	Senha do cliente
+
+	comunicadorDeMensagensInstantaneas:	string
+	Comunicação instantânea do cliente
+
+	dataDeNascimento:	string ($date)
+	Data de nascimento
+
+	situacaoDaAprovacao:	string
+	Informar a situação da aprovação do cliente
+
+	Enum:
+	[ PENDENTE, SIM, NAO ]
+	versaoDaRetaguarda:	integer ($int32)
+	Versão da retaguarda
+
+	tipoDeBloqueio:	string
+	Tipo de bloqueio
+
+	renda:	number ($double)
+	Renda do cliente
+
+	nome:	string *
+	Nome do cliente
+
+	observacao:	string
+	Observação sobre o cliente
+
+	tipoDePreco:	integer ($int32)
+	Tipo de preço
+
+	numeroDeIdentificacao:	string
+	Número de identificação do cliente
+
+	clienteRetemISS:	string
+	Retenção de ISS do cliente
+
+	id:	integer *($int64)
+	Identificador único
+
+	outraRenda:	number ($double)
+	Outra renda do cliente
+
+	tipoDePessoa:	string *
+	Informar tipo de pessoa
+
+	Enum:
+	[ FISICA, JURIDICA, ESTRANGEIRO ]
+	origemDeAlteracao:	string
+	Origem de alteração
+
+	email:	string *
+	maxLength: 80
+	E-mail do cliente
+
+	fax:	string
+	Fax do cliente
+
+	versao:	integer ($int64)
+	Versão do cliente
+
+	naturalidade:	string
+	Naturalidade do cliente
+
+	holdingId:	integer *($int32)
+	Código do holding
+
+	}]
+xml:Map { "name": "items" }
+description:Coleções de objetos
+*
+}
+400	
+Requisição inválida
+
+401	
+Não autorizado
+
+404	
+Não encontrado
+
+500	
+Erro inesperado

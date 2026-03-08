@@ -1,0 +1,434 @@
+GET
+/v1/produto/produtos
+Buscar Produtos
+
+Parameters
+Name	Description
+q
+string
+(query)
+Queries. Fiql
+
+sort
+string
+(query)
+Ordenação. Sort
+
+start
+integer
+(query)
+Posição do primeiro elemento. EX:start=0
+
+count
+integer
+(query)
+Quantidade de registros. EX:count=100
+
+Responses
+Response content type
+
+application/json
+Code	Description
+200	
+Sucesso
+
+Example Value
+Model
+ResultListProduto{
+start:	integer *($int64)
+Posição do primeiro registro
+
+count:	integer *($int64)
+Quantidade de registros na coleção
+
+total:	integer *($int64)
+Quantidade total de itens
+
+items:	[Produto{
+	descontoMaximo2:	number ($double)
+	Desconto máximo 2
+
+	situacaoFiscalId:	integer *($int32)
+	Código da situação fiscal do produto
+
+	fornecedorId:	integer ($int64)
+	Código do fornecedor do produto
+
+	medidaReferencial:	number ($double)
+	Medida da referencial do produto
+
+	frenteLoja:	boolean
+	Informar se é frente de loja
+
+	itensImpostosFederais:	[ItemImpostoFederal{
+	id:	string
+	Identificador único do item do imposto federal
+
+	}]
+	description:Itens dos impostos federais
+	descontoMaximo3:	number ($double)
+	Desconto máximo 3
+
+	unidadeDeReferencia:	string
+	Unidade de referência
+
+	pagaComissao:	boolean
+	Informar se deve ser paga a commisão do produto
+
+	tributacaoId:	string
+	Código da tributação
+
+	fatorRendimentoUnidade:	number *($double)
+	Fator de rendimento da unidade do produto
+
+	ipi:	number ($double)
+	IPI do produto
+
+	textoDaReceita:	string
+	Texto da receita
+
+	pesoLiquido:	number ($double)
+	Peso liquido de produto
+
+	qtdMaximaVenda:	number ($double)
+	Quantidade máxima de venda
+
+	cest:	integer ($int64)
+	Código criado pelo governo para agrupar os produtos por tipo de substituição tributária
+
+	nomeclaturaMercosulExcecaoId:	string
+	Código da nomeclatura MERCOSUL exceção
+
+	associacao:	string
+	Associação do produto
+
+	Enum:
+	[ NORMAL ]
+	subgrupoId:	integer ($int32)
+	Código do subgrupo do produto
+
+	dataInclusao:	string ($date)
+	Data da inclusão do produto
+
+	codigoInterno:	string
+	Código interno
+
+	grupoId:	integer ($int32)
+	Código do grupo do produto
+
+	baixaNaVendaComposto:	boolean
+	Informar se deve realiza baixa na venda composta
+
+	diasDeSeguranca:	integer ($int32)
+	Dias de segurança
+
+	comissaoVenda:	number ($double)
+	Comissão de venda do produto
+
+	modelo:	string
+	Modelo do produto
+
+	validade:	string
+	Validade do produto
+
+	descricaoVariavel:	boolean
+	Informar a descrição variável
+
+	familiaId:	integer ($int64)
+	readOnly: true
+	Código da família do produto
+
+	itensEmbalagemVenda:	number *($double)
+	Itens da embalagem venda
+
+	regimesDoProduto:	[RegimeEstadualProduto{
+	lojaId:	integer ($int64)
+	Código da loja
+
+	regimeEstadualId:	integer ($int64)
+	Código regime estadual
+
+	}]
+	description:Regime estadual do produto
+	finalidadeProduto:	string
+	Informar a finalidade do produto
+
+	Enum:
+	[ COMERCIALIZACAO, CONSUMO, IMOBILIZADO, INDUSTRIALIZADO, MATERIA_PRIMA, OUTROS ]
+	descricao:	string *
+	Descrição do produto
+
+	comissaoProducao:	number ($double)
+	Comissão de produção do produto
+
+	naturezaId:	string
+	Código da natureza do produto
+
+	incidenciaIPI:	string
+	Informar incidência IPI
+
+	Enum:
+	[ COMPRA, VENDA, AMBOS ]
+	endereco:	string
+	Endereço do produto
+
+	compoeTotalDaNota:	boolean
+	Informar se compõe total da nota
+
+	codigoANP:	string
+	Código ANP
+
+	controlaValidade:	boolean
+	Informar se deve controlar a validade
+
+	atualizaFamilia:	boolean
+	Informar se atualiza a familia do produto
+
+	produtoDestinoId:	integer ($int64)
+	readOnly: true
+	Código do destino do produto
+
+	tipoAgregacao:	string
+	Informar o tipo de agregação
+
+	Enum:
+	[ PAUTA, MARGEM ]
+	comprimento:	string
+	Comprimento do produto
+
+	componentes:	[Componente{
+	id:	integer ($int64)
+	Código
+
+	produtoId:	integer ($int64)
+	Código do produto
+
+	quantidade:	number *($double)
+	Quantidade Componente
+
+	preco1:	number *($double)
+	Preco 1
+
+	preco2:	number *($double)
+	Preco 2
+
+	preco3:	number *($double)
+	Preco 3
+
+	}]
+	description:Componentes do produto
+	participaCotacao:	boolean
+	Informar se participa ou não de cotação
+
+	pautasDoProduto:	[PautaDoProduto{
+	uf:	string
+	Sigla do estado
+
+	tipoDePauta:	string
+	Tipo de pauta
+
+	Enum:
+	[ FIXA, MINIMA ]
+	valorDePauta:	number ($double)
+	Valor da pauta
+
+	}]
+	description:Pautas do produto
+	fatorBonificacao:	number ($double)
+	Fator de bonificação do produto
+
+	caracteristicasIds:	[integer ($int64)]
+	description:Identificadores das características
+	precoVariavel:	boolean
+	Informar preço variável
+
+	generoId:	integer ($int64)
+	Código do genêro do produto
+
+	unidadeDeVenda:	string *
+	Unidade de venda do produto
+
+	unidadeDeCompra:	string *
+	Unidade da compra
+
+	dataSaida:	string ($date)
+	Data da saída do produto
+
+	tipoIPI:	string
+	Informar o tipo de IPI
+
+	Enum:
+	[ PERCENTUAL, VALOR ]
+	situacaoFiscalSaidaId:	integer ($int32)
+	Código da situação fiscal do produto
+
+	tipoFatorKit:	string
+	Tipo fator Kit
+
+	Enum:
+	[ PRECO, FATOR ]
+	nomeclaturaMercosulId:	string *
+	Código da nomeclatura MERCOSUL
+
+	fatorRendimentoCusto:	number *($double)
+	Fator de rendimento do custo do produto
+
+	pesoBruto:	number ($double)
+	Peso bruto do produto
+
+	pesoVariavel:	string *
+	Informar peso variável do produto
+
+	Enum:
+	[ SIM, PESO, NAO, UNITARIO, PENDENTE ]
+	ativoNoEcommerce:	boolean
+	Informar se está ativo no e-commerce
+
+	validadeMinima:	integer ($int64)
+	Informar a quantidate mínima de dias de validade do produto
+
+	foraDeLinha:	string
+	Fora de linha
+
+	quantidadeComposto:	number ($double)
+	Quantidade composta do produto
+
+	imagem:	string
+	Imagem do produto
+
+	enviaBalanca:	boolean
+	Informar se envia a balança
+
+	ncmId:	string
+	Código NCM
+
+	itensEmbalagemTransferencia:	number ($double)
+	Itens embalagem transferência
+
+	producao:	string
+	Informar produção
+
+	Enum:
+	[ PROPRIO, TERCEIROS ]
+	tipoBonificacao:	string
+	Informar tipo de bonificação
+
+	Enum:
+	[ NAO_GERA_PONTOS, GERA_PONTOS_POR_PRECO, GERA_PONTOS_POR_QUANTIDADE ]
+	incentivoZonaFranca:	string
+	Incentivo a zona franca
+
+	itensEmbalagem:	number *($double)
+	Itens da embalagem
+
+	controlaEstoque:	boolean
+	Informar controla estoque
+
+	aplicacoesIds:	[integer ($int64)]
+	description:Identificadores das aplicações
+	permiteDesconto:	boolean
+	Informar se permite desconto
+
+	funcionarioId:	integer ($int32)
+	Código do funcionário
+
+	estoqueDoProduto:	[EstoqueDoProduto{
+	lojaId:	integer *($int64)
+	Identificador único da loja
+
+	estoqueMinimo:	number *($double)
+	Estoque mínimo do produto
+
+	estoqueMaximo:	number *($double)
+	Estoque máximo do produto
+
+	}]
+	description:Estoque do produto
+	custoMedio:	number ($double)
+	Custo médio do produto
+
+	identificadorDeOrigem:	string
+	Identificador de origem
+
+	marcaId:	integer ($int64)
+	Código da marca do produto
+
+	comissaoCapitacao:	number ($double)
+	Comissão de capitação do produto
+
+	quantidadeEtiqueta:	integer ($int32)
+	Quantidade de etiqueta
+
+	unidadeDeTransferencia:	string
+	Unidade de transferência
+
+	descricaoReduzida:	string *
+	Descrição reduzida do produto
+
+	secaoId:	integer *($int32)
+	Código da seção
+
+	largura:	string
+	Largura do produto
+
+	valorAgregacao:	number ($double)
+	Valor da agregação do produto
+
+	id:	integer *($int64)
+	Identificador único
+
+	composicao:	string *
+	Informar a composição do produto
+
+	Enum:
+	[ NORMAL, COMPOSTO, KIT, RENDIMENTO ]
+	altura:	string
+	Altura do produto
+
+	dataAlteracao:	string ($date)
+	Data da alteração do produto
+
+	naturezaDeImpostoFederalId:	integer *($int32)
+	Código da natureza do imposto federal
+
+	controlaNumeroSerie:	boolean
+	Controla número de série
+
+	mix:	string
+	Mix do produto
+
+	localDeImpressaoId:	integer ($int64)
+	Código do local de impressão
+
+	tabelaA:	string *
+	Informar valor da tabela A
+
+	Enum:
+	[ NACIONAL, IMPORTACAO_DIRETA, ADQUIRIDO_DO_MERCADO_INTERNO, MERCADORIA_CONTENDO_IMPORTACAO_SUPERIOR_40, CUJO_PRODUCAO_TENHA_SIDO_FEITO, MERCADORIA_COM_CONTEUDO_DE_IMPORTACAO_EM_CONFORMIDADE, IMPORTACAO_DIRETA_SEM_SIMILAR_NACIONAL, ADQUIRIDO_DO_MERCADO_INTERNO_SEM_SIMILAR_NACIONAL, MERCADORIA_COM_CONTEUDO_DE_IMPORTACAO_SUPERIOR_A_70 ]
+	percentualPerda:	number ($double)
+	Percentual da perda do produto
+
+	indiceAT:	string
+	Informar o índice AT
+
+	Enum:
+	[ ARREDONDA, TRUNCA ]
+	descontoMaximo1:	number ($double)
+	Desconto máximo 1
+
+	}]
+xml:Map { "name": "items" }
+description:Coleções de objetos
+*
+}
+400	
+Requisição inválida
+
+401	
+Não autorizado
+
+404	
+Não encontrado
+
+500	
+Erro inesperado

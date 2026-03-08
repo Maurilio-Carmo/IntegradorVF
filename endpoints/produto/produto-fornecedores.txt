@@ -1,0 +1,91 @@
+GET
+/v1/produto/produtos/{produtoId}/fornecedores
+Buscar Referências dos Fornecedores
+
+Parameters
+Name	Description
+produtoId *
+string
+(path)
+Identificador único do produto.
+
+q
+string
+(query)
+Queries. Fiql
+
+sort
+string
+(query)
+Ordenação. Sort
+
+start
+integer
+(query)
+Posição do primeiro elemento. EX:start=0
+
+count
+integer
+(query)
+Quantidade de registros. EX:count=100
+
+Responses
+Response content type
+
+application/json
+Code	Description
+200	
+Sucesso
+
+Example Value
+Model
+ResultListReferenciaDoFornecedor{
+start:	integer *($int64)
+Posição do primeiro registro
+
+count:	integer *($int64)
+Quantidade de registros na coleção
+
+total:	integer *($int64)
+Quantidade total de itens
+
+items:	[ReferenciaDoFornecedor{
+	id:	integer ($int64)
+	Identificador único
+
+	fornecedorId:	integer *($int64)
+	Código do fornecedor
+
+	produtoId:	integer ($int64)
+	Código do produto
+
+	referencia:	string *
+	Referência do fornecedor
+
+	unidade:	string *
+	Unidade
+
+	quantidade:	number *($double)
+	Quantidade
+
+	nivel:	string *
+	Nível da referência do fornecedor
+
+	Enum:
+	[ PRINCIPAL, SECUNDARIO ]
+	}]
+xml:Map { "name": "items" }
+description:Coleções de objetos
+*
+}
+400	
+Requisição inválida
+
+401	
+Não autorizado
+
+404	
+Não encontrado
+
+500	
+Erro inesperado

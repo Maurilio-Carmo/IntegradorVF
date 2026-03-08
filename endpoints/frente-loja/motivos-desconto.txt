@@ -1,0 +1,66 @@
+GET
+/v1/motivos-desconto
+Buscar Motivos Desconto
+
+Parameters
+Name	Description
+q
+string
+(query)
+Queries. Fiql
+
+sort
+string
+(query)
+Ordenação. Sort
+
+start
+integer
+(query)
+Posição do primeiro elemento. EX:start=0
+
+count
+integer
+(query)
+Quantidade de registros. EX:count=100
+
+Responses
+Response content type
+
+application/json
+Code	Description
+200	
+Sucesso
+
+Example Value
+Model
+MotivoDesconto{
+id:	integer ($int32)
+ID do motivoDesconto
+
+descricao:	string
+Descricao do motivoDesconto
+
+tipoAplicacaoDesconto:	string
+Tipo de aplicação do Desconto
+
+Enum:
+[ ITEM, SUB_TOTAL, AMBOS ]
+solicitaJustificativa:	boolean
+Solicita justificativa
+
+descontoFidelidade:	boolean
+É desconto fidelidade
+
+}
+400	
+Requisição inválida
+
+401	
+Não autorizado
+
+404	
+Não encontrado
+
+500	
+Erro inesperado

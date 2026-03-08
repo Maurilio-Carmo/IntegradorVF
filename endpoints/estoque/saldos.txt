@@ -1,0 +1,86 @@
+GET
+/v1/estoque/saldos
+Buscar Saldo
+
+Parameters
+Name	Description
+q
+string
+(query)
+Queries. Fiql
+
+sort
+string
+(query)
+Ordenação. Sort
+
+start
+integer
+(query)
+Posição do primeiro elemento. EX:start=0
+
+count
+integer
+(query)
+Quantidade de registros. EX:count=100
+
+Responses
+Response content type
+
+application/json
+Code	Description
+200	
+Sucesso
+
+Example Value
+Model
+ResultListResumoDeEstoque{
+start:	integer *($int64)
+Posição do primeiro registro
+
+count:	integer *($int64)
+Quantidade de registros na coleção
+
+total:	integer *($int64)
+Quantidade total de itens
+
+items:	[ResumoDeEstoque{
+	id:	integer ($int64)
+	Identificador único
+
+	lojaId:	integer ($int64)
+	Identificador único da loja
+
+	produtoId:	integer ($int64)
+	Identificador único do produto
+
+	localId:	integer ($int64)
+	Identificador único do local
+
+	saldo:	number ($double)
+	Saldo do produto
+
+	criadoEm:	string ($date)
+	readOnly: true
+	Data de criação do estoque
+
+	atualizadoEm:	string ($date)
+	readOnly: true
+	Data de atualização do estoque
+
+	}]
+xml:Map { "name": "items" }
+description:Coleções de objetos
+*
+}
+400	
+Requisição inválida
+
+401	
+Não autorizado
+
+404	
+Não encontrado
+
+500	
+Erro inesperado

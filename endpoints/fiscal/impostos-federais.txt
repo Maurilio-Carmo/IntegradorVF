@@ -1,0 +1,115 @@
+GET
+/v1/fiscal/impostos-federais
+Buscar Impostos Federais
+
+Parameters
+Name	Description
+q
+string
+(query)
+Queries. Fiql
+
+sort
+string
+(query)
+Ordenação. Sort
+
+start
+integer
+(query)
+Posição do primeiro elemento. EX:start=0
+
+count
+integer
+(query)
+Quantidade de registros. EX:count=100
+
+Responses
+Response content type
+
+application/json
+Code	Description
+200	
+Sucesso
+
+Example Value
+Model
+ResultListImpostoFederal{
+start:	integer *($int64)
+Posição do primeiro registro
+
+count:	integer *($int64)
+Quantidade de registros na coleção
+
+total:	integer *($int64)
+Quantidade total de itens
+
+items:	[ImpostoFederal{
+	id:	string *
+	Código
+
+	descricao:	string *
+	Descrição sobre Imposto Federal
+
+	retencao:	number ($double)
+	Retenção do imposto
+
+	impostoFederalGeral:	ImpostoFederalGeral{
+		id:	string
+		Código
+		
+		cstEntrada:	string
+		CST de entrada
+
+		cstSaida:	string
+		CST de saída
+		
+		cstEntradaPresumido:	string
+		CST de entrada presumido
+
+		cstSaidaPresumido:	string
+		CST de saída presumido
+		
+		cstEntradaSimples:	string
+		CST de entrada simples
+		
+		cstSaidaSimples:	string
+		CST de saída simples
+		
+		aliquotaEntrada:	number ($double)
+		Alíquota de entrada
+
+		aliquotaSaida:	number ($double)
+		Alíquota de saída
+		
+		aliquotaEntradaPresumido:	number ($double)
+		Alíquota de entrada presumido
+		
+		aliquotaSaidaPresumido:	number ($double)
+		Alíquota de saída presumido
+		}
+
+	tipoImposto:	string *
+	Tipo de imposto
+
+	Enum:
+	[ PIS, COFINS, IRPJ, CSLL, OUTROS ]
+	observacao:	string
+	Observação sobre o imposto
+	}]
+	
+xml:Map { "name": "items" }
+description:Coleções de objetos
+*
+}
+400	
+Requisição inválida
+
+401	
+Não autorizado
+
+404	
+Não encontrado
+
+500	
+Erro inesperado

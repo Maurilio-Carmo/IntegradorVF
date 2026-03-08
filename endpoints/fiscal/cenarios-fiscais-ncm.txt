@@ -1,0 +1,128 @@
+GET
+/v1/fiscal/cenarios-fiscais-ncm
+Lista os cenários fiscais por ncm
+
+Parameters
+Name	Description
+q
+string
+(query)
+Queries. Fiql
+
+sort
+string
+(query)
+Ordenação. Sort
+
+start
+integer
+(query)
+Posição do primeiro elemento. EX:start=0
+
+count
+integer
+(query)
+Quantidade de registros. EX:count=100
+
+Responses
+Response content type
+
+application/json
+Code	Description
+200	
+Sucesso
+
+Example Value
+Model
+{
+start:	integer
+example: 0
+count:	integer
+example: 7
+total:	integer
+example: 7
+items:	[CenarioFiscalNcmBase{
+	id:	integer ($int64)
+	example: 1
+	Identificador do recurso
+
+	descricao:	string
+	example: Cenário Fiscal 1
+	Descrição do cenário fiscal
+
+	cst:	integer ($int64)
+	example: 101
+	Código de Situação Tributária
+
+	cClassTrib:	integer ($int64)
+	example: 101100
+	Classificação Tributária
+
+	ncms:	[CenarioFiscalNcmNcm{
+		codigoNcm:	integer ($int64)
+		example: 12345678
+		Código do NCM
+
+		descricaoNcm:	string
+		example: NCM 12345678
+		readOnly: true
+		Descrição do NCM
+
+		codigoCenarioFiscal:	integer ($int64)
+		example: 1
+		Código do cenário fiscal
+
+		quantidadeProdutos:	integer ($int64)
+		example: 10
+		readOnly: true
+		Quantidade de produtos vinculados ao NCM
+
+		}]
+	description:NCMs vinculados ao cenário fiscal
+	lojas:	[CenarioFiscalNcmLoja{
+		codigoLoja:	integer ($int64)
+		example: 1
+		Codigo da loja
+
+		descricaoLoja:	string
+		example: Loja 1
+		readOnly: true
+		Descrição da loja
+
+		ufOrigem:	string
+		example: CE
+		readOnly: true
+		UF da loja
+
+		codigoCenarioFiscal:	integer ($int64)
+		example: 1
+		readOnly: true
+		Código do cenário fiscal
+
+		}]
+	description:Lojas vinculadas ao cenário fiscal
+	ufsDestino:	[CenarioFiscalNcmUfDestino{
+		ufDestino:	string
+		example: CE
+		UF destino
+
+		codigoCenarioFiscal:	integer ($int64)
+		example: 1
+		readOnly: true
+		Código do cenário fiscal
+
+		}]
+	description:UFs de destino vinculados ao cenário fiscal
+	}]
+	}
+400	
+Requisição inválida
+
+401	
+Não autorizado
+
+404	
+Não encontrado
+
+500	
+Erro inesperado

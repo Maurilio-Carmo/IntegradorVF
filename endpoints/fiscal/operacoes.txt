@@ -1,0 +1,127 @@
+GET
+/v1/fiscal/operacoes
+Tipos de Operação
+
+Parameters
+Name	Description
+q
+string
+(query)
+Queries. Fiql
+
+sort
+string
+(query)
+Ordenação. Sort
+
+start
+integer
+(query)
+Posição do primeiro elemento. EX:start=0
+
+count
+integer
+(query)
+Quantidade de registros. EX:count=100
+
+Responses
+Response content type
+
+application/json
+Code	Description
+200	
+Sucesso
+
+Example Value
+Model
+OperacaoFiscal{
+	codigoDoCst:	string
+	código do CST da operação
+
+	cfopExterior:	integer ($int64)
+	Id do CFOP exterior
+
+	destacaIpiNaVenda:	boolean
+	Operação destaca IPI na venda
+
+	ipiCompoeBaseDeCalculoPisCofins:	boolean
+	Ipi da operação compõe base de cálculo PisCofins
+
+	descricao:	string
+	Descrição da operação fiscal
+
+	cfopNoEstado:	integer ($int64)
+	Id do CFOP no estado
+
+	geraFiscal:	boolean
+	Operação gera fiscal
+
+	incideImpostosFederais:	boolean
+	Operação incide impostos federais
+
+	cfopForaDoEstado:	integer ($int64)
+	Id do CFOP fora do estado
+
+	cfops:	[integer ($int64)
+	example: List [ 1303, 2303 ]]
+	description:Lista de CFOPs vinculados à operação
+	tipoDocumentoNaOperacao:	string
+	Tipo de documento na operação
+
+	utilizaConferencia:	boolean
+	Operação utiliza conferência
+
+	tipoDeOperacao:	string
+	Tipo de operação
+
+	origemDaNota:	string
+	Origem da nota
+
+	atualizaEstoque:	boolean
+	Operação atualiza estoque
+
+	outrasDespesasCompoeBaseDeCalculoPisCofins:	boolean
+	Outras despesas da operação compõe base de cálculo PisCofins
+
+	imprimeDescricaoEmNFE:	boolean
+	Operação imprime descrição em NFE
+
+	outrasDespesasCompoeBaseDeCalculoIcms:	boolean
+	Outras despesas da operação compõe base de cálculo ICMS
+
+	observacao:	string
+	Observação da operação
+
+	atualizaCustos:	boolean
+	Operação atualiza custos
+
+	modalidade:	string
+	Modalidade da operação
+
+	id:	integer ($int64)
+	Identificador do recurso
+
+	tipoDeGeracaoDeFinanceiro:	string
+	Tipo de geração de financeiro
+
+	destacaICMS:	boolean
+	Operação destaca ICMS
+
+	enviaObservacaoNaNotaFiscal:	boolean
+	Operação envia observação na NF
+
+	compoeABC:	boolean
+	Operação compõe ABC
+
+	}
+400	
+Requisição inválida
+
+401	
+Não autorizado
+
+404	
+Não encontrado
+
+500	
+Erro inesperado

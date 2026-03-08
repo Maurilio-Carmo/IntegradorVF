@@ -1,0 +1,184 @@
+GET
+/v1/fiscal/tabelas-tributarias
+Buscar Tabelas Tributárias
+
+Parameters
+Name	Description
+q
+string
+(query)
+Queries. Fiql
+
+sort
+string
+(query)
+Ordenação. Sort
+
+start
+integer
+(query)
+Posição do primeiro elemento. EX:start=0
+
+count
+integer
+(query)
+Quantidade de registros. EX:count=100
+
+Responses
+Response content type
+
+application/json
+Code	Description
+200	
+Sucesso
+
+Example Value
+Model
+ResultListTabelaDeTributacao{
+start:	integer *($int64)
+Posição do primeiro registro
+
+count:	integer *($int64)
+Quantidade de registros na coleção
+
+total:	integer *($int64)
+Quantidade total de itens
+
+items:	[TabelaDeTributacao{
+	situacaoFiscalId:	integer ($int32)
+	Identificador único da situação da fiscal
+
+	decreto:	string
+	Decreto da tabela de tributação
+
+	uf:	string
+	Sigla do estado
+
+	tipoDeOperacao:	string
+	Tipo de operação
+
+	Enum:
+	[ ENTRADA, SAIDA ]
+
+	figuraFiscalId:	integer ($int32)
+	Identificador único da figura fiscal
+
+	id:	integer ($int64)
+	Identificador único
+
+	regimeEstadualId:	integer ($int64)
+	Identificador único do regime estadual
+
+	itens:	[ItemDaTabelaDeTributacao{
+		csosnCupomFiscal:	string
+		Informar o CSOSN referente a Cupons Fiscais
+
+		Enum:
+		[ TRIBUTACAO_COM_PERMISSAO_DE_CREDITO_101, TRIBUTACAO_SEM_PERMISSAO_DE_CREDITO_102, ISENCAO_DO_ICSM_PARA_FAIXA_DE_RECEITA_BRUTA, TRIBUTACAO_COM_PERMISSAO_DE_CREDITO_201, TRIBUTACAO_SEM_PERMISSAO_DE_CREDITO_202, ISENCAO_DO_ICMS, IMUNE, NAO_TRIBUTADO, ICMS_COBRADO_ANTERIORMENTE_POR_SUBSTITUICAO_TRIBUTARIA, OUTROS ]
+		outrosNF:	number *($double)
+		Outras tributações na nota fiscal
+
+		fecop:	number ($double)
+		Valor referente ao fundo estadual de combate à pobreza
+
+		fecopST:	number ($double)
+		Valor refrente ao fundo estadual de combate à pobreza para Substituição Tributária
+
+		tributacao:	string
+		Informar tributação
+
+		isentoNF:	number *($double)
+		Informar o que foi insento na nota fiscal
+
+		classificacaoDePessoa:	string
+		Classificação da pessoa
+
+		Enum:
+		[ ENTRADA_DE_INDUSTRIA, ENTRADA_DE_DISTRIBUIDOR, ENTRADA_DE_MICROEMPRESA, ENTRADA_DE_VAREJO, ENTRADA_DE_TRANSFERENCIA, SAIDA_PARA_CONTRIBUINTE, SAIDA_PARA_NAO_CONTRIBUINTE, SAIDA_PARA_TRANSFERENCIA ]
+		stDestacado:	boolean
+		Substituição destacada do ICMS
+
+		icmsOrigem:	number ($double)
+		Valor referente a alíquota de ICMS Desonerado
+
+		somaIPINaBaseDeCalculo:	boolean
+		Informar a soma do IPI da base de calculo
+
+		tributadoNF:	number *($double)
+		Informar o tributado da Nota fiscal
+
+		icmsDesonerado:	boolean
+		Informar se o item configura ICMS Desonerado
+
+		codigoBeneficioFiscal:	string
+		Informar o Código do Benefício Fiscal
+
+		uf:	string *
+		Sigla do estado
+
+		icmsEfetivo:	boolean
+		Informar se o item configura ICMS Efetivo
+
+		aliquotaInterna:	number ($double)
+		Informar percentual da alíquota interna
+
+		reducaoOrigem:	number ($double)
+		Valor referente a alíquota de ICMS Efetivo
+
+		tributadoICMS:	number ($double)
+		Informar o que foi tributado do ICMS
+
+		cargaLiquida:	number ($double)
+		Informar valor da carga liquida
+
+		csosnDocumentoFiscal:	string
+		Informar o CSOSN referente a Documentos Fiscais
+
+		Enum:
+		[ TRIBUTACAO_COM_PERMISSAO_DE_CREDITO_101, TRIBUTACAO_SEM_PERMISSAO_DE_CREDITO_102, ISENCAO_DO_ICSM_PARA_FAIXA_DE_RECEITA_BRUTA, TRIBUTACAO_COM_PERMISSAO_DE_CREDITO_201, TRIBUTACAO_SEM_PERMISSAO_DE_CREDITO_202, ISENCAO_DO_ICMS, IMUNE, NAO_TRIBUTADO, ICMS_COBRADO_ANTERIORMENTE_POR_SUBSTITUICAO_TRIBUTARIA, OUTROS ]
+		cfopCuponsFiscaisId:	integer ($int64)
+		Código Fiscal de Operações e Prestações da Frente de Loja
+
+		csosn:	string
+		Informar o CSOSN referente a Escriturações Fiscais
+
+		Enum:
+		[ TRIBUTACAO_COM_PERMISSAO_DE_CREDITO_101, TRIBUTACAO_SEM_PERMISSAO_DE_CREDITO_102, ISENCAO_DO_ICSM_PARA_FAIXA_DE_RECEITA_BRUTA, TRIBUTACAO_COM_PERMISSAO_DE_CREDITO_201, TRIBUTACAO_SEM_PERMISSAO_DE_CREDITO_202, ISENCAO_DO_ICMS, IMUNE, NAO_TRIBUTADO, ICMS_COBRADO_ANTERIORMENTE_POR_SUBSTITUICAO_TRIBUTARIA, OUTROS ]
+		aliquota:	number ($double)
+		Valor da alíquota
+
+		somaIPINaBaseDeCalculoSubstituicao:	boolean
+		Informar a soma do IPI da base de calculo do ICMS Substituto
+
+		motivoDesoneracaoICMS:	string
+		Informar o CSOSN referente a Cupons Fiscais
+
+		Enum:
+		[ TAXI, DEFICIENTE_FISICO, PRODUTOR_AGROPECUARI, FROTISTA_OU_LOCADORA, DIPLOMATICO_CONSULAR, UTILITARIOS, SUFRAMA, VENDA_ORGÃO_PUBLICO, OUTROS, DEFICIENTE_CONDUTOR, DEFICIENTE_NAO_COND, FOMENTO_AGRO_PECU ]
+		agregado:	number ($double)
+		Informar ICMS agregado
+
+		cfopId:	integer ($int64)
+		Código Fiscal de Operações e Prestações
+
+		cstId:	integer ($int32)
+		Identificador único do CST referente a Escriturações Fiscal
+
+		}]
+	description:Itens da tabela de tributação
+	}]
+xml:Map { "name": "items" }
+description:Coleções de objetos
+*
+}
+400	
+Requisição inválida
+
+401	
+Não autorizado
+
+404	
+Não encontrado
+
+500	
+Erro inesperado

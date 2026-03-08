@@ -1,0 +1,90 @@
+GET
+/v1/financeiro/contas-correntes
+Buscar Contas Corrente
+
+Parameters
+Name	Description
+q
+string
+(query)
+Queries. Fiql
+
+sort
+string
+(query)
+Ordenação. Sort
+
+start
+integer
+(query)
+Posição do primeiro elemento. EX:start=0
+
+count
+integer
+(query)
+Quantidade de registros. EX:count=100
+
+Responses
+Response content type
+
+application/json
+Code	Description
+200	
+Sucesso
+
+Example Value
+Model
+ResultListContaCorrente{
+start:	integer *($int64)
+Posição do primeiro registro
+
+count:	integer *($int64)
+Quantidade de registros na coleção
+
+total:	integer *($int64)
+Quantidade total de itens
+
+items:	[ContaCorrente{
+	agenteFinanceiroId:	integer *($int64)
+	Identificador único do agente finaceiro
+
+	descricao:	string *
+	Descrição da conta Corrente
+
+	agencia:	string
+	Agência da conta correte
+
+	conta:	string
+	Conta
+
+	tipo:	string *
+	Tipo de conta
+
+	Enum:
+	[ CAIXA, BANCARIA ]
+
+	lojaId:	integer *($int64)
+	Código da loja
+
+	localDePagamento:	string
+	Local onde pode ser pago
+
+	id:	integer *($int64)
+	Código
+
+	}]
+xml:Map { "name": "items" }
+description:Coleções de objetos
+*
+}
+400	
+Requisição inválida
+
+401	
+Não autorizado
+
+404	
+Não encontrado
+
+500	
+Erro inesperado

@@ -1,0 +1,137 @@
+GET
+/v1/produto/precos
+Buscar Preços
+
+Parameters
+Name	Description
+q
+string
+(query)
+Queries. Fiql
+
+sort
+string
+(query)
+Ordenação. Sort
+
+start
+integer
+(query)
+Posição do primeiro elemento. EX:start=0
+
+count
+integer
+(query)
+Quantidade de registros. EX:count=100
+
+Responses
+Response content type
+
+application/json
+Code	Description
+200	
+Sucesso
+
+Example Value
+Model
+ResultListPreco{
+start:	integer *($int64)
+Posição do primeiro registro
+
+count:	integer *($int64)
+Quantidade de registros na coleção
+
+total:	integer *($int64)
+Quantidade total de itens
+
+items:	[Preco{
+	precoVenda1:	number *($double)
+	Preço da venda 1
+
+	dataUltimoReajustePreco1:	string ($date)
+	Data do ultimo reajuste do preco 1
+
+	precoVenda2:	number *($double)
+	Preço da venda 2
+
+	precoMedioDeReposicao:	number ($double)
+	Custo médio de reposição
+
+	dataUltimoReajustePreco2:	string ($date)
+	Data do ultimo reajuste do preco 2
+
+	precoVenda3:	number *($double)
+	Preço da venda 3
+
+	dataUltimoReajustePreco3:	string ($date)
+	Data do ultimo reajuste do preco 3
+
+	origem:	string *
+	Origem do preço
+
+	Enum:
+	[ CADASTRO, REAJUSTE_INDIVIDUAL, REAJUSTE_GERAL, REAJUSTE_LOTE, PROGRAMADO, NOTA_FISCAL, ASSISTENTE_COMPRA, ESPELHAMENTO, SIMULADOR ]
+	precoOferta1:	number *($double)
+	Preço da oferta 1
+
+	quantidadeMinimaPreco2:	number *($double)
+	Quantidade mínima do preço 2
+
+	descontoMaximo:	number *($double)
+	Valor do desconto máximo
+
+	precoOferta2:	number *($double)
+	Preço da oferta 2
+
+	quantidadeMinimaPreco3:	number *($double)
+	Quantidade mínima do preço 3
+
+	margemPreco1:	number *($double)
+	Margem do preço 1
+
+	precoOferta3:	number *($double)
+	Preço da oferta 3
+
+	margemPreco2:	number *($double)
+	Margem do preço 2
+
+	produtoId:	integer *($int64)
+	Código do produto
+
+	margemPreco3:	number *($double)
+	Margem do preço 3
+
+	permiteDesconto:	boolean *
+	Informar se permite desconto
+
+	lojaId:	integer *($int64)
+	Código da loja
+
+	id:	integer ($int32)
+	Identificador único
+
+	precoFiscalDeReposicao:	number ($double)
+	Custo fiscal de reposição
+
+	incentivoEmZonaFranca:	string
+	Incentivo em zona franca
+
+	custoProduto:	number ($double)
+	Custo do produto
+
+	}]
+xml:Map { "name": "items" }
+description:Coleções de objetos
+*
+}
+400	
+Requisição inválida
+
+401	
+Não autorizado
+
+404	
+Não encontrado
+
+500	
+Erro inesperado
