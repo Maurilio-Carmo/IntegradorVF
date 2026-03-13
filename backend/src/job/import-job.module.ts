@@ -4,9 +4,9 @@ import { ImportJobController }      from './import-job.controller';
 import { ImportJobService }         from './import-job.service';
 import { ImportJobExecutorService } from './import-job-executor.service';
 
-import { ImportacaoModule }  from '../importacao/importacao.module';
-import { CredencialModule }  from '../importacao/credenciais/credencial.module';
-import { VarejoFacilModule } from '../importacao/varejo-facil/varejo-facil.module';
+import { ImportacaoModule }  from '../importacao/module/importacao.module';
+import { CredencialModule }  from '../importacao/module/credencial.module';
+import { VarejoFacilModule } from '../importacao/module/varejo-facil.module';
 
 @Module({
   imports: [

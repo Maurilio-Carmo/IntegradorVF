@@ -8,7 +8,7 @@ import {
   IsOptional,
 } from 'class-validator';
 import { Type }                           from 'class-transformer';
-import { CredencialService }              from './credencial.service';
+import { CredencialService }              from '../service/credencial.service';
 import { VarejoFacilHttpService }         from '../varejo-facil/varejo-facil-http.service';
 
 class SalvarCredencialDto {

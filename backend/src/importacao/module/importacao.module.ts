@@ -3,21 +3,21 @@
 import { Module } from '@nestjs/common';
 
 // Controllers
-import { ImportacaoController }  from './importacao.controller';
-import { ProdutoController }     from './produto/produto.controller';
+import { ImportacaoController }  from '../importacao.controller';
+import { ProdutoController }     from '../controller/produto.controller';
 import { FinanceiroController }  from './financeiro/financeiro.controller';
-import { FiscalController }      from './fiscal/fiscal.controller';
-import { EstoqueController }     from './estoque/estoque.controller';
-import { PdvController }         from './pdv/pdv.controller';
-import { PessoaController }      from './pessoa/pessoa.controller';
+import { FiscalController }      from '../controller/fiscal.controller';
+import { EstoqueController }     from '../controller/estoque.controller';
+import { PdvController }         from '../controller/frente-loja.controller';
+import { PessoaController }      from '../controller/pessoa.controller';
 
 // Services
-import { ProdutoService }    from './produto/produto.service';
-import { FinanceiroService } from './financeiro/financeiro.service';
-import { FiscalService }     from './fiscal/fiscal.service';
-import { EstoqueService }    from './estoque/estoque.service';
-import { PdvService }        from './pdv/pdv.service';
-import { PessoaService }     from './pessoa/pessoa.service';
+import { ProdutoService }    from '../service/produto.service';
+import { FinanceiroService } from '../service/financeiro.service';
+import { FiscalService }     from '../service/fiscal.service';
+import { EstoqueService }    from '../service/estoque.service';
+import { PdvService }        from '../service/frente-loja.service';
+import { PessoaService }     from '../service/pessoa.service';
 
 // Repositories — importados do barrel file (index.ts)
 import {
@@ -63,7 +63,7 @@ import {
   LojasRepository,
   ClientesRepository,
   FornecedoresRepository,
-} from './repositories';
+} from '../repositories';
 
 const ALL_REPOSITORIES = [
   SecoesRepository,

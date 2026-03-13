@@ -1,6 +1,6 @@
 // backend/src/importacao/varejo-facil/varejo-facil-http.service.ts
 import { Injectable }       from '@nestjs/common';
-import { CredencialVF }     from '../credenciais/credencial.service';
+import { CredencialVF }     from '../service/credencial.service';
 import { AppLoggerService }  from '../../logger/logger.service';
 
 export type ApiConfig = CredencialVF;

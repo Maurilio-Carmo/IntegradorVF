@@ -1,7 +1,7 @@
 // backend/src/importacao/fiscal/fiscal.controller.ts
 import { Controller, Post, Body, HttpCode } from '@nestjs/common';
 import { ApiTags, ApiOperation }             from '@nestjs/swagger';
-import { FiscalService }                     from './fiscal.service';
+import { FiscalService }                     from '../service/fiscal.service';
 import { ImportarArrayDto }                  from '../dto/importar-array.dto';
 
 /**

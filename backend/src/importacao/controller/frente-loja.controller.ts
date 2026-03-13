@@ -1,7 +1,7 @@
 // backend/src/importacao/pdv/pdv.controller.ts
 import { Controller, Post, Body, HttpCode } from '@nestjs/common';
 import { ApiTags, ApiOperation }             from '@nestjs/swagger';
-import { PdvService }                        from './pdv.service';
+import { PdvService }                        from '../service/frente-loja.service';
 import { ImportarArrayDto }                  from '../dto/importar-array.dto';
 
 /**

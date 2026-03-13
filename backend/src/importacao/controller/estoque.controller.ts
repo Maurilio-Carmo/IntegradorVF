@@ -1,7 +1,7 @@
 // backend/src/importacao/estoque/estoque.controller.ts
 import { Controller, Post, Body, HttpCode } from '@nestjs/common';
 import { ApiTags, ApiOperation }             from '@nestjs/swagger';
-import { EstoqueService }                    from './estoque.service';
+import { EstoqueService }                    from '../service/estoque.service';
 import { ImportarArrayDto }                  from '../dto/importar-array.dto';
 
 /**

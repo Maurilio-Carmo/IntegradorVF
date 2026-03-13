@@ -1,8 +1,8 @@
 // backend/src/importacao/credenciais/credencial.module.ts
 import { Module }               from '@nestjs/common';
-import { CredencialController } from './credencial.controller';
-import { CredencialService }    from './credencial.service';
-import { VarejoFacilModule }    from '../varejo-facil/varejo-facil.module';
+import { CredencialController } from '../controller/credencial.controller';
+import { CredencialService }    from '../service/credencial.service';
+import { VarejoFacilModule }    from './varejo-facil.module';
 
 /**
  * CredencialModule

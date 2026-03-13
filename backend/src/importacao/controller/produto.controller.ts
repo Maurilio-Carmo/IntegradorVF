@@ -1,7 +1,7 @@
 // backend/src/importacao/produto/produto.controller.ts
 import { Controller, Post, Body, HttpCode } from '@nestjs/common';
 import { ApiTags, ApiOperation }             from '@nestjs/swagger';
-import { ProdutoService }                    from './produto.service';
+import { ProdutoService }                    from '../service/produto.service';
 import { ImportarArrayDto }                  from '../dto/importar-array.dto';
 
 /**

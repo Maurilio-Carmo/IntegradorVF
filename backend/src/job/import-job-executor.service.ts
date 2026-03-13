@@ -2,7 +2,7 @@
 
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { eq }                               from 'drizzle-orm';
-import { CredencialService, CredencialVF }  from '../importacao/credenciais/credencial.service';
+import { CredencialService, CredencialVF }  from '../importacao/service/credencial.service';
 import { VarejoFacilHttpService }            from '../importacao/varejo-facil/varejo-facil-http.service';
 import { AppLoggerService }                  from '../logger/logger.service';
 import { DrizzleService }                    from '../database/drizzle.service';

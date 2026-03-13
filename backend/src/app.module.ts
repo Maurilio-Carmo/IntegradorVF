@@ -14,11 +14,11 @@ import { DatabaseControlModule } from './database-control/database-control.modul
 import { ComparatorModule }      from './comparator/comparator.module';
 
 // ── Credenciais + cliente HTTP (declarados UMA VEZ) ───────────────────────────
-import { CredencialModule }      from './importacao/credenciais/credencial.module';
-import { VarejoFacilModule }     from './importacao/varejo-facil/varejo-facil.module';
+import { CredencialModule }      from './importacao/module/credencial.module';
+import { VarejoFacilModule }     from './importacao/module/varejo-facil.module';
 
 // ── Domínios de importação ────────────────────────────────────────────────────
-import { ImportacaoModule }      from './importacao/importacao.module';
+import { ImportacaoModule }      from './importacao/module/importacao.module';
 import { ImportJobModule }       from './job/import-job.module';
 
 // ── Sincronização ─────────────────────────────────────────────────────────────

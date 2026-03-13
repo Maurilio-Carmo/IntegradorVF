@@ -1,7 +1,7 @@
 // backend/src/importacao/pessoa/pessoa.controller.ts
 import { Controller, Post, Body, HttpCode } from '@nestjs/common';
 import { ApiTags, ApiOperation }             from '@nestjs/swagger';
-import { PessoaService }                     from './pessoa.service';
+import { PessoaService }                     from '../service/pessoa.service';
 import { ImportarArrayDto }                  from '../dto/importar-array.dto';
 
 /**
