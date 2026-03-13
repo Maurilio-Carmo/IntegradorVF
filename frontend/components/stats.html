@@ -1,0 +1,316 @@
+<!-- Stats Component -->
+<!-- Ordem e emojis espelham exatamente as abas do import-tabs -->
+
+<!-- PRODUTO  -->
+<div class="stats-section" data-tab="produto">
+    <div class="stats-section-title">
+        <span class="stats-section-icon">🛒</span> Produto
+    </div>
+    <div class="stats-grid">
+
+        <div class="stat-card">
+            <div class="stat-icon">📂</div>
+            <div class="stat-content">
+                <div class="stat-label">Seções</div>
+                <div class="stat-value" id="statSecoes">-</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">📁</div>
+            <div class="stat-content">
+                <div class="stat-label">Grupos</div>
+                <div class="stat-value" id="statGrupos">-</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">📁</div>
+            <div class="stat-content">
+                <div class="stat-label">Subgrupos</div>
+                <div class="stat-value" id="statSubgrupos">-</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">🏷️</div>
+            <div class="stat-content">
+                <div class="stat-label">Marcas</div>
+                <div class="stat-value" id="statMarcas">-</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">🗃️</div>
+            <div class="stat-content">
+                <div class="stat-label">Famílias</div>
+                <div class="stat-value" id="statFamilias">-</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">🛍️</div>
+            <div class="stat-content">
+                <div class="stat-label">Produtos</div>
+                <div class="stat-value" id="statProdutos">-</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">📦</div>
+            <div class="stat-content">
+                <div class="stat-label">Códigos Auxiliares</div>
+                <div class="stat-value" id="statProdutoAuxiliares">-</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">🏭</div>
+            <div class="stat-content">
+                <div class="stat-label">Fornecedores dos Produtos</div>
+                <div class="stat-value" id="statProdutoFornecedores">-</div>
+            </div>
+        </div>
+        
+    </div>
+</div>
+
+<!-- FINANCEIRO -->
+<div class="stats-section" data-tab="financeiro">
+    <div class="stats-section-title">
+        <span class="stats-section-icon">💰</span> Financeiro
+    </div>
+    <div class="stats-grid">
+
+        <div class="stat-card">
+            <div class="stat-icon">📋</div>
+            <div class="stat-content">
+                <div class="stat-label">Categorias</div>
+                <div class="stat-value" id="statCategorias">-</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">👔</div>
+            <div class="stat-content">
+                <div class="stat-label">Agentes</div>
+                <div class="stat-value" id="statAgentes">-</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">🏦</div>
+            <div class="stat-content">
+                <div class="stat-label">Contas Correntes</div>
+                <div class="stat-value" id="statContasCorrentes">-</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">📜</div>
+            <div class="stat-content">
+                <div class="stat-label">Espécies de Documento</div>
+                <div class="stat-value" id="statEspeciesDocumento">-</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">📇</div>
+            <div class="stat-content">
+                <div class="stat-label">Histórico Padrão</div>
+                <div class="stat-value" id="statHistoricoPadrao">-</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">📉</div>
+            <div class="stat-content">
+                <div class="stat-label">Limite de Crédito</div>
+                <div class="stat-value" id="statLimiteCredito">-</div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- FRENTE DE LOJA -->
+<div class="stats-section" data-tab="frente-loja">
+    <div class="stats-section-title">
+        <span class="stats-section-icon">🏪</span> Frente de Loja
+    </div>
+    <div class="stats-grid">
+
+        <div class="stat-card">
+            <div class="stat-icon">💳</div>
+            <div class="stat-content">
+                <div class="stat-label">Formas de Pagamento</div>
+                <div class="stat-value" id="statFormasPagamento">-</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">💵</div>
+            <div class="stat-content">
+                <div class="stat-label">Pagamentos PDV</div>
+                <div class="stat-value" id="statPagamentosPDV">-</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">💰</div>
+            <div class="stat-content">
+                <div class="stat-label">Recebimentos PDV</div>
+                <div class="stat-value" id="statRecebimentosPDV">-</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">🎯</div>
+            <div class="stat-content">
+                <div class="stat-label">Motivos Desconto</div>
+                <div class="stat-value" id="statMotivosDesconto">-</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">↩️</div>
+            <div class="stat-content">
+                <div class="stat-label">Motivos Devolução</div>
+                <div class="stat-value" id="statMotivosDevolucao">-</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">🚫</div>
+            <div class="stat-content">
+                <div class="stat-label">Motivos Cancelamento</div>
+                <div class="stat-value" id="statMotivosCancelamento">-</div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- ESTOQUE -->
+<div class="stats-section" data-tab="estoque">
+    <div class="stats-section-title">
+        <span class="stats-section-icon">📦</span> Estoque
+    </div>
+    <div class="stats-grid">
+
+        <div class="stat-card">
+            <div class="stat-icon">🏪</div>
+            <div class="stat-content">
+                <div class="stat-label">Locais de Estoque</div>
+                <div class="stat-value" id="statLocalEstoque">-</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">📊</div>
+            <div class="stat-content">
+                <div class="stat-label">Tipos de Ajustes</div>
+                <div class="stat-value" id="statTiposAjustes">-</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">📦</div>
+            <div class="stat-content">
+                <div class="stat-label">Saldo de Estoque</div>
+                <div class="stat-value" id="statSaldoEstoque">-</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ⚖️ FISCAL -->
+<div class="stats-section" data-tab="fiscal">
+    <div class="stats-section-title">
+        <span class="stats-section-icon">⚖️</span> Fiscal
+    </div>
+    <div class="stats-grid">
+
+        <div class="stat-card">
+            <div class="stat-icon">🏛️</div>
+            <div class="stat-content">
+                <div class="stat-label">Regime Tributário</div>
+                <div class="stat-value" id="statRegimeTributario">-</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">📋</div>
+            <div class="stat-content">
+                <div class="stat-label">Situações Fiscais</div>
+                <div class="stat-value" id="statSituacoesFiscais">-</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">📄</div>
+            <div class="stat-content">
+                <div class="stat-label">Tipos de Operações</div>
+                <div class="stat-value" id="statTiposOperacoes">-</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">💰</div>
+            <div class="stat-content">
+                <div class="stat-label">Impostos Federais</div>
+                <div class="stat-value" id="statImpostosFederais">-</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">🧮</div>
+            <div class="stat-content">
+                <div class="stat-label">Tab. Tributárias</div>
+                <div class="stat-value" id="statTabelasTributarias">-</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">⚖️</div>
+            <div class="stat-content">
+                <div class="stat-label">Cenários Fiscais</div>
+                <div class="stat-value" id="statCenariosFiscais">-</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- PESSOA -->
+<div class="stats-section" data-tab="pessoa">
+    <div class="stats-section-title">
+        <span class="stats-section-icon">👥</span> Pessoa
+    </div>
+    <div class="stats-grid">
+
+        <div class="stat-card">
+            <div class="stat-icon">🏪</div>
+            <div class="stat-content">
+                <div class="stat-label">Lojas</div>
+                <div class="stat-value" id="statLojas">-</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">👤</div>
+            <div class="stat-content">
+                <div class="stat-label">Clientes</div>
+                <div class="stat-value" id="statClientes">-</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">🏢</div>
+            <div class="stat-content">
+                <div class="stat-label">Fornecedores</div>
+                <div class="stat-value" id="statFornecedores">-</div>
+            </div>
+        </div>
+
+    </div>
+</div>

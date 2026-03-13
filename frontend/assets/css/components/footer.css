@@ -1,0 +1,22 @@
+/**
+ * footer.css
+ * Estilos do footer
+ */
+
+.footer {
+    background: var(--bg-primary);
+    border-top: 1px solid var(--border-color);
+    padding: var(--spacing-xl) 0;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+    margin-top: auto;
+}
+
+.footer p {
+    margin-bottom: var(--spacing-sm);
+}
+
+.footer p:last-child {
+    margin-bottom: 0;
+}

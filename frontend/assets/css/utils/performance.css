@@ -1,0 +1,71 @@
+/**
+ * performance.css
+ * Otimizações de renderização e layout
+ */
+
+/* ── Scroll suave global ──────────────────────────────────────── */
+html {
+    scroll-behavior: smooth;
+}
+
+/* ── Seções abaixo do fold ────────────────────────────────────── */
+/*
+ * content-visibility: auto instrui o browser a pular rendering
+ * de elementos fora da viewport — melhora LCP e Speed Index.
+ * contain-intrinsic-size evita CLS quando a seção entrar na tela.
+ */
+#dashboard-section {
+    content-visibility: auto;
+    contain-intrinsic-size: 0 800px;
+}
+
+#log-component {
+    content-visibility: auto;
+    contain-intrinsic-size: 0 260px;
+}
+
+/* ── will-change: remover de elementos estáticos ─────────────── */
+/*
+ * will-change em elementos que NÃO animam desperdiça memória GPU
+ * e aumenta o tempo de compositing.
+ * Aplicar SOMENTE em overlays/modais que fazem opacity animation.
+ */
+.btn,
+.card,
+.stat-card,
+.import-card {
+    will-change: auto;
+}
+
+/* Somente o que realmente anima opacity */
+.modal-overlay,
+.modal-content {
+    will-change: opacity;
+}
+
+/* ── Imagens sem dimensões explícitas ─────────────────────────── */
+/*
+ * Fallback para imagens sem width/height no HTML.
+ * Evita CLS causado por imagens que chegam e empurram o layout.
+ */
+img:not([width]):not([height]) {
+    aspect-ratio: auto;
+    width: 100%;
+    height: auto;
+}
+
+/* ── Reduced motion ───────────────────────────────────────────── */
+/*
+ * Respeita preferência do usuário e melhora score de Acessibilidade.
+ * Também reduz TBT em dispositivos lentos ao eliminar animações.
+ */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration:       0.01ms !important;
+        animation-iteration-count: 1     !important;
+        transition-duration:      0.01ms !important;
+        scroll-behavior:          auto   !important;
+    }
+}

@@ -1,0 +1,77 @@
+{
+  "name": "integrador-varejo-facil",
+  "version": "3.0.0",
+  "description": "Sistema de integração com API Varejo Fácil",
+  "main": "backend/src/main.ts",
+  "author": "Maurilio Carmo",
+  "license": "MIT",
+  "keywords": [
+    "varejo",
+    "integração",
+    "api",
+    "nestjs",
+    "sqlite",
+    "firebird"
+  ],
+  "scripts": {
+    "start": "node dist/backend/src/main.js",
+    "dev": "nodemon --exec \"ts-node -r tsconfig-paths/register backend/src/main.ts\" --ext ts",
+    "build": "tsc -p tsconfig.json",
+    "init-db": "ts-node -r tsconfig-paths/register backend/src/cli.ts init-db",
+    "reset-db": "ts-node -r tsconfig-paths/register backend/src/cli.ts reset-db",
+    "check-db": "ts-node -r tsconfig-paths/register backend/src/cli.ts check-db",
+    "test": "jest --config jest.config.json",
+    "test:watch": "jest --watch --config jest.config.json",
+    "test:cov": "jest --coverage --config jest.config.json",
+    "build:exe": "pkg . --targets node22-win-x64 --output dist/IntegradorVF.exe",
+    "db:generate": "drizzle-kit generate --config=backend/drizzle.config.ts",
+    "db:migrate":  "drizzle-kit migrate  --config=backend/drizzle.config.ts",
+    "db:studio":   "drizzle-kit studio   --config=backend/drizzle.config.ts",
+    "db:push":     "drizzle-kit push     --config=backend/drizzle.config.ts",
+    "db:check":    "drizzle-kit check    --config=backend/drizzle.config.ts"
+  },
+  "pkg": {
+    "scripts": [
+      "dist/backend/src/**/*.js"
+    ],
+    "assets": [
+      "frontend/**/*",
+      "backend/database/*.sql",
+      "config/.env.example"
+    ],
+    "targets": [
+      "node22-win-x64"
+    ],
+    "outputPath": "dist"
+  },
+  "dependencies": {
+    "@nestjs/common": "^11.1.14",
+    "@nestjs/config": "^4.0.3",
+    "@nestjs/core": "^11.1.14",
+    "@nestjs/platform-express": "^11.1.14",
+    "@nestjs/serve-static": "^5.0.4",
+    "@nestjs/swagger": "^11.2.6",
+    "better-sqlite3": "^12.6.2",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.4",
+    "drizzle-orm": "^0.45.1",
+    "node-firebird": "^1.1.10",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2"
+  },
+  "devDependencies": {
+    "@nestjs/testing": "^11.1.14",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/express": "^5.0.6",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.19.13",
+    "@yao-pkg/pkg": "^5.11.5",
+    "drizzle-kit": "^0.31.9",
+    "jest": "^29.7.0",
+    "nodemon": "^3.1.14",
+    "ts-jest": "^29.4.6",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.9.3"
+  }
+}

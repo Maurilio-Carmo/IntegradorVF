@@ -1,0 +1,55 @@
+/**
+ * theme-switcher.css
+ * Seletor de tema claro/escuro com ícones
+ */
+
+.theme-switcher {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-xs);
+    background: var(--bg-secondary);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+}
+
+.theme-option {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    cursor: pointer;
+    border-radius: var(--border-radius);
+    transition: all var(--transition-fast);
+    opacity: 0.5;
+}
+
+.theme-option:hover {
+    opacity: 0.8;
+    background: var(--bg-tertiary);
+}
+
+.theme-option.active {
+    opacity: 1;
+    background: var(--primary-color);
+    box-shadow: var(--shadow-sm);
+}
+
+.theme-icon-light::before {
+    content: '☀️';
+}
+
+.theme-icon-dark::before {
+    content: '🌙';
+}
+
+/* Estado ativo com cor de fundo */
+.theme-option.active.theme-icon-light {
+    background: #fbbf24;
+}
+
+.theme-option.active.theme-icon-dark {
+    background: #1e293b;
+}
