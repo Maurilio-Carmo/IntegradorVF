@@ -52,7 +52,7 @@ export class ImportButtonManager {
             'importar-motivos-cancelamento': 'importarMotivosCancelamento',
 
             // ESTOQUE
-            'importar-locais-estoque':       'importarLocalEstoque',
+            'importar-local-estoque':       'importarLocalEstoque',
             'importar-tipos-ajustes':        'importarTiposAjustes',
             'importar-saldo-estoque':        'importarSaldoEstoque',
 

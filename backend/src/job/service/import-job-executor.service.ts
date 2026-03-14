@@ -59,13 +59,13 @@ export class ImportJobExecutorService {
         { name: 'contasCorrentes',   label: 'Contas Correntes' },
         { name: 'especiesDocumento', label: 'Espécies de Documento' },
         { name: 'historicoPadrao',   label: 'Histórico Padrão' },
-        { name: 'formasPagamento',   label: 'Formas de Pagamento' },
       ],
       executor: (id) => this._executarFinanceiro(id),
     },
     frenteLoja: {
       label: 'Importar Tudo — Frente de Loja',
       steps: [
+        { name: 'formasPagamento',     label: 'Formas de Pagamento' },
         { name: 'pagamentosPDV',       label: 'Pagamentos PDV' },
         { name: 'recebimentosPDV',     label: 'Recebimentos PDV' },
         { name: 'motivosDesconto',     label: 'Motivos de Desconto' },
@@ -130,29 +130,29 @@ export class ImportJobExecutorService {
     produtoAuxiliares:   { endpoint: 'produto/codigos-auxiliares', save: d => this.produto.importarProdutoAuxiliares(d) },
     produtoFornecedores: { endpoint: 'produto/fornecedores',       save: d => this.produto.importarProdutoFornecedores(d) },
     // Financeiro
-    categorias:          { endpoint: 'financeiro/categorias',         save: d => this.financeiro.importarCategorias(d) },
+    categorias:          { endpoint: 'financeiro/categorias',          save: d => this.financeiro.importarCategorias(d) },
     agentes:             { endpoint: 'pessoa/agentes-financeiros',     save: d => this.financeiro.importarAgentes(d) },
     contasCorrentes:     { endpoint: 'financeiro/contas-correntes',    save: d => this.financeiro.importarContasCorrentes(d) },
     especiesDocumento:   { endpoint: 'financeiro/especies-documentos', save: d => this.financeiro.importarEspeciesDocumento(d) },
     historicoPadrao:     { endpoint: 'financeiro/historicos-padrao',   save: d => this.financeiro.importarHistoricoPadrao(d) },
-    formasPagamento:     { endpoint: 'financeiro/formas-pagamento',    save: d => this.financeiro.importarFormasPagamento(d) },
     // PDV / Frente de Loja
-    pagamentosPDV:       { endpoint: 'pdv/pagamentos',               save: d => this.frenteLoja.importarPagamentosPDV(d) },
-    recebimentosPDV:     { endpoint: 'pdv/recebimentos',             save: d => this.frenteLoja.importarRecebimentosPDV(d) },
+    formasPagamento:     { endpoint: 'financeiro/formas-pagamento',  save: d => this.financeiro.importarFormasPagamento(d) },
+    pagamentosPDV:       { endpoint: 'financeiro/pagamentos-pdv',    save: d => this.frenteLoja.importarPagamentosPDV(d) },
+    recebimentosPDV:     { endpoint: 'financeiro/recebimentos-pdv',  save: d => this.frenteLoja.importarRecebimentosPDV(d) },
     motivosDesconto:     { endpoint: 'motivos-desconto',             save: d => this.frenteLoja.importarMotivosDesconto(d) },
     motivosDevolucao:    { endpoint: 'financeiro/motivos-devolucao', save: d => this.frenteLoja.importarMotivosDevolucao(d) },
     motivosCancelamento: { endpoint: 'motivos-cancelamento',         save: d => this.frenteLoja.importarMotivosCancelamento(d) },
     // Estoque
     localEstoque:        { endpoint: 'estoque/locais',             save: d => this.estoque.importarLocalEstoque(d) },
-    tiposAjustes:        { endpoint: 'estoque/tipos-ajustes',      save: d => this.estoque.importarTiposAjustes(d) },
+    tiposAjustes:        { endpoint: 'estoque/tipos-ajuste',       save: d => this.estoque.importarTiposAjustes(d) },
     saldoEstoque:        { endpoint: 'estoque/saldos',             save: d => this.estoque.importarSaldoEstoque(d) },
     // Fiscal
-    impostosFederais:    { endpoint: 'fiscal/impostos-federais',   save: d => this.fiscal.importarImpostosFederais(d) },
-    regimeTributario:    { endpoint: 'fiscal/regimes-tributarios', save: d => this.fiscal.importarRegimeTributario(d) },
-    situacoesFiscais:    { endpoint: 'fiscal/situacoes-fiscais',   save: d => this.fiscal.importarSituacoesFiscais(d) },
-    tiposOperacoes:      { endpoint: 'fiscal/tipos-operacoes',     save: d => this.fiscal.importarTiposOperacoes(d) },
-    tabelasTributarias:  { endpoint: 'fiscal/tabelas-tributarias', save: d => this.fiscal.importarTabelasTributarias(d) },
-    cenariosFiscais:     { endpoint: 'fiscal/cenarios-fiscais',    save: d => this.fiscal.importarCenariosFiscais(d) },
+    impostosFederais:    { endpoint: 'fiscal/impostos-federais',           save: d => this.fiscal.importarImpostosFederais(d) },
+    regimeTributario:    { endpoint: 'fiscal/regime-estadual-tributario',  save: d => this.fiscal.importarRegimeTributario(d) },
+    situacoesFiscais:    { endpoint: 'fiscal/situacoes',                   save: d => this.fiscal.importarSituacoesFiscais(d) },
+    tiposOperacoes:      { endpoint: 'fiscal/operacoes',                   save: d => this.fiscal.importarTiposOperacoes(d) },
+    tabelasTributarias:  { endpoint: 'fiscal/tabelas-tributarias',         save: d => this.fiscal.importarTabelasTributarias(d) },
+    cenariosFiscais:     { endpoint: 'fiscal/cenarios-fiscais-ncm',        save: d => this.fiscal.importarCenariosFiscais(d) },
     // Pessoa
     lojas:               { endpoint: 'pessoa/lojas',               save: d => this.pessoa.importarLojas(d) },
     clientes:            { endpoint: 'pessoa/clientes',            save: d => this.pessoa.importarClientes(d) },
@@ -205,13 +205,13 @@ export class ImportJobExecutorService {
     await this.runner.run(jobId, 'contasCorrentes',   cred, this.STEP_MAP['contasCorrentes']);
     await this.runner.run(jobId, 'especiesDocumento', cred, this.STEP_MAP['especiesDocumento']);
     await this.runner.run(jobId, 'historicoPadrao',   cred, this.STEP_MAP['historicoPadrao']);
-    await this.runner.run(jobId, 'formasPagamento',   cred, this.STEP_MAP['formasPagamento']);
     this.jobService.completeJob(jobId);
   }
 
   private async _executarPdv(jobId: string): Promise<void> {
     const cred = this.credencial.carregar();
     this.jobService.startJob(jobId);
+    await this.runner.run(jobId, 'formasPagamento',     cred, this.STEP_MAP['formasPagamento']);
     await this.runner.run(jobId, 'pagamentosPDV',       cred, this.STEP_MAP['pagamentosPDV']);
     await this.runner.run(jobId, 'recebimentosPDV',     cred, this.STEP_MAP['recebimentosPDV']);
     await this.runner.run(jobId, 'motivosDesconto',     cred, this.STEP_MAP['motivosDesconto']);

@@ -1,10 +1,8 @@
 // backend/src/database/schema/produto/produtos.schema.ts
 
-import { sqliteTable, integer, text, real, index } from 'drizzle-orm/sqlite-core';
+import { sqliteTable, integer, text, real, index, foreignKey } from 'drizzle-orm/sqlite-core';
 import { sql } from 'drizzle-orm';
-import { secoes } from './secoes.schema';
-import { grupos } from './grupos.schema';
-import { subgrupos } from './subgrupos.schema';
+import { secoes } from '../mercadologia/secoes.schema';
 import { familias } from './familias.schema';
 import { marcas } from './marcas.schema';
 
@@ -12,11 +10,11 @@ export const produtos = sqliteTable('produtos', {
   produtoId:            integer('produto_id').primaryKey(),
   descricao:            text('descricao').notNull(),
   descricaoReduzida:    text('descricao_reduzida').notNull(),
-  secaoId:              integer('secao_id').references(() => secoes.secaoId, { onDelete: 'set null' }),
-  grupoId:              integer('grupo_id').references(() => grupos.grupoId, { onDelete: 'set null' }),
-  subgrupoId:           integer('subgrupo_id').references(() => subgrupos.subgrupoId, { onDelete: 'set null' }),
-  familiaId:            integer('familia_id').references(() => familias.familiaId, { onDelete: 'set null' }),
-  marcaId:              integer('marca_id').references(() => marcas.marcaId, { onDelete: 'set null' }),
+  secaoId:              integer('secao_id'),
+  grupoId:              integer('grupo_id'),
+  subgrupoId:           integer('subgrupo_id'),
+  familiaId:            integer('familia_id'),
+  marcaId:              integer('marca_id'),
   composicao:           text('composicao', { enum: ['NORMAL','COMPOSTO','KIT','RENDIMENTO'] }),
   pesoVariavel:         text('peso_variavel', { enum: ['SIM','PESO','NAO','UNITARIO','PENDENTE'] }),
   unidadeCompra:        text('unidade_compra').notNull(),
@@ -59,6 +57,12 @@ export const produtos = sqliteTable('produtos', {
   createdAt:            text('created_at').default(sql`CURRENT_TIMESTAMP`),
   updatedAt:            text('updated_at').default(sql`CURRENT_TIMESTAMP`),
 }, (t) => ({
+  // FKs apenas para tabelas com PK simples
+  fkSecao:   foreignKey({ columns: [t.secaoId],   foreignColumns: [secoes.secaoId]   }).onDelete('set null'),
+  fkFamilia: foreignKey({ columns: [t.familiaId], foreignColumns: [familias.familiaId] }).onDelete('set null'),
+  fkMarca:   foreignKey({ columns: [t.marcaId],   foreignColumns: [marcas.marcaId]   }).onDelete('set null'),
+
+  // Índices de busca (grupoId e subgrupoId ficam só como índices, sem FK)
   idxSecao:    index('idx_produtos_secao').on(t.secaoId),
   idxGrupo:    index('idx_produtos_grupo').on(t.grupoId),
   idxSubgrupo: index('idx_produtos_subgrupo').on(t.subgrupoId),

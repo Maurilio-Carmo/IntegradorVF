@@ -3,6 +3,7 @@
 // ⚠️  Ordem importa: domínios sem dependências cruzadas primeiro.
 //     Dentro de cada domínio, o index interno já garante a ordem correta.
 
+export * from './mercadologia';
 export * from './controle';
 export * from './estoque';
 export * from './financeiro';
