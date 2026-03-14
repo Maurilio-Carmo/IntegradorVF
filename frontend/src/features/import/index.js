@@ -1,23 +1,16 @@
 // frontend/src/features/import/index.js
-// ─────────────────────────────────────────────────────────────────────────────
-// CORREÇÕES:
-//  - _runStep passa step correto para JobClient.start(dominio, step)
-//  - _runDominio chama cada step INDIVIDUALMENTE em sequência
-//    (botão "Importar Tudo" executa os individuais um a um, não um job bulk)
-//  - Sem distinção de loja — endpoint sem ?lojaId= (backend busca todas)
-// ─────────────────────────────────────────────────────────────────────────────
 
-import JobClient   from './job-client.js';
-import JobProgress from './job-progress.js';
+import JobClient      from './job-client.js';
+import JobProgress    from './job-progress.js';
 import DatabaseClient from '../../services/database/db-client.js';
-import UI from '../../ui/ui.js';
+import UI             from '../../ui/ui.js';
 
 const db = new DatabaseClient();
 
 // ─── Mapa: domínio → lista ordenada de steps ─────────────────────────────────
-// "Importar Tudo" percorre esses steps em sequência, um a um.
+// Deve coincidir EXATAMENTE com os nomes definidos em STEP_MAP do backend
 const DOMINIO_STEPS = {
-    produto:    ['mercadologia', 'marcas', 'familias', 'produtos', 'produtoAuxiliares', 'produtoFornecedores'],
+    produto:    ['secoes', 'grupos', 'subgrupos', 'marcas', 'familias', 'produtos', 'produtoAuxiliares', 'produtoFornecedores'],
     financeiro: ['categorias', 'agentes', 'contasCorrentes', 'especiesDocumento', 'historicoPadrao', 'formasPagamento'],
     frenteLoja: ['formasPagamento', 'pagamentosPDV', 'recebimentosPDV', 'motivosDesconto', 'motivosDevolucao', 'motivosCancelamento'],
     estoque:    ['localEstoque', 'tiposAjustes', 'saldoEstoque'],
@@ -69,13 +62,13 @@ async function _runDominio(dominio, tabPanel, bulkBtn) {
     }
 
     if (bulkBtn) bulkBtn.disabled = true;
-    UI.log(`🚀 Iniciando importação de ${steps.length} grupos: ${dominio}`, 'info');
+    UI.log(`🚀 Iniciando importação de ${steps.length} steps: ${dominio}`, 'info');
 
     let ok = 0, fail = 0;
 
     for (const step of steps) {
         // Localiza o import-item correspondente ao step no painel
-        const selector = STEP_TO_ACTION[step];
+        const selector  = STEP_TO_ACTION[step];
         const btn       = selector && tabPanel ? tabPanel.querySelector(selector) : null;
         const uiElement = btn?.closest('.import-item') ?? null;
 
@@ -92,49 +85,13 @@ async function _runDominio(dominio, tabPanel, bulkBtn) {
     if (bulkBtn) bulkBtn.disabled = false;
 
     if (fail === 0) {
-        UI.log(`✅ Importação completa: ${ok} grupos importados com sucesso`, 'success');
+        UI.log(`✅ Importação completa: ${ok} steps com sucesso`, 'success');
     } else {
         UI.log(`⚠️ Importação finalizada: ${ok} OK — ${fail} com erro`, 'warning');
     }
 
     await _refreshStats();
 }
-
-/**
- * Mapa step name → seletor data-action do botão no HTML.
- * Usado por _runDominio para encontrar o import-item de cada step.
- */
-const STEP_TO_ACTION = {
-    mercadologia:          '[data-action="importar-mercadologia"]',
-    marcas:                '[data-action="importar-marcas"]',
-    familias:              '[data-action="importar-familias"]',
-    produtos:              '[data-action="importar-produtos"]',
-    produtoAuxiliares:     '[data-action="importar-produto-auxiliares"]',
-    produtoFornecedores:   '[data-action="importar-produto-fornecedores"]',
-    categorias:            '[data-action="importar-categorias"]',
-    agentes:               '[data-action="importar-agentes"]',
-    contasCorrentes:       '[data-action="importar-contas-correntes"]',
-    especiesDocumento:     '[data-action="importar-especies-documento"]',
-    historicoPadrao:       '[data-action="importar-historico-padrao"]',
-    formasPagamento:       '[data-action="importar-formas-pagamento"]',
-    pagamentosPDV:         '[data-action="importar-pagamentos-pdv"]',
-    recebimentosPDV:       '[data-action="importar-recebimentos-pdv"]',
-    motivosDesconto:       '[data-action="importar-motivos-desconto"]',
-    motivosDevolucao:      '[data-action="importar-motivos-devolucao"]',
-    motivosCancelamento:   '[data-action="importar-motivos-cancelamento"]',
-    localEstoque:          '[data-action="importar-local-estoque"]',
-    tiposAjustes:          '[data-action="importar-tipos-ajustes"]',
-    saldoEstoque:          '[data-action="importar-saldo-estoque"]',
-    regimeTributario:      '[data-action="importar-regime-tributario"]',
-    situacoesFiscais:      '[data-action="importar-situacoes-fiscais"]',
-    tiposOperacoes:        '[data-action="importar-tipos-operacoes"]',
-    impostosFederais:      '[data-action="importar-impostos-federais"]',
-    tabelasTributarias:    '[data-action="importar-tabelas-tributarias"]',
-    cenariosFiscais:       '[data-action="importar-cenarios-fiscais"]',
-    lojas:                 '[data-action="importar-lojas"]',
-    clientes:              '[data-action="importar-clientes"]',
-    fornecedores:          '[data-action="importar-fornecedores"]',
-};
 
 async function _refreshStats() {
     try {
@@ -145,6 +102,48 @@ async function _refreshStats() {
     }
 }
 
+// ─── Mapa step name → seletor data-action do botão no HTML ───────────────────
+const STEP_TO_ACTION = {
+    // Mercadologia — 3 steps reais, todos vinculados ao mesmo botão de UI
+    secoes:                '[data-action="importar-mercadologia"]',
+    grupos:                '[data-action="importar-mercadologia"]',
+    subgrupos:             '[data-action="importar-mercadologia"]',
+    // Produto
+    marcas:                '[data-action="importar-marcas"]',
+    familias:              '[data-action="importar-familias"]',
+    produtos:              '[data-action="importar-produtos"]',
+    produtoAuxiliares:     '[data-action="importar-produto-auxiliares"]',
+    produtoFornecedores:   '[data-action="importar-produto-fornecedores"]',
+    // Financeiro
+    categorias:            '[data-action="importar-categorias"]',
+    agentes:               '[data-action="importar-agentes"]',
+    contasCorrentes:       '[data-action="importar-contas-correntes"]',
+    especiesDocumento:     '[data-action="importar-especies-documento"]',
+    historicoPadrao:       '[data-action="importar-historico-padrao"]',
+    formasPagamento:       '[data-action="importar-formas-pagamento"]',
+    // PDV / Frente de loja
+    pagamentosPDV:         '[data-action="importar-pagamentos-pdv"]',
+    recebimentosPDV:       '[data-action="importar-recebimentos-pdv"]',
+    motivosDesconto:       '[data-action="importar-motivos-desconto"]',
+    motivosDevolucao:      '[data-action="importar-motivos-devolucao"]',
+    motivosCancelamento:   '[data-action="importar-motivos-cancelamento"]',
+    // Estoque
+    localEstoque:          '[data-action="importar-local-estoque"]',
+    tiposAjustes:          '[data-action="importar-tipos-ajustes"]',
+    saldoEstoque:          '[data-action="importar-saldo-estoque"]',
+    // Fiscal
+    regimeTributario:      '[data-action="importar-regime-tributario"]',
+    situacoesFiscais:      '[data-action="importar-situacoes-fiscais"]',
+    tiposOperacoes:        '[data-action="importar-tipos-operacoes"]',
+    impostosFederais:      '[data-action="importar-impostos-federais"]',
+    tabelasTributarias:    '[data-action="importar-tabelas-tributarias"]',
+    cenariosFiscais:       '[data-action="importar-cenarios-fiscais"]',
+    // Pessoa
+    lojas:                 '[data-action="importar-lojas"]',
+    clientes:              '[data-action="importar-clientes"]',
+    fornecedores:          '[data-action="importar-fornecedores"]',
+};
+
 // ─── API Pública ──────────────────────────────────────────────────────────────
 
 const Importacao = {
@@ -152,7 +151,13 @@ const Importacao = {
     async atualizarEstatisticas() { return _refreshStats(); },
 
     // ── PRODUTO ──────────────────────────────────────────────────────────────
-    importarMercadologia:        (el) => _runStep('produto', 'mercadologia',        el),
+
+    async importarMercadologia(el) {
+        await _runStep('produto', 'secoes',    el);
+        await _runStep('produto', 'grupos',    el);
+        await _runStep('produto', 'subgrupos', el);
+    },
+
     importarMarcas:              (el) => _runStep('produto', 'marcas',              el),
     importarFamilias:            (el) => _runStep('produto', 'familias',            el),
     importarProdutos:            (el) => _runStep('produto', 'produtos',            el),
@@ -194,7 +199,6 @@ const Importacao = {
 
     /**
      * "Importar Tudo" — executa steps individuais do domínio em sequência.
-     * O botão bulk delega para os mesmos _runStep() dos botões individuais.
      */
     importarTudo(dominio, tabPanel, bulkBtn) {
         return _runDominio(dominio, tabPanel, bulkBtn);

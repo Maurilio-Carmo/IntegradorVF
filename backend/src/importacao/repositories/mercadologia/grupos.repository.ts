@@ -1,4 +1,4 @@
-// mercadologia/grupos.repository.ts
+// backend/src/importacao/repositories/mercadologia/grupos.repository.ts
 import { Injectable }          from '@nestjs/common';
 import { notInArray, sql }     from 'drizzle-orm';
 import { DrizzleService }      from '../../../database/drizzle.service';
@@ -30,5 +30,13 @@ export class GruposRepository {
     });
 
     return { success: true, count: list.length };
+  }
+
+  /** Retorna todos os pares {secaoId, grupoId} — usado pelo step de subgrupos. */
+  listarIds(): { secaoId: number; grupoId: number }[] {
+    return this.drizzle.db
+      .select({ secaoId: grupos.secaoId, grupoId: grupos.grupoId })
+      .from(grupos)
+      .all() as { secaoId: number; grupoId: number }[];
   }
 }

@@ -1,5 +1,4 @@
-// backend/src/job/import-job-executor.service.ts
-// Responsabilidade única: mapas de domínio/step e dispatcher de execução.
+// backend/src/job/service/import-job-executor.service.ts
 
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { CredencialService }               from '../../importacao/service/credencial.service';
@@ -14,6 +13,7 @@ import { EstoqueService }                  from '../../importacao/service/estoqu
 import { FiscalService }                   from '../../importacao/service/fiscal.service';
 import { PessoaService }                   from '../../importacao/service/pessoa.service';
 import { VarejoFacilHttpService }          from '../../importacao/service/varejo-facil-http.service';
+import { CredencialVF }                    from '../../importacao/service/credencial.service';
 import { DominioDef, StepDef }             from '../job.types';
 
 @Injectable()
@@ -119,13 +119,11 @@ export class ImportJobExecutorService {
     },
   };
 
-  // ─── Mapa step → endpoint + save ──────────────────────────────────────────
+  // ─── Mapa step → endpoint + save ─────────────────────────────────────────
 
   private readonly STEP_MAP: Record<string, StepDef> = {
     // Produto / Mercadológica
     secoes:              { endpoint: 'produto/secoes',             save: d => this.mercadologia.importarSecoes(d) },
-    grupos:              { endpoint: 'produto/grupos',             save: d => this.mercadologia.importarGrupos(d) },
-    subgrupos:           { endpoint: 'produto/subgrupos',          save: d => this.mercadologia.importarSubgrupos(d) },
     marcas:              { endpoint: 'produto/marcas',             save: d => this.produto.importarMarcas(d) },
     familias:            { endpoint: 'produto/familias',           save: d => this.produto.importarFamilias(d) },
     produtos:            { endpoint: 'produto/produtos',           save: d => this.produto.importarProdutos(d) },
@@ -163,9 +161,6 @@ export class ImportJobExecutorService {
 
   // ─── API Pública ──────────────────────────────────────────────────────────
 
-  /**
-   * Cria o job, dispara execução assíncrona e retorna o jobId imediatamente.
-   */
   async iniciar(dominio: string, step?: string): Promise<string> {
     const def = this.DOMINIOS[dominio];
     if (!def) throw new BadRequestException(`Domínio desconhecido: ${dominio}`);
@@ -192,8 +187,8 @@ export class ImportJobExecutorService {
     const cred = this.credencial.carregar();
     this.jobService.startJob(jobId);
     await this.runner.run(jobId, 'secoes',            cred, this.STEP_MAP['secoes']);
-    await this.runner.run(jobId, 'grupos',            cred, this.STEP_MAP['grupos']);
-    await this.runner.run(jobId, 'subgrupos',         cred, this.STEP_MAP['subgrupos']);
+    await this._stepGrupos(jobId, cred);
+    await this._stepSubgrupos(jobId, cred);
     await this.runner.run(jobId, 'marcas',            cred, this.STEP_MAP['marcas']);
     await this.runner.run(jobId, 'familias',          cred, this.STEP_MAP['familias']);
     await this.runner.run(jobId, 'produtos',          cred, this.STEP_MAP['produtos']);
@@ -222,7 +217,6 @@ export class ImportJobExecutorService {
     await this.runner.run(jobId, 'motivosDesconto',     cred, this.STEP_MAP['motivosDesconto']);
     await this.runner.run(jobId, 'motivosDevolucao',    cred, this.STEP_MAP['motivosDevolucao']);
     await this.runner.run(jobId, 'motivosCancelamento', cred, this.STEP_MAP['motivosCancelamento']);
-    await this.runner.run(jobId, 'perguntasRespostas',  cred, this.STEP_MAP['perguntasRespostas']);
     this.jobService.completeJob(jobId);
   }
 
@@ -256,17 +250,104 @@ export class ImportJobExecutorService {
     this.jobService.completeJob(jobId);
   }
 
-  // ─── Step especial: fornecedores por produto ──────────────────────────────
+  // ─── Steps hierárquicos ───────────────────────────────────────────────────
 
   /**
-   * A API exige uma requisição por produto — não usa fetchAll paginado.
+   * Grupos: a API exige GET /produto/secoes/:secaoId/grupos
+   * Itera sobre todas as seções já salvas e coleta os grupos de cada uma.
    */
-  private async _stepFornecedoresProduto(jobId: string, cred: any): Promise<void> {
+  private async _stepGrupos(jobId: string, cred: CredencialVF): Promise<void> {
+    const stepName = 'grupos';
+    try {
+      this.jobService.updateStep(jobId, stepName, 0, 0, 'running');
+
+      const secaoIds    = this.mercadologia.listarSecaoIds();
+      const total       = secaoIds.length;
+      let   processados = 0;
+      let   totalGrupos = 0;
+
+      for (const secaoId of secaoIds) {
+        const endpoint = `produto/secoes/${secaoId}/grupos`;
+        const grupos   = await this.vf.fetchAllFlat(cred, endpoint);
+
+        if (grupos.length > 0) {
+          // Garante que secaoId está em cada item para o repository
+          await this.mercadologia.importarGrupos(
+            grupos.map((g: any) => ({ ...g, secaoId })),
+          );
+          totalGrupos += grupos.length;
+        }
+
+        processados++;
+        this.jobService.updateStep(jobId, stepName, processados, total);
+        this.logger.info(
+          `  grupos seção ${secaoId}: ${grupos.length} (${processados}/${total})`,
+          'Executor',
+        );
+      }
+
+      this.jobService.completeStep(jobId, stepName, totalGrupos);
+      this.logger.info(`✅ grupos: ${totalGrupos} registros de ${total} seções`, 'Executor');
+
+    } catch (err: any) {
+      this.jobService.failStep(jobId, stepName, err.message);
+      this.logger.error(`❌ grupos: ${err.message}`, 'Executor');
+      throw err;
+    }
+  }
+
+  /**
+   * Subgrupos: a API exige GET /produto/secoes/:secaoId/grupos/:grupoId/subgrupos
+   * Itera sobre todos os pares secaoId+grupoId já salvos.
+   */
+  private async _stepSubgrupos(jobId: string, cred: CredencialVF): Promise<void> {
+    const stepName = 'subgrupos';
+    try {
+      this.jobService.updateStep(jobId, stepName, 0, 0, 'running');
+
+      const pares         = this.mercadologia.listarGrupoIds();
+      const total         = pares.length;
+      let   processados   = 0;
+      let   totalSubgrupos = 0;
+
+      for (const { secaoId, grupoId } of pares) {
+        const endpoint  = `produto/secoes/${secaoId}/grupos/${grupoId}/subgrupos`;
+        const subgrupos = await this.vf.fetchAllFlat(cred, endpoint);
+
+        if (subgrupos.length > 0) {
+          await this.mercadologia.importarSubgrupos(
+            subgrupos.map((s: any) => ({ ...s, secaoId, grupoId })),
+          );
+          totalSubgrupos += subgrupos.length;
+        }
+
+        processados++;
+        this.jobService.updateStep(jobId, stepName, processados, total);
+        this.logger.info(
+          `  subgrupos ${secaoId}/${grupoId}: ${subgrupos.length} (${processados}/${total})`,
+          'Executor',
+        );
+      }
+
+      this.jobService.completeStep(jobId, stepName, totalSubgrupos);
+      this.logger.info(`✅ subgrupos: ${totalSubgrupos} registros de ${total} grupos`, 'Executor');
+
+    } catch (err: any) {
+      this.jobService.failStep(jobId, stepName, err.message);
+      this.logger.error(`❌ subgrupos: ${err.message}`, 'Executor');
+      throw err;
+    }
+  }
+
+  /**
+   * Fornecedores por produto: GET /produto/produtos/:produtoId/fornecedores
+   */
+  private async _stepFornecedoresProduto(jobId: string, cred: CredencialVF): Promise<void> {
     const stepName = 'produtoFornecedores';
     try {
       this.jobService.updateStep(jobId, stepName, 0, 0, 'running');
 
-      const ids         = await this.produto.listarProdutoIds();
+      const ids         = this.produto.listarProdutoIds();
       const total       = ids.length;
       let   processados = 0;
 
@@ -294,18 +375,28 @@ export class ImportJobExecutorService {
   // ─── Dispatcher ──────────────────────────────────────────────────────────
 
   private async _executarJob(jobId: string, dominio: string, step?: string): Promise<void> {
+    const def = this.DOMINIOS[dominio];
+
     if (step) {
-      const def = this.STEP_MAP[step];
-      if (!def) throw new BadRequestException(`Step desconhecido: ${step}`);
+      // Step individual — decide qual executor usar
       const cred = this.credencial.carregar();
       this.jobService.startJob(jobId);
-      await this.runner.run(jobId, step, cred, def);
-      this.jobService.completeJob(jobId);
-      return;
-    }
 
-    const dominioDef = this.DOMINIOS[dominio];
-    if (!dominioDef) throw new BadRequestException(`Domínio desconhecido: ${dominio}`);
-    await dominioDef.executor(jobId);
+      if (step === 'grupos') {
+        await this._stepGrupos(jobId, cred);
+      } else if (step === 'subgrupos') {
+        await this._stepSubgrupos(jobId, cred);
+      } else if (step === 'produtoFornecedores') {
+        await this._stepFornecedoresProduto(jobId, cred);
+      } else {
+        const stepDef = this.STEP_MAP[step];
+        if (!stepDef) throw new BadRequestException(`Step sem mapeamento: ${step}`);
+        await this.runner.run(jobId, step, cred, stepDef);
+      }
+
+      this.jobService.completeJob(jobId);
+    } else {
+      await def.executor(jobId);
+    }
   }
 }

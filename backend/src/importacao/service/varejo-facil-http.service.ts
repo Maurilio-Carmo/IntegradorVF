@@ -1,4 +1,4 @@
-// backend/src/importacao/varejo-facil/varejo-facil-http.service.ts
+// backend/src/importacao/service/varejo-facil-http.service.ts
 import { Injectable }       from '@nestjs/common';
 import { CredencialVF }     from '../service/credencial.service';
 import { AppLoggerService }  from '../../logger/logger.service';
@@ -28,7 +28,7 @@ export class VarejoFacilHttpService {
     count     = this.PAGE_SIZE,
     sort      = 'id',
   ): Promise<PagedResponse<T>> {
-    const base  = this._baseUrl(config.urlApi);         // ← sempre termina em /api/v1
+    const base  = this._baseUrl(config.urlApi);
     const url   = `${base}/${endpoint}?start=${start}&count=${count}&sort=${sort}`;
     const raw   = await this._fetch(url, config.tokenApi);
     const items: T[] = raw.items ?? raw.data ?? (Array.isArray(raw) ? raw : []);
@@ -67,8 +67,31 @@ export class VarejoFacilHttpService {
     return totalFetched;
   }
 
+  /**
+   * Busca todos os itens de um endpoint hierárquico (sem paginação).
+   * Usado para endpoints como:
+   *   produto/secoes/:id/grupos
+   *   produto/secoes/:id/grupos/:id/subgrupos
+   *
+   * Esses endpoints da API costumam retornar todos os itens de uma vez
+   * (sem start/count), então não usamos paginação.
+   * Retorna [] silenciosamente em caso de 404 (seção/grupo pode estar vazia).
+   */
+  async fetchAllFlat<T = any>(config: ApiConfig, endpoint: string): Promise<T[]> {
+    const base = this._baseUrl(config.urlApi);
+    const url  = `${base}/${endpoint}`;
+    try {
+      const raw = await this._fetch(url, config.tokenApi);
+      return raw.items ?? raw.data ?? (Array.isArray(raw) ? raw : []);
+    } catch (err: any) {
+      // 404 = seção ou grupo existe mas não tem filhos — normal, não é erro
+      if (err.message?.includes('404')) return [];
+      throw err;
+    }
+  }
+
   async fetchFornecedoresProduto(config: ApiConfig, produtoId: number): Promise<any[]> {
-    const base = this._baseUrl(config.urlApi);           // ← corrigido também aqui
+    const base = this._baseUrl(config.urlApi);
     const url  = `${base}/produto/produtos/${produtoId}/fornecedores`;
     try {
       const raw = await this._fetch(url, config.tokenApi);
@@ -81,24 +104,12 @@ export class VarejoFacilHttpService {
 
   // ─── Privado ──────────────────────────────────────────────────────────────
 
-  /**
-   * Normaliza a URL e GARANTE que termina em /api/v1.
-   *
-   * Exemplos:
-   *   "https://superios.varejofacil.com"        → "https://superios.varejofacil.com/api/v1"
-   *   "https://superios.varejofacil.com/"       → "https://superios.varejofacil.com/api/v1"
-   *   "https://superios.varejofacil.com/api/v1" → "https://superios.varejofacil.com/api/v1"
-   *
-   * CORREÇÃO: o método anterior só removia /api/v1 sem recolocá-lo,
-   * fazendo a URL ficar como https://superios.varejofacil.com/pessoa/lojas
-   * em vez de https://superios.varejofacil.com/api/v1/pessoa/lojas.
-   */
   private _baseUrl(urlApi: string): string {
     const clean = urlApi
       .trim()
-      .replace(/\/$/, '')          // remove barra final
-      .replace(/\/api\/v1$/, '');  // remove /api/v1 se já existir (evita duplicar)
-    return `${clean}/api/v1`;      // sempre recoloca /api/v1
+      .replace(/\/$/, '')
+      .replace(/\/api\/v1$/, '');
+    return `${clean}/api/v1`;
   }
 
   private async _fetch(url: string, tokenApi: string, attempt = 1): Promise<any> {
@@ -129,7 +140,7 @@ export class VarejoFacilHttpService {
       return await res.json();
 
     } catch (err: any) {
-      const status = parseInt(err.message?.match(/HTTP (\d+)/)?.[1] ?? '0');
+      const status   = parseInt(err.message?.match(/HTTP (\d+)/)?.[1] ?? '0');
       const retryable = [408, 429, 500, 502, 503, 504];
 
       if (attempt < this.MAX_RETRIES && (retryable.includes(status) || status === 0)) {

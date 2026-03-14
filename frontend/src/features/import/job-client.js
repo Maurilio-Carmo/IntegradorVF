@@ -6,26 +6,32 @@ const _activeSources = new Map(); // jobId → EventSource
 const _listeners     = new Map(); // jobId → Set<Function>
 
 async function _fetchJSON(url, options = {}) {
-    const res = await fetch(url, options);
+    const res         = await fetch(url, options);
     const contentType = res.headers.get('content-type') ?? '';
-    const isJson = contentType.includes('application/json');
+    const isJson      = contentType.includes('application/json');
 
     if (!res.ok) {
         if (isJson) {
-            const err = await res.json().catch(() => ({}));
-            throw new Error(err.message ?? `HTTP ${res.status} ${res.statusText}`);
+            // ✅ CORRIGIDO: extrair message como string antes de lançar
+            const body = await res.json().catch(() => ({}));
+            const msg  = typeof body?.message === 'string'
+                ? body.message
+                : JSON.stringify(body);
+            throw new Error(msg || `HTTP ${res.status} ${res.statusText}`);
         }
         throw new Error(
             `HTTP ${res.status} ${res.statusText} — servidor retornou HTML. ` +
             `Verifique o endpoint: ${options.method ?? 'GET'} ${url}`
         );
     }
+
     if (!isJson) {
         throw new Error(
             `Servidor retornou HTML para ${url}. ` +
             `Confirme se POST /api/import-job/start existe no backend.`
         );
     }
+
     return res.json();
 }
 
@@ -33,9 +39,8 @@ const JobClient = {
 
     /**
      * Inicia um job no backend.
-     * @param {string}           dominio  — 'produto' | 'financeiro' | 'frenteLoja' | 'estoque' | 'fiscal' | 'pessoa'
-     * @param {string|undefined} step     — nome da etapa individual (ex: 'marcas').
-     *                                      Se omitido → roda o domínio completo.
+     * @param {string}           dominio
+     * @param {string|undefined} step
      * @returns {Promise<string>} jobId
      */
     async start(dominio, step = undefined) {
@@ -77,6 +82,11 @@ const JobClient = {
         catch { return false; }
     },
 
+    /**
+     * Registra um listener para eventos de um job.
+     * O callback recebe (event: string, data: object).
+     * Retorna função para cancelar a inscrição.
+     */
     subscribe(jobId, callback) {
         if (!_listeners.has(jobId)) _listeners.set(jobId, new Set());
         _listeners.get(jobId).add(callback);
@@ -91,12 +101,18 @@ const JobClient = {
 
     _connect(jobId) {
         if (_activeSources.has(jobId)) return;
+
         const source = new EventSource(`${BASE_URL}/${jobId}/events`);
         _activeSources.set(jobId, source);
 
-        ['job:snapshot','job:started','step:progress','step:completed','step:error'].forEach(ev => {
-            source.addEventListener(ev, (e) => this._emit(jobId, ev, JSON.parse(e.data)));
+        // Eventos de progresso — repassados para listeners sem desconectar
+        ['job:snapshot', 'job:started', 'step:progress', 'step:completed', 'step:error'].forEach(ev => {
+            source.addEventListener(ev, (e) => {
+                this._emit(jobId, ev, JSON.parse(e.data));
+            });
         });
+
+        // Eventos terminais — disparam o listener e desconectam após breve delay
         source.addEventListener('job:completed', (e) => {
             this._emit(jobId, 'job:completed', JSON.parse(e.data));
             setTimeout(() => this.disconnect(jobId), 2000);
@@ -109,6 +125,7 @@ const JobClient = {
             this._emit(jobId, 'job:cancelled', JSON.parse(e.data));
             this.disconnect(jobId);
         });
+
         source.onerror = () => console.warn(`⚠️ SSE perdida: job ${jobId}`);
         console.log(`📡 SSE conectado: ${jobId}`);
     },

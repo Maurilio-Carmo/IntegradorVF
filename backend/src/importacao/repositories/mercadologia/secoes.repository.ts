@@ -1,4 +1,4 @@
-// mercadologia/secoes.repository.ts
+// backend/src/importacao/repositories/mercadologia/secoes.repository.ts
 import { Injectable }          from '@nestjs/common';
 import { notInArray, sql }     from 'drizzle-orm';
 import { DrizzleService }      from '../../../database/drizzle.service';
@@ -29,5 +29,14 @@ export class SecoesRepository {
     });
 
     return { success: true, count: list.length };
+  }
+
+  /** Retorna todos os secaoIds cadastrados — usado pelo step de grupos. */
+  listarIds(): number[] {
+    return this.drizzle.db
+      .select({ secaoId: secoes.secaoId })
+      .from(secoes)
+      .all()
+      .map(r => r.secaoId as number);
   }
 }
