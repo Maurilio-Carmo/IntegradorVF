@@ -12,7 +12,7 @@ import { Injectable, BadRequestException } from '@nestjs/common';
 import { eq, inArray, desc }               from 'drizzle-orm';
 import { DrizzleService }                  from '../database/drizzle.service';
 import { AppLoggerService }                from '../logger/logger.service';
-import { CredencialService }               from '../importacao/credenciais/credencial.service';
+import { CredencialService }               from '../importacao/service/credencial.service';
 import { SincronizacaoExecutor }           from './sincronizacao.executor';
 import { syncHistorico }                   from '../database/schema';
 import { DOMINIOS_VALIDOS }                from './dto/executar-sync.dto';

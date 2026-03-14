@@ -1,31 +1,30 @@
-// backend/src/importacao/importacao.module.ts
+// backend/src/importacao/module/importacao.module.ts
 
 import { Module } from '@nestjs/common';
 
 // Controllers
-import { ImportacaoController }  from '../controller/importacao.controller';
-import { ProdutoController }     from '../controller/produto.controller';
-import { FinanceiroController }  from '../controller/financeiro.controller';
-import { FiscalController }      from '../controller/fiscal.controller';
-import { EstoqueController }     from '../controller/estoque.controller';
-import { PdvController }         from '../controller/frente-loja.controller';
-import { PessoaController }      from '../controller/pessoa.controller';
+import { ImportacaoController } from '../controller/importacao.controller';
+import { ProdutoController }    from '../controller/produto.controller';
+import { FinanceiroController } from '../controller/financeiro.controller';
+import { FiscalController }     from '../controller/fiscal.controller';
+import { EstoqueController }    from '../controller/estoque.controller';
+import { PdvController }        from '../controller/frente-loja.controller';
+import { PessoaController }     from '../controller/pessoa.controller';
 
 // Services
-import { ProdutoService }    from '../service/produto.service';
-import { FinanceiroService } from '../service/financeiro.service';
-import { FiscalService }     from '../service/fiscal.service';
-import { EstoqueService }    from '../service/estoque.service';
-import { PdvService }        from '../service/frente-loja.service';
-import { PessoaService }     from '../service/pessoa.service';
+import { MercadologiaService } from '../service/mercadologia.service';
+import { ProdutoService }      from '../service/produto.service';
+import { FinanceiroService }   from '../service/financeiro.service';
+import { FiscalService }       from '../service/fiscal.service';
+import { EstoqueService }      from '../service/estoque.service';
+import { PdvService }          from '../service/frente-loja.service';
+import { PessoaService }       from '../service/pessoa.service';
 
-// Repositories — importados do barrel file (index.ts)
+// Repositories
 import {
-  // Mercadologia
   SecoesRepository,
   GruposRepository,
   SubgruposRepository,
-  // Produto
   MarcasRepository,
   FamiliasRepository,
   ProdutosRepository,
@@ -35,31 +34,26 @@ import {
   ProdutoRegimesRepository,
   ProdutoComponentesRepository,
   ProdutoImpostosFederaisRepository,
-  // Financeiro
   CategoriasRepository,
   AgentesRepository,
   ContasCorrentesRepository,
   EspeciesDocumentosRepository,
   HistoricoPadraoRepository,
-  // Frente de Loja
   FormasPagamentoRepository,
   PagamentosPdvRepository,
   RecebimentosPdvRepository,
   MotivoDescontoRepository,
   MotivosDevolucaoRepository,
   MotivosCancelamentoRepository,
-  // Estoque
   LocalEstoqueRepository,
   TiposAjustesRepository,
   SaldoEstoqueRepository,
-  // Fiscal
   RegimeTributarioRepository,
   SituacoesFiscaisRepository,
   TiposOperacoesRepository,
   ImpostosFederaisRepository,
   TabelasTributariasRepository,
   CenariosFiscaisRepository,
-  // Pessoa
   LojasRepository,
   ClientesRepository,
   FornecedoresRepository,
@@ -103,6 +97,16 @@ const ALL_REPOSITORIES = [
   FornecedoresRepository,
 ];
 
+const ALL_SERVICES = [
+  MercadologiaService,
+  ProdutoService,
+  FinanceiroService,
+  FiscalService,
+  EstoqueService,
+  PdvService,
+  PessoaService,
+];
+
 @Module({
   controllers: [
     ImportacaoController,
@@ -114,16 +118,12 @@ const ALL_REPOSITORIES = [
     PessoaController,
   ],
   providers: [
-    ProdutoService,
-    FinanceiroService,
-    FiscalService,
-    EstoqueService,
-    PdvService,
-    PessoaService,
+    ...ALL_SERVICES,
     ...ALL_REPOSITORIES,
   ],
   exports: [
-    // Exportados para ImportJobModule consumir via ImportacaoModule
+    // Exportados para o ImportJobModule consumir via injeção de dependência
+    ...ALL_SERVICES,
     ...ALL_REPOSITORIES,
   ],
 })

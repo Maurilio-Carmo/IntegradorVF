@@ -1,6 +1,6 @@
-// backend/src/importacao/produto/produto.service.ts
-import { Injectable } from '@nestjs/common';
+// backend/src/importacao/service/produto.service.ts
 
+import { Injectable } from '@nestjs/common';
 import {
   SecoesRepository,
   GruposRepository,
@@ -14,6 +14,7 @@ import {
 
 @Injectable()
 export class ProdutoService {
+
   constructor(
     private readonly secoes:              SecoesRepository,
     private readonly grupos:              GruposRepository,
@@ -33,4 +34,9 @@ export class ProdutoService {
   importarProdutos(data: any[])            { return this.produtos.importarProdutos(data); }
   importarProdutoAuxiliares(data: any[])   { return this.produtoAuxiliares.importarProdutoAuxiliares(data); }
   importarProdutoFornecedores(data: any[]) { return this.produtoFornecedores.importarProdutoFornecedores(data); }
+
+  /** Retorna todos os produtoIds — usado pelo step de fornecedores por produto. */
+  listarProdutoIds(): number[] {
+    return this.produtos.listarIds();
+  }
 }

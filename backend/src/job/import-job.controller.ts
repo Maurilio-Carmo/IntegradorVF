@@ -1,34 +1,22 @@
 // backend/src/job/import-job.controller.ts
-// ─────────────────────────────────────────────────────────────────────────────
-// CORREÇÃO BUG #2: IniciarJobDto agora aceita `step` opcional.
-//   POST /api/import-job/start { dominio: 'produto', step: 'marcas' }
-//   → executor.iniciar('produto', 'marcas') → roda só aquele step
-//   → executor.iniciar('produto')           → roda o domínio completo
-// ─────────────────────────────────────────────────────────────────────────────
 
 import {
   Controller, Get, Post, Delete,
-  Param, Body, Res, HttpCode,
-  NotFoundException,
+  Param, Body, Res, HttpCode, NotFoundException,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBody }   from '@nestjs/swagger';
 import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
 import { Response }                          from 'express';
-import { ImportJobService, ImportJob }       from './import-job.service';
-import { ImportJobExecutorService }          from './import-job-executor.service';
+import { ImportJobService }                  from './service/import-job.service';
+import { ImportJobExecutorService }          from './service/import-job-executor.service';
+import { ImportJobModel }                    from './job.types';
 
 class IniciarJobDto {
-  @IsString()
-  @IsNotEmpty()
+  @IsString() @IsNotEmpty()
   dominio: string;
-  // 'produto' | 'financeiro' | 'frenteLoja' | 'estoque' | 'fiscal' | 'pessoa'
 
-  @IsString()
-  @IsOptional()
+  @IsString() @IsOptional()
   step?: string;
-  // Ex: 'marcas' | 'produtos' | 'categorias' | ...
-  // Quando presente → roda apenas esse step.
-  // Quando ausente  → roda o domínio completo em sequência.
 }
 
 @ApiTags('Import · Jobs')
@@ -42,23 +30,22 @@ export class ImportJobController {
 
   @Post('start')
   @HttpCode(201)
-  @ApiOperation({ summary: 'Inicia job de importação (individual ou completo)' })
+  @ApiOperation({ summary: 'Inicia job de importação (domínio completo ou step individual)' })
   @ApiBody({ type: IniciarJobDto })
   async start(@Body() body: IniciarJobDto): Promise<{ jobId: string }> {
-    // ✅ Passa step para o executor (pode ser undefined = domínio completo)
     const jobId = await this.executor.iniciar(body.dominio, body.step);
     return { jobId };
   }
 
   @Get('active')
-  @ApiOperation({ summary: 'Lista jobs em andamento (para reconexão SSE no boot)' })
-  getActiveJobs(): ImportJob[] {
+  @ApiOperation({ summary: 'Lista jobs em andamento (reconexão SSE no boot)' })
+  getActiveJobs(): ImportJobModel[] {
     return this.jobService.getActiveJobs();
   }
 
   @Get(':jobId')
   @ApiOperation({ summary: 'Snapshot atual de um job (sem streaming)' })
-  getJob(@Param('jobId') jobId: string): ImportJob {
+  getJob(@Param('jobId') jobId: string): ImportJobModel {
     const job = this.jobService.getJob(jobId);
     if (!job) throw new NotFoundException(`Job não encontrado: ${jobId}`);
     return job;
