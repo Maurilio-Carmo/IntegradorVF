@@ -9,7 +9,7 @@ export const cenariosFiscaisNcms = sqliteTable('cenarios_fiscais_ncms', {
   cenarioId:    integer('cenario_id').notNull().references(() => cenariosFiscais.cenarioId, { onDelete: 'cascade' }),
   codigoNcm:    integer('codigo_ncm').notNull(),
   descricaoNcm: text('descricao_ncm'),
-  status:       text('status', { enum: ['C','U','D','E','S'] }).default('U'),
+  status:       text('status', { enum: ['C','U','D','E','S'] }).default('C'),
   createdAt:    text('created_at').default(sql`CURRENT_TIMESTAMP`),
 }, (t) => ({
   uq: uniqueIndex('uq_cf_ncm').on(t.cenarioId, t.codigoNcm),

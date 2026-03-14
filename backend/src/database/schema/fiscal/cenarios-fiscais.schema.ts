@@ -8,7 +8,7 @@ export const cenariosFiscais = sqliteTable('cenarios_fiscais', {
   descricao:  text('descricao'),
   cst:        integer('cst'),
   cclasstrib: integer('cclasstrib'),
-  status:     text('status', { enum: ['C','U','D','E','S'] }).default('U'),
+  status:     text('status', { enum: ['C','U','D','E','S'] }).default('C'),
   retorno:    text('retorno'),
   createdAt:  text('created_at').default(sql`CURRENT_TIMESTAMP`),
   updatedAt:  text('updated_at').default(sql`CURRENT_TIMESTAMP`),

@@ -17,7 +17,7 @@ export const impostosFederais = sqliteTable('impostos_federais', {
   aliquotaSaidaPresumido:   real('aliquota_saida_presumido').default(0),
   cstEntradaSimples:        text('cst_entrada_simples'),
   cstSaidaSimples:          text('cst_saida_simples'),
-  status:                   text('status', { enum: ['C','U','D','E','S'] }).default('U'),
+  status:                   text('status', { enum: ['C','U','D','E','S'] }).default('C'),
   retorno:                  text('retorno'),
   createdAt:                text('created_at').default(sql`CURRENT_TIMESTAMP`),
   updatedAt:                text('updated_at').default(sql`CURRENT_TIMESTAMP`),

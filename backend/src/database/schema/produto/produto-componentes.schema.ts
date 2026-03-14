@@ -12,7 +12,7 @@ export const produtoComponentes = sqliteTable('produto_componentes', {
   preco1:              real('preco1').default(0),
   preco2:              real('preco2').default(0),
   preco3:              real('preco3').default(0),
-  status:              text('status', { enum: ['C','U','D','E','S'] }).default('U'),
+  status:              text('status', { enum: ['C','U','D','E','S'] }).default('C'),
   createdAt:           text('created_at').default(sql`CURRENT_TIMESTAMP`),
   updatedAt:           text('updated_at').default(sql`CURRENT_TIMESTAMP`),
 });

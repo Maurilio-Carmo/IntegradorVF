@@ -13,7 +13,7 @@ export const formasPagamento = sqliteTable('formas_pagamento', {
   movimentaContaCorrente: integer('movimenta_conta_corrente').default(0),
   ativa:                 integer('ativa').default(1),
   contaCorrenteId:       integer('conta_corrente_id'),
-  status:                text('status', { enum: ['C','U','D','E','S'] }).default('U'),
+  status:                text('status', { enum: ['C','U','D','E','S'] }).default('C'),
   retorno:               text('retorno'),
   createdAt:             text('created_at').default(sql`CURRENT_TIMESTAMP`),
   updatedAt:             text('updated_at').default(sql`CURRENT_TIMESTAMP`),

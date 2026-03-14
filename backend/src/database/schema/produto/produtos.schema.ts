@@ -52,7 +52,7 @@ export const produtos = sqliteTable('produtos', {
   dataSaida:            text('data_saida'),
   dataInclusao:         text('data_inclusao'),
   dataAlteracao:        text('data_alteracao'),
-  status:               text('status', { enum: ['C','U','D','E','S'] }).default('U'),
+  status:               text('status', { enum: ['C','U','D','E','S'] }).default('C'),
   retorno:              text('retorno'),
   createdAt:            text('created_at').default(sql`CURRENT_TIMESTAMP`),
   updatedAt:            text('updated_at').default(sql`CURRENT_TIMESTAMP`),

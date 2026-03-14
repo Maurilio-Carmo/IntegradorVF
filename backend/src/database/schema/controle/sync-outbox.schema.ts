@@ -8,7 +8,7 @@ export const syncOutbox = sqliteTable('sync_outbox', {
   dominio:            text('dominio').notNull(),
   registroId:         integer('registro_id').notNull(),
   operacao:           text('operacao', { enum: ['C', 'U', 'D'] }).notNull(),
-  payload:            text('payload'),                    // JSON snapshot do registro
+  payload:            text('payload'),
   tentativas:         integer('tentativas').default(0),
   maxTentativas:      integer('max_tentativas').default(3),
   status:             text('status', { enum: ['pending', 'processing', 'done', 'error'] })

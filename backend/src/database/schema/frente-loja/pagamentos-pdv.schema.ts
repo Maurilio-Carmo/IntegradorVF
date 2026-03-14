@@ -9,7 +9,7 @@ export const pagamentosPdv = sqliteTable('pagamentos_pdv', {
   categoriaId: integer('categoria_id'),
   lojaId:      integer('loja_id'),
   valorMaximo: real('valor_maximo'),
-  status:      text('status', { enum: ['C','U','D','E','S'] }).default('U'),
+  status:      text('status', { enum: ['C','U','D','E','S'] }).default('C'),
   retorno:     text('retorno'),
   createdAt:   text('created_at').default(sql`CURRENT_TIMESTAMP`),
   updatedAt:   text('updated_at').default(sql`CURRENT_TIMESTAMP`),

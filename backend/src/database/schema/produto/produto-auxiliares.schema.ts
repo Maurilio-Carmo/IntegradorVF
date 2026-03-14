@@ -10,7 +10,7 @@ export const produtoAuxiliares = sqliteTable('produto_auxiliares', {
   fator:        real('fator').default(1),
   eanTributado: integer('ean_tributado').default(0),
   tipo:         text('tipo', { enum: ['LITERAL','EAN'] }),
-  status:       text('status', { enum: ['C','U','D','E','S'] }).default('U'),
+  status:       text('status', { enum: ['C','U','D','E','S'] }).default('C'),
   retorno:      text('retorno'),
   createdAt:    text('created_at').default(sql`CURRENT_TIMESTAMP`),
   updatedAt:    text('updated_at').default(sql`CURRENT_TIMESTAMP`),

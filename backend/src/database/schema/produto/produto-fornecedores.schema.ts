@@ -11,7 +11,7 @@ export const produtoFornecedores = sqliteTable('produto_fornecedores', {
   unidade:      text('unidade').notNull(),
   fator:        real('fator').notNull().default(1),
   nivel:        text('nivel', { enum: ['PRINCIPAL','SECUNDARIO'] }),
-  status:       text('status', { enum: ['C','U','D','E','S'] }).default('U'),
+  status:       text('status', { enum: ['C','U','D','E','S'] }).default('C'),
   retorno:      text('retorno'),
   createdAt:    text('created_at').default(sql`CURRENT_TIMESTAMP`),
   updatedAt:    text('updated_at').default(sql`CURRENT_TIMESTAMP`),

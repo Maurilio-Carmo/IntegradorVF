@@ -9,7 +9,7 @@ export const regimeTributario = sqliteTable('regime_tributario', {
   classificacao: text('classificacao'),
   loja:          integer('loja').default(0),
   fornecedor:    integer('fornecedor').default(0),
-  status:        text('status', { enum: ['C','U','D','E','S'] }).default('U'),
+  status:        text('status', { enum: ['C','U','D','E','S'] }).default('C'),
   retorno:       text('retorno'),
   createdAt:     text('created_at').default(sql`CURRENT_TIMESTAMP`),
   updatedAt:     text('updated_at').default(sql`CURRENT_TIMESTAMP`),

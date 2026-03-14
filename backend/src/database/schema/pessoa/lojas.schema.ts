@@ -27,7 +27,7 @@ export const lojas = sqliteTable('lojas', {
   ativo:              integer('ativo').default(1),
   ecommerce:          integer('ecommerce').default(0),
   locaisDaLojaIds:    text('locais_da_loja_ids'),
-  status:             text('status', { enum: ['C','U','D','E','S'] }).default('U'),
+  status:             text('status', { enum: ['C','U','D','E','S'] }).default('C'),
   retorno:            text('retorno'),
   createdAt:          text('created_at').default(sql`CURRENT_TIMESTAMP`),
   updatedAt:          text('updated_at').default(sql`CURRENT_TIMESTAMP`),

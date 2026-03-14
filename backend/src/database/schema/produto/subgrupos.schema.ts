@@ -9,7 +9,7 @@ export const subgrupos = sqliteTable('subgrupos', {
   subgrupoId:   integer('subgrupo_id').notNull(),
   descricaoOld: text('descricao_old'),
   descricaoNew: text('descricao_new'),
-  status:       text('status', { enum: ['C','U','D','E','S'] }).default('U'),
+  status:       text('status', { enum: ['C','U','D','E','S'] }).default('C'),
   retorno:      text('retorno'),
   createdAt:    text('created_at').default(sql`CURRENT_TIMESTAMP`),
   updatedAt:    text('updated_at').default(sql`CURRENT_TIMESTAMP`),

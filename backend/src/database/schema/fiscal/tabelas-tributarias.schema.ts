@@ -11,7 +11,7 @@ export const tabelasTributarias = sqliteTable('tabelas_tributarias', {
   figuraFiscalId:   integer('figura_fiscal_id'),
   ufOrigem:         text('uf_origem'),
   decreto:          text('decreto'),
-  status:           text('status', { enum: ['C','U','D','E','S'] }).default('U'),
+  status:           text('status', { enum: ['C','U','D','E','S'] }).default('C'),
   retorno:          text('retorno'),
   createdAt:        text('created_at').default(sql`CURRENT_TIMESTAMP`),
   updatedAt:        text('updated_at').default(sql`CURRENT_TIMESTAMP`),

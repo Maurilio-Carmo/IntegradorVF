@@ -12,7 +12,7 @@ export const categorias = sqliteTable('categorias', {
   posicao:        text('posicao'),
   classificacao:  text('classificacao', { enum: ['RECEITA','DESPESA'] }),
   tipo:           text('tipo', { enum: ['SINTETICA','ANALITICA'] }),
-  status:         text('status', { enum: ['C','U','D','E','S'] }).default('U'),
+  status:         text('status', { enum: ['C','U','D','E','S'] }).default('C'),
   retorno:        text('retorno'),
   createdAt:      text('created_at').default(sql`CURRENT_TIMESTAMP`),
   updatedAt:      text('updated_at').default(sql`CURRENT_TIMESTAMP`),

@@ -9,7 +9,7 @@ export const produtoMinMax = sqliteTable('produto_min_max', {
   lojaId:        integer('loja_id').notNull(),
   estoqueMinimo: real('estoque_minimo'),
   estoqueMaximo: real('estoque_maximo'),
-  status:        text('status', { enum: ['C','U','D','E','S'] }).default('U'),
+  status:        text('status', { enum: ['C','U','D','E','S'] }).default('C'),
   createdAt:     text('created_at').default(sql`CURRENT_TIMESTAMP`),
   updatedAt:     text('updated_at').default(sql`CURRENT_TIMESTAMP`),
 }, (t) => ({

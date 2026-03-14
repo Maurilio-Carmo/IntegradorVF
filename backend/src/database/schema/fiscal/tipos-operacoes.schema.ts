@@ -30,7 +30,7 @@ export const tiposOperacoes = sqliteTable('tipos_operacoes', {
   observacao:              text('observacao'),
   codigoCst:               text('codigo_cst'),
   cfopsRelacionados:       text('cfops_relacionados'),
-  status:                  text('status', { enum: ['C','U','D','E','S'] }).default('U'),
+  status:                  text('status', { enum: ['C','U','D','E','S'] }).default('C'),
   retorno:                 text('retorno'),
   createdAt:               text('created_at').default(sql`CURRENT_TIMESTAMP`),
   updatedAt:               text('updated_at').default(sql`CURRENT_TIMESTAMP`),
