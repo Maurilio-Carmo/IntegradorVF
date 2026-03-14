@@ -82,7 +82,7 @@ export const DOMINIO_PK: Record<string, any> = {
 
   // Estoque
   local_estoque:        schema.localEstoque.localId,
-  tipos_ajustes:        schema.tiposAjustes.tipoAjusteId,
+  tipos_ajustes:        schema.tiposAjustes.ajusteId,
   saldo_estoque:        schema.saldoEstoque.produtoId,
 
   // Fiscal
