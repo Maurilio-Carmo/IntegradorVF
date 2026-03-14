@@ -163,16 +163,5 @@ vite.config.ts.timestamp-*
 # =========================
 
 # Ignora bancos físicos dentro da pasta database
-backend/database/*.db
-backend/database/*.db-shm
-backend/database/*.db-wal
-backend/database/*.sqlite
-backend/database/*.sqlite3
-backend/database/*.fdb
-backend/database/*.gdb
-backend/database/*.ib
-backend/database/*.fbk
-backend/database/*.lck
 
-# Mantém scripts SQL versionados (estrutura do banco)
-!backend/database/*.sql
+backend/database/*

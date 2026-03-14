@@ -11,7 +11,6 @@ import { LoggerModule }          from './logger/logger.module';
 import { HealthModule }          from './health/health.module';
 import { ProxyModule }           from './proxy/proxy.module';
 import { DatabaseControlModule } from './database-control/database-control.module';
-import { ComparatorModule }      from './comparator/comparator.module';
 
 // ── Credenciais + cliente HTTP (declarados UMA VEZ) ───────────────────────────
 import { CredencialModule }      from './importacao/module/credencial.module';
@@ -23,7 +22,6 @@ import { ImportJobModule }       from './job/import-job.module';
 
 // ── Sincronização ─────────────────────────────────────────────────────────────
 import { SincronizacaoModule }   from './sincronizacao/sincronizacao.module';
-import { FirebirdSyncModule }    from './firebird-sync/firebird-sync.module';
 
 @Module({
   imports: [
@@ -41,7 +39,6 @@ import { FirebirdSyncModule }    from './firebird-sync/firebird-sync.module';
     HealthModule,
     ProxyModule,
     DatabaseControlModule,
-    ComparatorModule,
 
     // ── Credenciais e cliente HTTP ──────────────────────────────────────────
     CredencialModule,
@@ -53,7 +50,6 @@ import { FirebirdSyncModule }    from './firebird-sync/firebird-sync.module';
 
     // ── Sincronização SQLite → API e SQLite ↔ Firebird ──────────────────────
     SincronizacaoModule,
-    FirebirdSyncModule,
   ],
 })
 export class AppModule {}

@@ -11,7 +11,7 @@ export const syncLogs = sqliteTable('sync_logs', {
   modulo:   text('modulo'),
   mensagem: text('mensagem').notNull(),
   detalhes: text('detalhes'),
-  criadoEm: text('criado_em').default(sql`datetime('now','localtime')`),
+  criadoEm: text('criado_em').default(sql`(datetime('now','localtime'))`),
 });
 
 export type SyncLog    = typeof syncLogs.$inferSelect;
