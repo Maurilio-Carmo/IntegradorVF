@@ -2,10 +2,12 @@
 
 import { sqliteTable, integer, text, primaryKey, index } from 'drizzle-orm/sqlite-core';
 import { sql } from 'drizzle-orm';
+import { secoes } from './secoes.schema';
+import { grupos } from './grupos.schema';
 
 export const subgrupos = sqliteTable('subgrupos', {
-  secaoId:      integer('secao_id').notNull(),
-  grupoId:      integer('grupo_id').notNull(),
+  secaoId:      integer('secao_id').notNull().references(() => secoes.secaoId, { onUpdate: 'cascade', onDelete: 'cascade' }),
+  grupoId:      integer('grupo_id').notNull().references(() => grupos.grupoId, { onUpdate: 'cascade', onDelete: 'cascade' }),
   subgrupoId:   integer('subgrupo_id').notNull(),
   descricaoOld: text('descricao_old'),
   descricaoNew: text('descricao_new'),

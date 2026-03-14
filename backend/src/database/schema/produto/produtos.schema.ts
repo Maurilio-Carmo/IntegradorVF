@@ -3,6 +3,8 @@
 import { sqliteTable, integer, text, real, index } from 'drizzle-orm/sqlite-core';
 import { sql } from 'drizzle-orm';
 import { secoes } from './secoes.schema';
+import { grupos } from './grupos.schema';
+import { subgrupos } from './subgrupos.schema';
 import { familias } from './familias.schema';
 import { marcas } from './marcas.schema';
 
@@ -11,8 +13,8 @@ export const produtos = sqliteTable('produtos', {
   descricao:            text('descricao').notNull(),
   descricaoReduzida:    text('descricao_reduzida').notNull(),
   secaoId:              integer('secao_id').references(() => secoes.secaoId, { onDelete: 'set null' }),
-  grupoId:              integer('grupo_id'),
-  subgrupoId:           integer('subgrupo_id'),
+  grupoId:              integer('grupo_id').references(() => grupos.grupoId, { onDelete: 'set null' }),
+  subgrupoId:           integer('subgrupo_id').references(() => subgrupos.subgrupoId, { onDelete: 'set null' }),
   familiaId:            integer('familia_id').references(() => familias.familiaId, { onDelete: 'set null' }),
   marcaId:              integer('marca_id').references(() => marcas.marcaId, { onDelete: 'set null' }),
   composicao:           text('composicao', { enum: ['NORMAL','COMPOSTO','KIT','RENDIMENTO'] }),
