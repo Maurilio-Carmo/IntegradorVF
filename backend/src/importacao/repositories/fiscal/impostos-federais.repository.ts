@@ -28,12 +28,12 @@ export class ImpostosFederaisRepository {
             aliquotaSaidaPresumido:     i.aliquotaSaidaPresumido     ?? 0,
             cstEntradaSimples:          i.cstEntradaSimples          ?? null,
             cstSaidaSimples:            i.cstSaidaSimples            ?? null,
-            status:                     'U',
+            status:                     'S',
           })
           .onConflictDoUpdate({
             target:   impostosFederais.impostoId,
             set:      { descricao: sql`excluded.descricao`, updatedAt: sql`CURRENT_TIMESTAMP` },
-            setWhere: notInArray(impostosFederais.status, ['C', 'D']),
+            setWhere: notInArray(impostosFederais.status, ['C', 'U', 'D']),
           })
           .run();
       }

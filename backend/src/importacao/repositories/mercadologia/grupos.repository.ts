@@ -18,12 +18,12 @@ export class GruposRepository {
             secaoId:      g.secaoId   ?? null,
             grupoId:      g.id        ?? null,
             descricaoOld: g.descricao ?? null,
-            status:       'U',
+            status:       'S',
           })
           .onConflictDoUpdate({
             target:   [grupos.secaoId, grupos.grupoId],
             set:      { descricaoOld: sql`excluded.descricao_old`, updatedAt: sql`CURRENT_TIMESTAMP` },
-            setWhere: notInArray(grupos.status, ['C', 'D']),
+            setWhere: notInArray(grupos.status, ['C', 'U', 'D']),
           })
           .run();
       }

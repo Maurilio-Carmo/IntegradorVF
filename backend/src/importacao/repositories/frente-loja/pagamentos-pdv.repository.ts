@@ -20,12 +20,12 @@ export class PagamentosPdvRepository {
             categoriaId:  p.categoriaId ?? null,
             lojaId:       p.lojaId      ?? null,
             valorMaximo:  p.valorMaximo ?? null,
-            status:       'U',
+            status:       'S',
           })
           .onConflictDoUpdate({
             target:   pagamentosPdv.pagamentoId,
             set:      { descricao: sql`excluded.descricao`, valorMaximo: sql`excluded.valor_maximo`, updatedAt: sql`CURRENT_TIMESTAMP` },
-            setWhere: notInArray(pagamentosPdv.status, ['C', 'D']),
+            setWhere: notInArray(pagamentosPdv.status, ['C', 'U', 'D']),
           })
           .run();
       }

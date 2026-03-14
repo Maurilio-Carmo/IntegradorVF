@@ -54,12 +54,12 @@ export class FornecedoresRepository {
             pais:                 f.pais                  ?? null,
             criadoEm:             M.date(f.criadoEm),
             atualizadoEm:         M.date(f.atualizadoEm),
-            status:               'U',
+            status:               'S',
           })
           .onConflictDoUpdate({
             target:   fornecedores.fornecedorId,
             set:      { nome: sql`excluded.nome`, documento: sql`excluded.documento`, updatedAt: sql`CURRENT_TIMESTAMP` },
-            setWhere: notInArray(fornecedores.status, ['C', 'D']),
+            setWhere: notInArray(fornecedores.status, ['C', 'U', 'D']),
           })
           .run();
       }

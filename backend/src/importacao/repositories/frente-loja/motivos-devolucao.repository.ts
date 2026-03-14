@@ -17,12 +17,12 @@ export class MotivosDevolucaoRepository {
           .values({
             motivoId:  m.id        ?? null,
             descricao: m.descricao ?? null,
-            status:    'U',
+            status:    'S',
           })
           .onConflictDoUpdate({
             target:   motivosDevolucao.motivoId,
             set:      { descricao: sql`excluded.descricao`, updatedAt: sql`CURRENT_TIMESTAMP` },
-            setWhere: notInArray(motivosDevolucao.status, ['C', 'D']),
+            setWhere: notInArray(motivosDevolucao.status, ['C', 'U', 'D']),
           })
           .run();
       }

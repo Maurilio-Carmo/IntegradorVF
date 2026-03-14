@@ -21,7 +21,7 @@ export class ProdutoAuxiliaresRepository {
             fator:        a.fator       ?? 1,
             eanTributado: M.bool(a.eanTributado),
             tipo:         a.tipo        ?? null,
-            status:       'U',
+            status:       'S',
           })
           .onConflictDoUpdate({
             target:   produtoAuxiliares.codigoId,
@@ -32,7 +32,7 @@ export class ProdutoAuxiliaresRepository {
               tipo:         sql`excluded.tipo`,
               updatedAt:    sql`CURRENT_TIMESTAMP`,
             },
-            setWhere: notInArray(produtoAuxiliares.status, ['C', 'D']),
+            setWhere: notInArray(produtoAuxiliares.status, ['C', 'U', 'D']),
           })
           .run();
       }

@@ -82,38 +82,39 @@ export const STATUS = {
 };
 
 export const STATUS_LABELS = {
-    [STATUS.CREATED]: 'Criado',
-    [STATUS.UPDATE]: 'Atualizar',
-    [STATUS.DELETED]: 'Deletado',
-    [STATUS.ERROR]: 'Erro',
-    [STATUS.SUCCESS]: 'Sucesso'
+    'S': 'Sincronizado',      // veio da API, sem pendências
+    'C': 'Criação pendente',  // aguardando POST para API
+    'U': 'Edição pendente',   // aguardando PUT para API
+    'D': 'Exclusão pendente', // aguardando DELETE para API
+    'E': 'Erro',              // falha no envio — reprocessar
 };
 
 export const STATUS_ICONS = {
-    [STATUS.CREATED]: '✳️',
-    [STATUS.UPDATE]: '♻️',
-    [STATUS.DELETED]: '⛔',
-    [STATUS.ERROR]: '❌',
-    [STATUS.SUCCESS]: '✅'
+    'S': '✅',
+    'C': '🆕',
+    'U': '✏️',
+    'D': '🗑️',
+    'E': '❌',
 };
 
 export const STATUS_DESCRIPTIONS = {
-    [STATUS.CREATED]: 'Registro criado e vinculado ao novo sistema',
-    [STATUS.UPDATE]: 'Registro importado, aguardando sincronização',
-    [STATUS.DELETED]: 'Registro marcado para exclusão',
-    [STATUS.ERROR]: 'Erro ao processar registro',
-    [STATUS.SUCCESS]: 'Registro sincronizado com sucesso'
+    'S': 'Registro sincronizado com a API. Sem pendências.',
+    'C': 'Registro criado localmente. Será enviado na próxima sync.',
+    'U': 'Registro editado localmente. Será atualizado na próxima sync.',
+    'D': 'Registro marcado para exclusão. Será removido na próxima sync.',
+    'E': 'Erro no envio para a API. Clique em Reprocessar.',
 };
+
 
 // ============================================
 // ESTADOS DE IMPORTAÇÃO
 // ============================================
 export const IMPORT_STATUS = {
-    IDLE: 'idle',
-    LOADING: 'loading',
-    PROGRESS: 'progress',
-    SUCCESS: 'success',
-    ERROR: 'error'
+    SYNCED:  'S',  // Veio da API — sincronizado, sem modificações locais
+    CREATED: 'C',  // Criado localmente — pendente POST para a API
+    UPDATED: 'U',  // Editado localmente — pendente PUT para a API
+    DELETED: 'D',  // Deletado localmente — pendente DELETE para a API
+    ERROR:   'E',  // Erro no último envio — reprocessar manualmente
 };
 
 // ============================================
@@ -264,31 +265,32 @@ export const APP = {
 // ============================================
 export const SYNC_FLOW = {
     /**
-     * Fluxo de status na sincronização:
-     * 
+     * Máquina de estados da sincronização:
+     *
      * 1. IMPORTAÇÃO (API → SQLite)
-     *    Status inicial: U (Update)
-     *    Todos os registros importados ficam com status U
-     * 
-     * 2. COMPARAÇÃO (SQLite ↔ Firebird)
-     *    Compara registros entre bancos
-     *    Identifica diferenças
-     * 
-     * 3. SINCRONIZAÇÃO (SQLite → API → Firebird)
-     *    - Registros novos: envia para API e marca como C (Created)
-     *    - Registros alterados: atualiza na API e marca como C
-     *    - Registros deletados: marca como D (Deleted)
-     *    - Erros: marca como E (Error)
-     * 
-     * 4. CONFIRMAÇÃO
-     *    Após sucesso completo: marca como S (Success)
+     *    Status gravado: 'S' (Sincronizado)
+     *    Registros importados NÃO são reenviados para a API.
+     *
+     * 2. MODIFICAÇÃO LOCAL
+     *    Criação  → status = 'C' (pendente POST)
+     *    Edição   → status = 'U' (pendente PUT)
+     *    Deleção  → status = 'D' (pendente DELETE)
+     *
+     * 3. SINCRONIZAÇÃO (SQLite → API)
+     *    Busca WHERE status IN ('C', 'U', 'D')
+     *    Sucesso → status = 'S'
+     *    Falha   → status = 'E' + mensagem de erro
+     *
+     * 4. REPROCESSAMENTO
+     *    Registros com status 'E' podem ser reprocessados individualmente.
      */
-    IMPORT: 'U',      // Importado da API (pendente)
-    SYNCED: 'C',      // Sincronizado com sucesso
-    DELETED: 'D',     // Deletado
-    ERROR: 'E',       // Erro
-    SUCCESS: 'S'      // Processo completo
+    SYNCED:  'S',
+    CREATED: 'C',
+    UPDATED: 'U',
+    DELETED: 'D',
+    ERROR:   'E',
 };
+
 
 // Exportar tudo como default também
 export default {

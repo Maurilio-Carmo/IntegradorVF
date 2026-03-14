@@ -22,12 +22,12 @@ export class TabelasTributariasRepository {
             figuraFiscalId:    t.figuraFiscalId   ?? null,
             ufOrigem:          t.uf               ?? null,
             decreto:           t.decreto          ?? null,
-            status:            'U',
+            status:            'S',
           })
           .onConflictDoUpdate({
             target:   [tabelasTributarias.tabelaId, tabelasTributarias.tipoOperacao],
             set:      { decreto: sql`excluded.decreto`, updatedAt: sql`CURRENT_TIMESTAMP` },
-            setWhere: notInArray(tabelasTributarias.status, ['C', 'D']),
+            setWhere: notInArray(tabelasTributarias.status, ['C', 'U', 'D']),
           })
           .run();
       }

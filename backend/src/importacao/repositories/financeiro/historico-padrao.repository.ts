@@ -17,12 +17,12 @@ export class HistoricoPadraoRepository {
           .values({
             historicoId: h.id        ?? null,
             descricao:   h.descricao ?? null,
-            status:      'U',
+            status:      'S',
           })
           .onConflictDoUpdate({
             target:   historicoPadrao.historicoId,
             set:      { descricao: sql`excluded.descricao`, updatedAt: sql`CURRENT_TIMESTAMP` },
-            setWhere: notInArray(historicoPadrao.status, ['C', 'D']),
+            setWhere: notInArray(historicoPadrao.status, ['C', 'U', 'D']),
           })
           .run();
       }

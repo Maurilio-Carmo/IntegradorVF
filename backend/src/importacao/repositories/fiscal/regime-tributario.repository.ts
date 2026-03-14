@@ -21,12 +21,12 @@ export class RegimeTributarioRepository {
             classificacao: r.classificacao  ?? null,
             loja:          M.bool(r.loja),
             fornecedor:    M.bool(r.fornecedor),
-            status:        'U',
+            status:        'S',
           })
           .onConflictDoUpdate({
             target:   regimeTributario.regimeId,
             set:      { descricao: sql`excluded.descricao`, updatedAt: sql`CURRENT_TIMESTAMP` },
-            setWhere: notInArray(regimeTributario.status, ['C', 'D']),
+            setWhere: notInArray(regimeTributario.status, ['C', 'U', 'D']),
           })
           .run();
       }

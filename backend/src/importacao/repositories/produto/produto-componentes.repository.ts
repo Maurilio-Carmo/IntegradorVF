@@ -18,7 +18,7 @@ export class ProdutoComponentesRepository {
             produtoId:          c.produtoId          ?? null,
             componenteProdutoId: c.componenteId      ?? null, // campo real do schema
             quantidade:         c.quantidade         ?? 1,
-            status:             'U',
+            status:             'S',
           })
           .onConflictDoNothing()
           .run();

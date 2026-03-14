@@ -1,6 +1,6 @@
 // backend/src/importacao/varejo-facil/varejo-facil.module.ts
 import { Module }                  from '@nestjs/common';
-import { VarejoFacilHttpService }  from './varejo-facil-http.service';
+import { VarejoFacilHttpService }  from '../service/varejo-facil-http.service';
 
 /**
  * VarejoFacilModule

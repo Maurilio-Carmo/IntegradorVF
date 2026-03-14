@@ -21,12 +21,12 @@ export class TiposAjustesRepository {
             tipo:           t.tipo           ?? null,
             tipoDeOperacao: t.tipoDeOperacao ?? null,
             tipoReservado:  M.bool(t.tipoReservado),
-            status:         'U',
+            status:         'S',
           })
           .onConflictDoUpdate({
             target:   tiposAjustes.ajusteId,
             set:      { descricao: sql`excluded.descricao`, tipo: sql`excluded.tipo`, updatedAt: sql`CURRENT_TIMESTAMP` },
-            setWhere: notInArray(tiposAjustes.status, ['C', 'D']),
+            setWhere: notInArray(tiposAjustes.status, ['C', 'U', 'D']),
           })
           .run();
       }

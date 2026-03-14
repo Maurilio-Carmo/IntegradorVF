@@ -1,142 +1,40 @@
 // backend/src/sincronizacao/sincronizacao.service.ts
+//
+// Responsabilidade: orquestrar o fluxo de sincronização.
+//   - Valida domínio e lê credenciais
+//   - Consulta registros pendentes no SQLite
+//   - Delega o envio HTTP ao SincronizacaoExecutor
+//   - Persiste o histórico da execução
+//
+// Não contém lógica HTTP nem mapeamentos de schema — cada coisa em seu arquivo.
 
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { eq, inArray, desc }               from 'drizzle-orm';
 import { DrizzleService }                  from '../database/drizzle.service';
 import { AppLoggerService }                from '../logger/logger.service';
+import { CredencialService }               from '../importacao/credenciais/credencial.service';
+import { SincronizacaoExecutor }           from './sincronizacao.executor';
 import { syncHistorico }                   from '../database/schema';
 import { DOMINIOS_VALIDOS }                from './dto/executar-sync.dto';
-import * as schema                         from '../database/schema';
-
-// ─── Tipos internos ───────────────────────────────────────────────────────────
-
-interface ApiConfig {
-  apiUrl: string;
-  apiKey: string;
-}
-
-interface ResultadoSync {
-  criados:    number;
-  atualizados: number;
-  deletados:  number;
-  erros:      number;
-  total:      number;
-}
-
-// ─── Mapa domínio → tabela Drizzle ────────────────────────────────────────────
-// CORREÇÃO: expandido para cobrir todos os domínios válidos.
-// Cada entrada deve ter correspondência no mapa PKS abaixo.
-
-const DOMINIO_TABELA: Record<string, any> = {
-  // Produto / Mercadológica
-  secoes:               schema.secoes,
-  grupos:               schema.grupos,
-  subgrupos:            schema.subgrupos,
-  marcas:               schema.marcas,
-  familias:             schema.familias,
-  produtos:             schema.produtos,
-  produto_auxiliares:   schema.produtoAuxiliares,
-  produto_fornecedores: schema.produtoFornecedores,
-
-  // Financeiro
-  categorias:           schema.categorias,
-  agentes:              schema.agentes,
-  contas_correntes:     schema.contasCorrentes,
-  especies_documentos:  schema.especiesDocumentos,
-  historico_padrao:     schema.historicoPadrao,
-  formas_pagamento:     schema.formasPagamento,
-
-  // Frente de Loja / PDV
-  pagamentos_pdv:       schema.pagamentosPdv,
-  recebimentos_pdv:     schema.recebimentosPdv,
-  motivos_desconto:     schema.motivosDesconto,
-  motivos_devolucao:    schema.motivosDevolucao,
-  motivos_cancelamento: schema.motivosCancelamento,
-
-  // Estoque
-  local_estoque:        schema.localEstoque,
-  tipos_ajustes:        schema.tiposAjustes,
-  saldo_estoque:        schema.saldoEstoque,
-
-  // Fiscal
-  regime_tributario:    schema.regimeTributario,
-  situacoes_fiscais:    schema.situacoesFiscais,
-  tipos_operacoes:      schema.tiposOperacoes,
-  impostos_federais:    schema.impostosFederais,
-  tabelas_tributarias:  schema.tabelasTributarias,
-  cenarios_fiscais:     schema.cenariosFiscais,
-
-  // Pessoa
-  lojas:                schema.lojas,
-  clientes:             schema.clientes,
-  fornecedores:         schema.fornecedores,
-};
-
-// ─── Mapa domínio → coluna PK Drizzle ────────────────────────────────────────
-// CORREÇÃO CRÍTICA: todos os domínios de DOMINIO_TABELA devem ter entrada aqui.
-// Antes, domínios como subgrupos/marcas/familias retornavam undefined
-// causando "Cannot read properties of undefined" no .where(eq(pkField, ...)).
-
-const DOMINIO_PK: Record<string, any> = {
-  // Produto / Mercadológica
-  secoes:               schema.secoes.secaoId,
-  grupos:               schema.grupos.grupoId,
-  subgrupos:            schema.subgrupos.subgrupoId,
-  marcas:               schema.marcas.marcaId,
-  familias:             schema.familias.familiaId,
-  produtos:             schema.produtos.produtoId,
-  produto_auxiliares:   schema.produtoAuxiliares.produtoId,    // FK para produtos
-  produto_fornecedores: schema.produtoFornecedores.produtoId,  // FK para produtos
-
-  // Financeiro
-  categorias:           schema.categorias.categoriaId,
-  agentes:              schema.agentes.agenteId,
-  contas_correntes:     schema.contasCorrentes.contaId,
-  especies_documentos:  schema.especiesDocumentos.especieId,
-  historico_padrao:     schema.historicoPadrao.historicoId,
-  formas_pagamento:     schema.formasPagamento.formaPagamentoId,
-
-  // Frente de Loja / PDV
-  pagamentos_pdv:       schema.pagamentosPdv.pagamentoId,
-  recebimentos_pdv:     schema.recebimentosPdv.recebimentoId,
-  motivos_desconto:     schema.motivosDesconto.motivoId,
-  motivos_devolucao:    schema.motivosDevolucao.motivoId,
-  motivos_cancelamento: schema.motivosCancelamento.motivoId,
-
-  // Estoque
-  local_estoque:        schema.localEstoque.localId,
-  tipos_ajustes:        schema.tiposAjustes.tipoAjusteId,
-  saldo_estoque:        schema.saldoEstoque.produtoId,
-
-  // Fiscal
-  regime_tributario:    schema.regimeTributario.regimeId,
-  situacoes_fiscais:    schema.situacoesFiscais.situacaoId,
-  tipos_operacoes:      schema.tiposOperacoes.operacaoId,
-  impostos_federais:    schema.impostosFederais.impostoId,
-  tabelas_tributarias:  schema.tabelasTributarias.tabelaId,
-  cenarios_fiscais:     schema.cenariosFiscais.cenarioId,
-
-  // Pessoa
-  lojas:                schema.lojas.lojaId,
-  clientes:             schema.clientes.clienteId,
-  fornecedores:         schema.fornecedores.fornecedorId,
-};
-
-// Timeout padrão para chamadas à API externa (ms)
-const API_TIMEOUT_MS = 15_000;
-
-// ─────────────────────────────────────────────────────────────────────────────
+import { DOMINIO_TABELA, DOMINIO_PK }      from './sincronizacao.registry';
+import { ResultadoSync }                   from './sincronizacao.types';
 
 @Injectable()
 export class SincronizacaoService {
 
   constructor(
-    private readonly drizzle: DrizzleService,
-    private readonly logger:  AppLoggerService,
+    private readonly drizzle:   DrizzleService,
+    private readonly logger:    AppLoggerService,
+    private readonly credencial: CredencialService,
+    private readonly executor:  SincronizacaoExecutor,
   ) {}
 
   // ─── API Pública ──────────────────────────────────────────────────────────
 
+  /**
+   * Lista registros com modificações locais pendentes (status C, U ou D).
+   * Registros com status S foram importados da API e não têm pendências.
+   */
   listarPendentes(dominio: string) {
     this.validarDominio(dominio);
     const tabela = this.resolverTabela(dominio);
@@ -151,12 +49,17 @@ export class SincronizacaoService {
     return { dominio, total: registros.length, registros };
   }
 
-  async executarSincronizacao(dominio: string, apiConfig: ApiConfig) {
+  /**
+   * Executa a sincronização de todos os registros pendentes de um domínio.
+   * Credenciais são lidas do SQLite — nunca passadas por parâmetro HTTP.
+   */
+  async executarSincronizacao(dominio: string) {
     this.validarDominio(dominio);
-    this.validarApiConfig(apiConfig);
 
-    const inicio  = Date.now();
+    const cred    = this.credencial.carregar();
     const tabela  = this.resolverTabela(dominio);
+    const pkField = this.resolverPk(dominio);
+    const inicio  = Date.now();
 
     const pendentes = this.drizzle.db
       .select()
@@ -175,12 +78,13 @@ export class SincronizacaoService {
       total: pendentes.length,
     };
 
-    for (const registro of pendentes as any[]) {
-      await this.processarRegistro(dominio, registro, apiConfig, resultado);
-    }
+    await this.executor.processarEmLote(
+      dominio, tabela, pkField, pendentes as any[], cred, resultado,
+    );
 
     const duracao = Date.now() - inicio;
-    this.salvarHistorico(dominio, resultado, duracao);
+    this._salvarHistorico(dominio, resultado, duracao);
+
     this.logger.success(
       `Sync ${dominio} concluído em ${duracao}ms`,
       'Sincronizacao',
@@ -190,14 +94,14 @@ export class SincronizacaoService {
     return { ...resultado, duracao_ms: duracao, dominio };
   }
 
-  async reprocessarRegistro(
-    dominio:   string,
-    id:        string,
-    apiConfig: ApiConfig,
-  ) {
+  /**
+   * Reprocessa um único registro com status E (erro).
+   * Credenciais são lidas do SQLite — nunca passadas por parâmetro HTTP.
+   */
+  async reprocessarRegistro(dominio: string, id: string) {
     this.validarDominio(dominio);
-    this.validarApiConfig(apiConfig);
 
+    const cred    = this.credencial.carregar();
     const tabela  = this.resolverTabela(dominio);
     const pkField = this.resolverPk(dominio);
 
@@ -211,13 +115,18 @@ export class SincronizacaoService {
       throw new BadRequestException(`Registro ${id} não encontrado em ${dominio}`);
     }
     if ((registro as any).status !== 'E') {
-      throw new BadRequestException(`Registro ${id} não está com status E (atual: ${(registro as any).status})`);
+      throw new BadRequestException(
+        `Registro ${id} não pode ser reprocessado ` +
+        `(status atual: "${(registro as any).status}"). ` +
+        `Apenas registros com status "E" podem ser reprocessados.`,
+      );
     }
 
     const resultado: ResultadoSync = {
       criados: 0, atualizados: 0, deletados: 0, erros: 0, total: 1,
     };
-    await this.processarRegistro(dominio, registro, apiConfig, resultado);
+
+    await this.executor.processarUm(dominio, tabela, pkField, registro, cred, resultado);
     return resultado;
   }
 
@@ -238,108 +147,12 @@ export class SincronizacaoService {
 
   // ─── Helpers privados ─────────────────────────────────────────────────────
 
-  /**
-   * Processa um único registro: envia para a API e atualiza o status no SQLite.
-   *
-   * CORREÇÃO [2]: fetch com AbortController + timeout de 15s.
-   * CORREÇÃO [3]: pkValue lido via resolverPk() em vez de Object.keys()[0].
-   */
-  private async processarRegistro(
-    dominio:   string,
-    registro:  any,
-    apiConfig: ApiConfig,
-    resultado: ResultadoSync,
-  ): Promise<void> {
-    const tabela  = this.resolverTabela(dominio);
-    const pkField = this.resolverPk(dominio);
-
-    // CORREÇÃO [3]: usar o nome da coluna PK para ler o valor correto.
-    // pkField é uma coluna Drizzle — seu .name contém o nome da coluna SQL.
-    const pkColumnName = pkField.name as string;
-    const pkValue      = registro[pkColumnName];
-
-    if (pkValue === undefined || pkValue === null) {
-      this.logger.warn(
-        `Registro sem PK legível em ${dominio} (coluna: ${pkColumnName})`,
-        'Sincronizacao',
-      );
-      resultado.erros++;
-      return;
-    }
-
-    try {
-      const { apiUrl, apiKey } = apiConfig;
-
-      // CORREÇÃO [2]: AbortController com timeout de 15s
-      const ctrl   = new AbortController();
-      const timer  = setTimeout(() => ctrl.abort(), API_TIMEOUT_MS);
-      const signal = ctrl.signal;
-
-      const fetchOpts = (method: string, body?: object): RequestInit => ({
-        method,
-        signal,
-        headers: {
-          Authorization:  `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-          Accept:         'application/json',
-        },
-        ...(body ? { body: JSON.stringify(body) } : {}),
-      });
-
-      try {
-        if (registro.status === 'C') {
-          await fetch(`${apiUrl}/${dominio}`, fetchOpts('POST', registro));
-          resultado.criados++;
-        } else if (registro.status === 'U') {
-          await fetch(`${apiUrl}/${dominio}/${pkValue}`, fetchOpts('PUT', registro));
-          resultado.atualizados++;
-        } else if (registro.status === 'D') {
-          await fetch(`${apiUrl}/${dominio}/${pkValue}`, fetchOpts('DELETE'));
-          resultado.deletados++;
-        }
-      } finally {
-        clearTimeout(timer);
-      }
-
-      // Marca como sincronizado com sucesso
-      this.drizzle.db
-        .update(tabela)
-        .set({ status: 'S' } as any)
-        .where(eq(pkField, pkValue))
-        .run();
-
-    } catch (err: any) {
-      resultado.erros++;
-
-      const mensagemErro = err.name === 'AbortError'
-        ? `Timeout após ${API_TIMEOUT_MS}ms`
-        : (err.message?.substring(0, 500) ?? 'Erro desconhecido');
-
-      this.logger.error(
-        `Falha sync ${dominio}[${pkValue}]: ${mensagemErro}`,
-        'Sincronizacao',
-      );
-
-      this.drizzle.db
-        .update(tabela)
-        .set({ retorno: mensagemErro, status: 'E' } as any)
-        .where(eq(pkField, pkValue))
-        .run();
-    }
-  }
-
-  private salvarHistorico(
-    dominio:   string,
-    resultado: ResultadoSync,
-    duracaoMs: number,
-  ): void {
+  private _salvarHistorico(dominio: string, resultado: ResultadoSync, duracaoMs: number): void {
     this.drizzle.db
       .insert(syncHistorico)
       .values({ dominio, resultado: JSON.stringify(resultado), duracaoMs })
       .run();
   }
-
-  // ─── Resolvers ────────────────────────────────────────────────────────────
 
   private resolverTabela(dominio: string): any {
     const tabela = DOMINIO_TABELA[dominio];
@@ -352,19 +165,12 @@ export class SincronizacaoService {
     return tabela;
   }
 
-  /**
-   * Retorna a coluna PK Drizzle para o domínio.
-   * CORREÇÃO CRÍTICA: todos os domínios mapeados em DOMINIO_TABELA
-   * têm entrada correspondente em DOMINIO_PK — nunca retorna undefined.
-   */
   private resolverPk(dominio: string): any {
     const pk = DOMINIO_PK[dominio];
     if (!pk) {
-      // Este caso não deve ocorrer se DOMINIO_TABELA e DOMINIO_PK estiverem sincronizados,
-      // mas garantimos uma exceção clara em vez de TypeError silencioso.
       throw new BadRequestException(
         `Chave primária não mapeada para o domínio: "${dominio}". ` +
-        `Verifique DOMINIO_PK em sincronizacao.service.ts`,
+        `Verifique sincronizacao.registry.ts`,
       );
     }
     return pk;
@@ -376,10 +182,5 @@ export class SincronizacaoService {
         `Domínio inválido: "${dominio}". Válidos: ${DOMINIOS_VALIDOS.join(', ')}`,
       );
     }
-  }
-
-  private validarApiConfig(cfg: ApiConfig): void {
-    if (!cfg?.apiUrl) throw new BadRequestException('x-api-url é obrigatório');
-    if (!cfg?.apiKey) throw new BadRequestException('x-api-key é obrigatório');
   }
 }

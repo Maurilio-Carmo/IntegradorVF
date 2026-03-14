@@ -31,12 +31,12 @@ export class ContasCorrentesRepository {
             conta:                      c.conta                                      ?? null,
             localPagamento:             c.localDePagamento                           ?? null,
             identificacaoOfx:           c.identificacaoContaCorrenteOFX              ?? null,
-            status:                     'U',
+            status:                     'S',
           })
           .onConflictDoUpdate({
             target:   contasCorrentes.contaId,
             set:      { descricao: sql`excluded.descricao`, ativa: sql`excluded.ativa`, updatedAt: sql`CURRENT_TIMESTAMP` },
-            setWhere: notInArray(contasCorrentes.status, ['C', 'D']),
+            setWhere: notInArray(contasCorrentes.status, ['C', 'U', 'D']),
           })
           .run();
       }

@@ -24,12 +24,12 @@ export class RecebimentosPdvRepository {
             qtdAutenticacoes: r.qtdAutenticacoes ?? 0,
             imprimeDoc:       M.bool(r.imprimeDoc),
             qtdImpressoes:    r.qtdImpressoes    ?? 0,
-            status:           'U',
+            status:           'S',
           })
           .onConflictDoUpdate({
             target:   recebimentosPdv.recebimentoId,
             set:      { descricao: sql`excluded.descricao`, updatedAt: sql`CURRENT_TIMESTAMP` },
-            setWhere: notInArray(recebimentosPdv.status, ['C', 'D']),
+            setWhere: notInArray(recebimentosPdv.status, ['C', 'U', 'D']),
           })
           .run();
       }

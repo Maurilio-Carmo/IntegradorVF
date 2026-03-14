@@ -12,7 +12,7 @@
 import { Controller, Get } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { sql } from 'drizzle-orm';
-import { DrizzleService } from '../database/drizzle.service';
+import { DrizzleService } from '../../database/drizzle.service';
 
 @ApiTags('Importação · Utils')
 @Controller('api/importacao')

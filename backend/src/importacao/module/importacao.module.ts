@@ -3,9 +3,9 @@
 import { Module } from '@nestjs/common';
 
 // Controllers
-import { ImportacaoController }  from '../importacao.controller';
+import { ImportacaoController }  from '../controller/importacao.controller';
 import { ProdutoController }     from '../controller/produto.controller';
-import { FinanceiroController }  from './financeiro/financeiro.controller';
+import { FinanceiroController }  from '../controller/financeiro.controller';
 import { FiscalController }      from '../controller/fiscal.controller';
 import { EstoqueController }     from '../controller/estoque.controller';
 import { PdvController }         from '../controller/frente-loja.controller';

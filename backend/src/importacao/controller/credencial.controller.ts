@@ -1,4 +1,4 @@
-// backend/src/importacao/credenciais/credencial.controller.ts
+// backend/src/importacao/controller/credencial.controller.ts
 import {
   Controller, Get, Post, Delete, Body, HttpCode,
 } from '@nestjs/common';
@@ -9,7 +9,7 @@ import {
 } from 'class-validator';
 import { Type }                           from 'class-transformer';
 import { CredencialService }              from '../service/credencial.service';
-import { VarejoFacilHttpService }         from '../varejo-facil/varejo-facil-http.service';
+import { VarejoFacilHttpService }         from '../service/varejo-facil-http.service';
 
 class SalvarCredencialDto {
   @IsInt()

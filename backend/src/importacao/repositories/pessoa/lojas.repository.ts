@@ -39,12 +39,12 @@ export class LojasRepository {
             ativo:              M.bool(l.ativo !== false),
             ecommerce:          M.bool(l.ecommerce),
             locaisDaLojaIds:    M.ids(l.locaisDaLojaIds),
-            status:             'U',
+            status:             'S',
           })
           .onConflictDoUpdate({
             target:   lojas.lojaId,
             set:      { nome: sql`excluded.nome`, ativo: sql`excluded.ativo`, updatedAt: sql`CURRENT_TIMESTAMP` },
-            setWhere: notInArray(lojas.status, ['C', 'D']),
+            setWhere: notInArray(lojas.status, ['C', 'U', 'D']),
           })
           .run();
       }

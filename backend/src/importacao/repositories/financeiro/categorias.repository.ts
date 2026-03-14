@@ -24,12 +24,12 @@ export class CategoriasRepository {
             posicao:        c.posicao                  ?? null,
             classificacao:  c.classificacaoDaCategoria ?? null,
             tipo:           c.tipoDeCategoria          ?? null,
-            status:         'U',
+            status:         'S',
           })
           .onConflictDoUpdate({
             target:   categorias.categoriaId,
             set:      { descricao: sql`excluded.descricao`, inativa: sql`excluded.inativa`, updatedAt: sql`CURRENT_TIMESTAMP` },
-            setWhere: notInArray(categorias.status, ['C', 'D']),
+            setWhere: notInArray(categorias.status, ['C', 'U', 'D']),
           })
           .run();
       }

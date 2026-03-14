@@ -51,7 +51,7 @@ export class ProdutosRepository {
             producao:              p.producao               ?? null,
             genero:                p.genero                 ?? null,
             tabelaA:               p.tabelaA                ?? null,
-            status:                'U',
+            status:                'S',
           })
           .onConflictDoUpdate({
             target:   produtos.produtoId,
@@ -61,7 +61,7 @@ export class ProdutosRepository {
               ncm:                sql`excluded.ncm`,
               updatedAt:          sql`CURRENT_TIMESTAMP`,
             },
-            setWhere: notInArray(produtos.status, ['C', 'D']),
+            setWhere: notInArray(produtos.status, ['C', 'U', 'D']),
           })
           .run();
       }

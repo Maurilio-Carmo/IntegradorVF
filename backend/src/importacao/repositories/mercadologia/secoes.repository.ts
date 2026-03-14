@@ -17,12 +17,12 @@ export class SecoesRepository {
           .values({
             secaoId:      s.id        ?? null,
             descricaoOld: s.descricao ?? null,
-            status:       'U',
+            status:       'S',
           })
           .onConflictDoUpdate({
             target:   secoes.secaoId,
             set:      { descricaoOld: sql`excluded.descricao_old`, updatedAt: sql`CURRENT_TIMESTAMP` },
-            setWhere: notInArray(secoes.status, ['C', 'D']),
+            setWhere: notInArray(secoes.status, ['C', 'U', 'D']),
           })
           .run();
       }

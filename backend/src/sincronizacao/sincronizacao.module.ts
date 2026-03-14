@@ -1,21 +1,23 @@
 // backend/src/sincronizacao/sincronizacao.module.ts
-import { Module }                    from '@nestjs/common';
-import { SincronizacaoController }   from './sincronizacao.controller';
-import { SincronizacaoService }      from './sincronizacao.service';
+import { Module }                  from '@nestjs/common';
+import { SincronizacaoController } from './sincronizacao.controller';
+import { SincronizacaoService }    from './sincronizacao.service';
+import { SincronizacaoExecutor }   from './sincronizacao.executor';
+import { CredencialModule }        from '../importacao/module/credencial.module';
 
 /**
- * Módulo de sincronização bidirecional SQLite ↔ API.
- * Motor principal — funcionalidade nova, sem equivalente no Express legado.
+ * Módulo de sincronização SQLite → API externa.
  *
- * Fluxo de status:
- *   C (Create)   → POST na API → S (Sucesso) ou E (Erro)
- *   U (Update)   → PUT  na API → S (Sucesso) ou E (Erro)
- *   D (Delete)   → DELETE na API → S (Sucesso) ou E (Erro)
- *   S (Sincronizado) — estado final OK
- *   E (Erro) → pode ser reprocessado via /reprocessar/:dominio/:id
+ * Arquivos do módulo:
+ *   sincronizacao.types.ts    — tipos e constantes
+ *   sincronizacao.registry.ts — mapa domínio → tabela/PK (fonte única de verdade)
+ *   sincronizacao.executor.ts — lógica HTTP + persistência de status
+ *   sincronizacao.service.ts  — orquestração e API pública
+ *   sincronizacao.controller.ts — endpoints REST
  */
 @Module({
+  imports:     [CredencialModule],
   controllers: [SincronizacaoController],
-  providers:   [SincronizacaoService],
+  providers:   [SincronizacaoService, SincronizacaoExecutor],
 })
 export class SincronizacaoModule {}

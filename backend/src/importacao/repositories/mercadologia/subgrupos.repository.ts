@@ -19,12 +19,12 @@ export class SubgruposRepository {
             grupoId:      s.grupoId   ?? null,
             subgrupoId:   s.id        ?? null,
             descricaoOld: s.descricao ?? null,
-            status:       'U',
+            status:       'S',
           })
           .onConflictDoUpdate({
             target:   [subgrupos.secaoId, subgrupos.grupoId, subgrupos.subgrupoId],
             set:      { descricaoOld: sql`excluded.descricao_old`, updatedAt: sql`CURRENT_TIMESTAMP` },
-            setWhere: notInArray(subgrupos.status, ['C', 'D']),
+            setWhere: notInArray(subgrupos.status, ['C', 'U', 'D']),
           })
           .run();
       }

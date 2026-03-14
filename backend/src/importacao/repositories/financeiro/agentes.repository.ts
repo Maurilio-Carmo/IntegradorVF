@@ -34,12 +34,12 @@ export class AgentesRepository {
             uf:                a.uf                ?? null,
             pais:              a.pais              ?? null,
             tipoEndereco:      a.tipoEndereco      ?? null,
-            status:            'U',
+            status:            'S',
           })
           .onConflictDoUpdate({
             target:   agentes.agenteId,
             set:      { nome: sql`excluded.nome`, documento: sql`excluded.documento`, updatedAt: sql`CURRENT_TIMESTAMP` },
-            setWhere: notInArray(agentes.status, ['C', 'D']),
+            setWhere: notInArray(agentes.status, ['C', 'U', 'D']),
           })
           .run();
       }

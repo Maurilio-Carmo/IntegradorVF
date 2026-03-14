@@ -19,12 +19,12 @@ export class CenariosFiscaisRepository {
             descricao: c.descricao  ?? null,
             cst:       c.cst        ?? null,
             cclasstrib: c.cclasstrib ?? null,
-            status:    'U',
+            status:    'S',
           })
           .onConflictDoUpdate({
             target:   cenariosFiscais.cenarioId,
             set:      { descricao: sql`excluded.descricao`, updatedAt: sql`CURRENT_TIMESTAMP` },
-            setWhere: notInArray(cenariosFiscais.status, ['C', 'D']),
+            setWhere: notInArray(cenariosFiscais.status, ['C', 'U', 'D']),
           })
           .run();
       }

@@ -20,12 +20,12 @@ export class SituacoesFiscaisRepository {
             descricao:         s.descricao         ?? null,
             descricaoCompleta: s.descricaoCompleta ?? null,
             substituto:        M.bool(s.substituto),
-            status:            'U',
+            status:            'S',
           })
           .onConflictDoUpdate({
             target:   situacoesFiscais.situacaoId,
             set:      { descricao: sql`excluded.descricao`, updatedAt: sql`CURRENT_TIMESTAMP` },
-            setWhere: notInArray(situacoesFiscais.status, ['C', 'D']),
+            setWhere: notInArray(situacoesFiscais.status, ['C', 'U', 'D']),
           })
           .run();
       }

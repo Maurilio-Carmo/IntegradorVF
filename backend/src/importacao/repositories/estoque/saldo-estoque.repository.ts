@@ -19,12 +19,12 @@ export class SaldoEstoqueRepository {
             localId:   s.localId   ?? null,
             lojaId:    s.lojaId    ?? null,
             saldo:     s.saldo     ?? 0,
-            status:    'U',
+            status:    'S',
           })
           .onConflictDoUpdate({
             target:   [saldoEstoque.produtoId, saldoEstoque.localId, saldoEstoque.lojaId],
             set:      { saldo: sql`excluded.saldo`, updatedAt: sql`CURRENT_TIMESTAMP` },
-            setWhere: notInArray(saldoEstoque.status, ['C', 'D']),
+            setWhere: notInArray(saldoEstoque.status, ['C', 'U', 'D']),
           })
           .run();
       }

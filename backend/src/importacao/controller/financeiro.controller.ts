@@ -1,7 +1,7 @@
 // backend/src/importacao/financeiro/financeiro.controller.ts
 import { Controller, Post, Body, HttpCode } from '@nestjs/common';
 import { ApiTags, ApiOperation }             from '@nestjs/swagger';
-import { FinanceiroService }                 from './financeiro.service';
+import { FinanceiroService }                 from '../service/financeiro.service';
 import { ImportarArrayDto }                  from '../dto/importar-array.dto';
 
 /**

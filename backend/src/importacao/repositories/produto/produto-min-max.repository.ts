@@ -19,7 +19,7 @@ export class ProdutoMinMaxRepository {
             lojaId:         p.lojaId        ?? null,
             estoqueMinimo:  p.estoqueMinimo ?? 0,
             estoqueMaximo:  p.estoqueMaximo ?? 0,
-            status:         'U',
+            status:         'S',
           })
           .onConflictDoUpdate({
             target:   [produtoMinMax.produtoId, produtoMinMax.lojaId],
@@ -28,7 +28,7 @@ export class ProdutoMinMaxRepository {
               estoqueMaximo: sql`excluded.estoque_maximo`,
               updatedAt:     sql`CURRENT_TIMESTAMP`,
             },
-            setWhere: notInArray(produtoMinMax.status, ['C', 'D']),
+            setWhere: notInArray(produtoMinMax.status, ['C', 'U', 'D']),
           })
           .run();
       }

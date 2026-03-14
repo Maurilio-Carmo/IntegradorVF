@@ -17,12 +17,12 @@ export class FamiliasRepository {
           .values({
             familiaId:    f.id        ?? null,
             descricaoOld: f.descricao ?? null,
-            status:       'U',
+            status:       'S',
           })
           .onConflictDoUpdate({
             target:   familias.familiaId,
             set:      { descricaoOld: sql`excluded.descricao_old`, updatedAt: sql`CURRENT_TIMESTAMP` },
-            setWhere: notInArray(familias.status, ['C', 'D']),
+            setWhere: notInArray(familias.status, ['C', 'U', 'D']),
           })
           .run();
       }

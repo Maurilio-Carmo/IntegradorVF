@@ -21,12 +21,12 @@ export class LocalEstoqueRepository {
             tipoDeEstoque: l.tipoDeEstoque ?? null,
             bloqueio:      M.bool(l.bloqueio),
             avaria:        M.bool(l.avaria),
-            status:        'U',
+            status:        'S',
           })
           .onConflictDoUpdate({
             target:   localEstoque.localId,
             set:      { descricao: sql`excluded.descricao`, bloqueio: sql`excluded.bloqueio`, updatedAt: sql`CURRENT_TIMESTAMP` },
-            setWhere: notInArray(localEstoque.status, ['C', 'D']),
+            setWhere: notInArray(localEstoque.status, ['C', 'U', 'D']),
           })
           .run();
       }

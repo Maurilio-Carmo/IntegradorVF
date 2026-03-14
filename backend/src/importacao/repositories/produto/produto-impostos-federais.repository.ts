@@ -17,12 +17,12 @@ export class ProdutoImpostosFederaisRepository {
           .values({
             produtoId:  p.produtoId  ?? null,
             impostoId:  p.impostoId  ?? null,
-            status:     'U',
+            status:     'S',
           })
           .onConflictDoUpdate({
             target:   [produtoImpostosFederais.produtoId, produtoImpostosFederais.impostoId],
             set:      { updatedAt: sql`CURRENT_TIMESTAMP` },
-            setWhere: notInArray(produtoImpostosFederais.status, ['C', 'D']),
+            setWhere: notInArray(produtoImpostosFederais.status, ['C', 'U', 'D']),
           })
           .run();
       }

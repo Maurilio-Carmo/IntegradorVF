@@ -38,12 +38,12 @@ export class TiposOperacoesRepository {
             cfopExterior:            t.cfopExterior               ?? null,
             observacao:              t.observacao                 ?? null,
             codigoCst:               t.codigoCst                  ?? null,
-            status:                  'U',
+            status:                  'S',
           })
           .onConflictDoUpdate({
             target:   tiposOperacoes.operacaoId,
             set:      { descricao: sql`excluded.descricao`, updatedAt: sql`CURRENT_TIMESTAMP` },
-            setWhere: notInArray(tiposOperacoes.status, ['C', 'D']),
+            setWhere: notInArray(tiposOperacoes.status, ['C', 'U', 'D']),
           })
           .run();
       }

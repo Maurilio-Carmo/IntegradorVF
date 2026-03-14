@@ -52,12 +52,12 @@ export class ClientesRepository {
             uf:                c.enderecos?.uf                  ?? null,
             pais:              c.enderecos?.codigoDoPais        ?? null,
             dataCadastro:      M.date(c.dataDeCadastro),
-            status:            'U',
+            status:            'S',
           })
           .onConflictDoUpdate({
             target:   clientes.clienteId,
             set:      { nome: sql`excluded.nome`, documento: sql`excluded.documento`, updatedAt: sql`CURRENT_TIMESTAMP` },
-            setWhere: notInArray(clientes.status, ['C', 'D']),
+            setWhere: notInArray(clientes.status, ['C', 'U', 'D']),
           })
           .run();
       }

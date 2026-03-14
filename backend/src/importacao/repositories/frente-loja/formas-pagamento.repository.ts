@@ -25,12 +25,12 @@ export class FormasPagamentoRepository {
             movimentaContaCorrente: M.bool(f.movimentaContaCorrente),
             ativa:                  M.bool(f.ativa),
             contaCorrenteId:        f.contaCorrenteId       ?? null,
-            status:                 'U',
+            status:                 'S',
           })
           .onConflictDoUpdate({
             target:   formasPagamento.formaPagamentoId,
             set:      { descricao: sql`excluded.descricao`, ativa: sql`excluded.ativa`, updatedAt: sql`CURRENT_TIMESTAMP` },
-            setWhere: notInArray(formasPagamento.status, ['C', 'D']),
+            setWhere: notInArray(formasPagamento.status, ['C', 'U', 'D']),
           })
           .run();
       }

@@ -22,7 +22,7 @@ export class ProdutoFornecedoresRepository {
             unidade:      f.unidade      ?? '',
             fator:        f.quantidade   ?? f.fator ?? 1,
             nivel:        f.nivel        ?? null,
-            status:       'U',
+            status:       'S',
           })
           .onConflictDoUpdate({
             target:   produtoFornecedores.id,
@@ -35,7 +35,7 @@ export class ProdutoFornecedoresRepository {
               nivel:        sql`excluded.nivel`,
               updatedAt:    sql`CURRENT_TIMESTAMP`,
             },
-            setWhere: notInArray(produtoFornecedores.status, ['C', 'D']),
+            setWhere: notInArray(produtoFornecedores.status, ['C', 'U', 'D']),
           })
           .run();
       }

@@ -18,12 +18,12 @@ export class EspeciesDocumentosRepository {
             especieId:   e.id          ?? null,
             descricao:   e.descricao   ?? null,
             codigoBacen: e.codigoBacen ?? null,
-            status:      'U',
+            status:      'S',
           })
           .onConflictDoUpdate({
             target:   especiesDocumentos.especieId,
             set:      { descricao: sql`excluded.descricao`, updatedAt: sql`CURRENT_TIMESTAMP` },
-            setWhere: notInArray(especiesDocumentos.status, ['C', 'D']),
+            setWhere: notInArray(especiesDocumentos.status, ['C', 'U', 'D']),
           })
           .run();
       }

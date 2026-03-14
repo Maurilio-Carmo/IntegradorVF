@@ -18,7 +18,7 @@ export class ProdutoRegimesRepository {
             produtoId:        r.produtoId        ?? null,
             lojaId:           r.lojaId           ?? null,
             regimeEstadualId: r.regimeEstadualId ?? null,
-            status:           'U',
+            status:           'S',
           })
           .onConflictDoUpdate({
             target:   [produtoRegimes.produtoId, produtoRegimes.lojaId],
@@ -26,7 +26,7 @@ export class ProdutoRegimesRepository {
               regimeEstadualId: sql`excluded.regime_estadual_id`,
               updatedAt:        sql`CURRENT_TIMESTAMP`,
             },
-            setWhere: notInArray(produtoRegimes.status, ['C', 'D']),
+            setWhere: notInArray(produtoRegimes.status, ['C', 'U', 'D']),
           })
           .run();
       }
