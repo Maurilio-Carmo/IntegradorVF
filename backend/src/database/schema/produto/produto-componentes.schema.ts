@@ -5,7 +5,7 @@ import { sql } from 'drizzle-orm';
 import { produtos } from './produtos.schema';
 
 export const produtoComponentes = sqliteTable('produto_componentes', {
-  id:                  integer('id').primaryKey(),
+  id:                  integer('componente_id').primaryKey(),
   produtoId:           integer('produto_id').notNull().references(() => produtos.produtoId, { onDelete: 'cascade' }),
   componenteProdutoId: integer('componente_produto_id').notNull(),
   quantidade:          real('quantidade').default(1),

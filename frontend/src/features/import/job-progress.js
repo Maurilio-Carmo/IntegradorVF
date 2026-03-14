@@ -138,9 +138,9 @@ const JobProgress = {
                 }
 
                 case 'step:completed':
-                    _setStatus(container, 'success', `${data.total.toLocaleString()} registros importados`);
+                    _setStatus(container, 'success', `${data.total.toLocaleString()} importados`);
                     _setProgress(container, 100);
-                    UI.log(`✅ ${data.stepLabel}: ${data.total.toLocaleString()} registros`, 'success');
+                    UI.log(`✅ ${data.stepLabel}: ${data.total.toLocaleString()} importados`, 'success');
                     break;
 
                 case 'step:error':

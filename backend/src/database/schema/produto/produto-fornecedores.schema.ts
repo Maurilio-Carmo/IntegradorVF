@@ -2,11 +2,13 @@
 
 import { sqliteTable, integer, text, real } from 'drizzle-orm/sqlite-core';
 import { sql } from 'drizzle-orm';
+import { produtos } from './produtos.schema';
+import { fornecedores } from '../pessoa/fornecedores.schema'
 
 export const produtoFornecedores = sqliteTable('produto_fornecedores', {
   id:           integer('id').primaryKey(),
-  produtoId:    integer('produto_id').notNull(),
-  fornecedorId: integer('fornecedor_id').notNull(),
+  produtoId:    integer('produto_id').notNull().references(() => produtos.produtoId, { onDelete: 'cascade' }),
+  fornecedorId: integer('fornecedor_id').notNull().references(() => fornecedores.fornecedorId, { onDelete: 'cascade' }),
   referencia:   text('referencia').notNull(),
   unidade:      text('unidade').notNull(),
   fator:        real('fator').notNull().default(1),
