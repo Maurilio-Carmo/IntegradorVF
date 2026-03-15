@@ -16,9 +16,9 @@ export class ClientesRepository {
       for (const c of list) {
         tx.insert(clientes)
           .values({
-            clienteId:         c.id                             ?? null,
+            clienteId:         c.id,
             tipoDePessoa:      c.tipoDePessoa                   ?? null,
-            documento:         c.documento                      ?? null,
+            documento:         c.numeroDoDocumento              ?? null,
             nome:              c.nome                           ?? null,
             fantasia:          c.nomeFantasia                   ?? null,
             holdingId:         c.holdingId                      ?? 1,

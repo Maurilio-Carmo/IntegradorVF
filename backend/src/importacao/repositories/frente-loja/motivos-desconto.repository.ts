@@ -3,6 +3,7 @@ import { Injectable }        from '@nestjs/common';
 import { notInArray, sql }   from 'drizzle-orm';
 import { DrizzleService }    from '../../../database/drizzle.service';
 import { motivosDesconto }   from '../../../database/schema';
+import { SqliteMapper as M } from '../../../common/sqlite-mapper';
 
 @Injectable()
 export class MotivoDescontoRepository {
@@ -15,8 +16,12 @@ export class MotivoDescontoRepository {
       for (const m of list) {
         tx.insert(motivosDesconto)
           .values({
-            motivoId:  m.id        ?? null,
-            descricao: m.descricao ?? null,
+            motivoId:       m.id                            ?? null,
+            descricao:      m.descricao                     ?? null,
+            tipoDesconto:   m.tipoAplicacaoDesconto         ?? null,
+            tipoCalculo:    m.tipoCalculoAplicacaoDesconto  ?? null,
+            justificativa:  M.bool(m.solicitaJustificativa),
+            fidelidade:     M.bool(m.descontoFidelidade),
             status:    'S',
           })
           .onConflictDoUpdate({

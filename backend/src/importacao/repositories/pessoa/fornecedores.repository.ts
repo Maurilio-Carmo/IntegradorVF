@@ -16,11 +16,11 @@ export class FornecedoresRepository {
       for (const f of list) {
         tx.insert(fornecedores)
           .values({
-            fornecedorId:         f.id                   ?? null,
-            tipoPessoa:           f.tipoPessoa            ?? null,
-            documento:            f.documento             ?? null,
+            fornecedorId:         f.id,
+            tipoPessoa:           f.tipoDePessoa          ?? null,
+            documento:            f.numeroDoDocumento     ?? null,
             nome:                 f.nome                  ?? null,
-            fantasia:             f.nomeFantasia           ?? null,
+            fantasia:             f.fantasia              ?? null,
             holdingId:            f.holdingId             ?? null,
             tipoContribuinte:     f.tipoContribuinte      ?? null,
             inscricaoEstadual:    f.inscricaoEstadual     ?? null,

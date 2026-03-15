@@ -12,7 +12,7 @@ export const agentes = sqliteTable('agentes', {
   documento:         text('documento'),
   tipoContribuinte:  text('tipo_contribuinte', { enum: ['CONTRIBUINTE','NAO_CONTRIBUINTE','ISENTO'] }),
   inscricaoEstadual: text('inscricao_estadual'),
-  telefone1:         text('telefone1'),
+  telefone:          text('telefone'),
   holdingId:         text('holding_id'),
   cep:               text('cep'),
   logradouro:        text('logradouro'),

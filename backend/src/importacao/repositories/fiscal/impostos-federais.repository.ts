@@ -17,7 +17,7 @@ export class ImpostosFederaisRepository {
           .values({
             impostoId:                  i.id                         ?? null,
             descricao:                  i.descricao                  ?? null,
-            tipo:                       i.tipo                       ?? null,
+            tipo:                       i.tipoImposto                ?? null,
             cstEntradaReal:             i.cstEntradaReal             ?? null,
             cstSaidaReal:               i.cstSaidaReal               ?? null,
             aliquotaEntradaReal:        i.aliquotaEntradaReal        ?? 0,
