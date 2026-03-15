@@ -1,6 +1,6 @@
 // produto/produto-fornecedores.repository.ts
 import { Injectable }            from '@nestjs/common';
-import { notInArray, sql }       from 'drizzle-orm';
+import { and, notInArray, sql }  from 'drizzle-orm';
 import { DrizzleService }        from '../../../database/drizzle.service';
 import { produtoFornecedores }   from '../../../database/schema';
 
@@ -13,9 +13,10 @@ export class ProdutoFornecedoresRepository {
 
     this.drizzle.db.transaction((tx) => {
       for (const f of list) {
+        const id = f.id;
         tx.insert(produtoFornecedores)
           .values({
-            id:           f.id           ?? null,
+            id,
             produtoId:    f.produtoId    ?? null,
             fornecedorId: f.fornecedorId ?? null,
             referencia:   f.referencia   ?? '',
@@ -24,19 +25,27 @@ export class ProdutoFornecedoresRepository {
             nivel:        f.nivel        ?? null,
             status:       'S',
           })
-          .onConflictDoUpdate({
-            target:   produtoFornecedores.id,
-            set:      {
-              produtoId:    sql`excluded.produto_id`,
-              fornecedorId: sql`excluded.fornecedor_id`,
-              referencia:   sql`excluded.referencia`,
-              unidade:      sql`excluded.unidade`,
-              fator:        sql`excluded.fator`,
-              nivel:        sql`excluded.nivel`,
-              updatedAt:    sql`CURRENT_TIMESTAMP`,
-            },
-            setWhere: notInArray(produtoFornecedores.status, ['C', 'U', 'D']),
+          .onConflictDoNothing()
+          .run();
+
+        if (!id) continue;
+
+        tx.update(produtoFornecedores)
+          .set({
+            produtoId:    f.produtoId    ?? null,
+            fornecedorId: f.fornecedorId ?? null,
+            referencia:   f.referencia   ?? '',
+            unidade:      f.unidade      ?? '',
+            fator:        f.quantidade   ?? f.fator ?? 1,
+            nivel:        f.nivel        ?? null,
+            updatedAt:    sql`CURRENT_TIMESTAMP`,
           })
+          .where(
+            and(
+              sql`${produtoFornecedores.id} = ${id}`,
+              notInArray(produtoFornecedores.status, ['C', 'U', 'D']),
+            ),
+          )
           .run();
       }
     });

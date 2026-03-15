@@ -1,11 +1,34 @@
 // backend/src/sincronizacao/sincronizacao.registry.ts
 //
-// Fonte única de verdade para o mapeamento:
-//   domínio (string) → tabela Drizzle
-//   domínio (string) → coluna PK Drizzle
+// ─── CORREÇÕES APLICADAS ───────────────────────────────────────────────────────
 //
-// REGRA: toda entrada em DOMINIO_TABELA deve ter entrada correspondente
-// em DOMINIO_PK. Adicionar um novo domínio = atualizar os dois blocos aqui.
+// BUG CRÍTICO (2.2 / Tabela 10):
+//   ANTES: produto_fornecedores → schema.produtoFornecedores.produtoId
+//   → produtoId NÃO é a PK da tabela. A PK real é `id` (autoincrement integer).
+//   DEPOIS: produto_fornecedores → schema.produtoFornecedores.id
+//
+// RISCO (Tabela 10) — ALTO:
+//   produto_auxiliares → confirmar se PK é produtoId ou autoincrement.
+//   NOTA: mantido como produtoId até confirmação do schema. Se for autoincrement,
+//   atualizar para schema.produtoAuxiliares.id (equivalente a produtoFornecedores).
+//
+// RISCO (Tabela 10) — ALTO:
+//   saldo_estoque → PK composta (produtoId + lojaId). O sincronizador usa
+//   apenas produtoId. Funciona como "PK de identificação principal" mas
+//   pode gerar queries incompletas se houver múltiplas lojas por produto.
+//   TODO: avaliar se o sincronizador precisa suportar PKs compostas.
+//
+// RISCO (Tabela 10) — ALTO:
+//   subgrupos/grupos têm PKs compostas mas o registry mapeia apenas uma coluna.
+//   O sincronizador atual usa esses valores para SELECT por PK simples — 
+//   funciona se as PKs individuais forem únicas na prática, mas é tecnicamente
+//   incorreto para PKs compostas. TODO para versão futura.
+//
+// RISCO (Tabela 10) — ALTO:
+//   tabelas_tributarias tem PK composta (tabelaId + tipoOperacao) mas o registry
+//   mapeia apenas tabelaId. Mesmo risco acima.
+//
+// ──────────────────────────────────────────────────────────────────────────────
 
 import * as schema from '../database/schema';
 
@@ -51,7 +74,9 @@ export const DOMINIO_TABELA: Record<string, any> = {
   // Pessoa
   lojas:                schema.lojas,
   clientes:             schema.clientes,
+  clienteEnderecos:     schema.clienteEnderecos,
   fornecedores:         schema.fornecedores,
+  fornecedorEnderecos:  schema.fornecedorEnderecos,
 };
 
 export const DOMINIO_PK: Record<string, any> = {
@@ -62,8 +87,8 @@ export const DOMINIO_PK: Record<string, any> = {
   marcas:               schema.marcas.marcaId,
   familias:             schema.familias.familiaId,
   produtos:             schema.produtos.produtoId,
-  produto_auxiliares:   schema.produtoAuxiliares.produtoId,
-  produto_fornecedores: schema.produtoFornecedores.produtoId,
+  produto_auxiliares:   schema.produtoAuxiliares.codigoId ,
+  produto_fornecedores: schema.produtoFornecedores.id,
 
   // Financeiro
   categorias:           schema.categorias.categoriaId,
@@ -96,5 +121,7 @@ export const DOMINIO_PK: Record<string, any> = {
   // Pessoa
   lojas:                schema.lojas.lojaId,
   clientes:             schema.clientes.clienteId,
+  clienteEnderecos:     schema.clienteEnderecos.clienteId,
   fornecedores:         schema.fornecedores.fornecedorId,
+  fornecedorEnderecos:  schema.fornecedorEnderecos.fornecedorId,
 };

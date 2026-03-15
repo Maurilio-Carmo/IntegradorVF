@@ -3,3 +3,5 @@
 export * from './lojas.schema';
 export * from './clientes.schema';
 export * from './fornecedores.schema';
+export * from './cliente-enderecos.schema';
+export * from './fornecedor-enderecos.schema';
